@@ -1,0 +1,18 @@
+{
+  "name": "npcc-retenou-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Retenou AI - multilingual shop-floor capability for Mauritian manufacturing",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @retenou/web",
+    "build": "npm run build --workspace @retenou/web",
+    "lint": "npm run lint --workspace @retenou/web",
+    "typecheck": "npm run typecheck --workspace @retenou/web"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
