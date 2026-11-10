@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from threading import Lock
 
 from app.schemas.analytics import AnalyticsSummary
@@ -43,7 +43,7 @@ _COVERED_TOTAL = 0
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _new_id(prefix: str) -> str:
@@ -427,7 +427,12 @@ def _approved_passages() -> list[Passage]:
         if translation is None:
             continue
         passages.extend(
-            Passage(sop_id=sop.id, version=sop.version, step=step.order, text=step.text)
+            Passage(
+                sop_id=sop.id,
+                version=sop.version,
+                step=step.order,
+                text=f"{translation.title}. {step.text}",
+            )
             for step in translation.steps
         )
     return passages

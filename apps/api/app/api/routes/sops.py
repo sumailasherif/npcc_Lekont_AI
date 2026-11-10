@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import current_user
 from app.schemas.sops import (
@@ -17,8 +17,6 @@ from app.store import (
     submit_sop,
     translate_sop,
 )
-
-from fastapi import Depends
 
 router = APIRouter(prefix="/sops", tags=["sops"])
 

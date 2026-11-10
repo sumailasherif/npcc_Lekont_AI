@@ -67,10 +67,16 @@ def score(question: str, passage: Passage) -> float:
         return 0.0
     passage_tokens = tokenize(passage.text)
     overlap = question_tokens & passage_tokens
+    if len(overlap) < 2:
+        return 0.0
     return len(overlap) / len(question_tokens)
 
 
-def rank(question: str, passages: list[Passage], minimum: float = 0.25) -> list[tuple[float, Passage]]:
+def rank(
+    question: str,
+    passages: list[Passage],
+    minimum: float = 0.25,
+) -> list[tuple[float, Passage]]:
     scored = [(score(question, passage), passage) for passage in passages]
     matches = [(value, passage) for value, passage in scored if value >= minimum]
     matches.sort(key=lambda item: item[0], reverse=True)

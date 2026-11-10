@@ -1,0 +1,13 @@
+sector,machine_area,code,description,likely_causes,severity
+textile,overlock,OL-101,Thread break at needle,Incorrect threading; damaged needle; wrong tension,medium
+textile,overlock,OL-102,Machine stops mid-seam,Needle guard open; thermal cutout; jammed looper,high
+textile,overlock,OL-103,Uneven seam,Thread tension; worn feed dog; lint in tension discs,low
+textile,flatlock,FL-210,Needle deflection,Bent needle; needle too fine for fabric,medium
+food,filling,FD-301,Batch code missing from log,Label not scanned; operator skipped field,high
+food,filling,FD-302,Allergen changeover not signed,Checklist incomplete; supervisor absent,high
+food,cold room,FD-303,Temperature excursion,Thermostat drift; door left open,high
+food,packaging,FD-304,Metal detector reject,Contaminant; calibration drift,high
+light_engineering,cnc_lathe,SP-401,Spindle vibration at load,Unbalanced chuck; worn bearing; loose tool holder,medium
+light_engineering,cnc_lathe,SP-402,Spindle vibration at no load,Damaged bearing; misaligned spindle; loose belt,high
+light_engineering,cnc_lathe,SP-403,Tool wear alarm,Insert worn; wrong feed and speed,low
+light_engineering,press,PR-410,Hydraulic pressure low,Leak; pump wear; clogged filter,high

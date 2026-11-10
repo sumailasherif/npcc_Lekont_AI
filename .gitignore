@@ -13,7 +13,6 @@ out/
 dist/
 build/
 *.tsbuildinfo
-next-env.d.ts
 
 # python
 .venv/

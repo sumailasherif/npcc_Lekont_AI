@@ -17,9 +17,16 @@ class Settings(BaseSettings):
     api_env: str = "development"
     cors_origins: str = "http://localhost:3000"
 
-    openai_api_key: str = ""
-    llm_model: str = "gpt-4o-mini"
-    embedding_model: str = "text-embedding-3-small"
+    # OpenCode Go is the only model provider this project uses.
+    opencode_go_api_key: str = ""
+    opencode_go_base_url: str = "https://opencode.ai/inference/go/openai/v1"
+    llm_model: str = "deepseek-v4.1-flash"
+
+    # Supabase free tier (Postgres + pgvector).
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    supabase_service_role_key: str = ""
+    database_url: str = ""
 
     @property
     def cors_origin_list(self) -> list[str]:
