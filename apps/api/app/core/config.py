@@ -15,12 +15,14 @@ class Settings(BaseSettings):
     app_name: str = "Retenou AI API"
     api_version: str = "0.1.0"
     api_env: str = "development"
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # OpenCode Go is the only model provider this project uses.
     opencode_go_api_key: str = ""
     opencode_go_base_url: str = "https://opencode.ai/inference/go/openai/v1"
     llm_model: str = "deepseek-v4.1-flash"
+    llm_timeout_seconds: float = 60.0
+    llm_max_tokens: int = 2000
 
     # Supabase free tier (Postgres + pgvector).
     supabase_url: str = ""

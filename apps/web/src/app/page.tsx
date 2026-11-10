@@ -1,43 +1,7 @@
 import { AskPanel } from "@/components/ask-panel";
+import { ExpertDiscovery } from "@/components/expert-discovery";
 
-const navigation = ["Discover", "Conversations", "Knowledge", "Gaps", "Profile"];
-
-const categories = [
-  "Textile & apparel",
-  "Food manufacturing",
-  "Light engineering",
-  "Safety",
-  "Maintenance",
-  "Traceability",
-  "Quality",
-];
-
-const prompts = [
-  {
-    sector: "Textile & apparel",
-    title: "Ask a senior operator about clearing an overlock jam",
-    detail: "5 approved steps · EN · FR · Kreol",
-    tone: "bg-[#7b2d5e]",
-  },
-  {
-    sector: "Food manufacturing",
-    title: "Ask a supervisor about a missing lot number",
-    detail: "HACCP traceability · escalation path",
-    tone: "bg-[#efe9dc] text-[#1a1a1a]",
-  },
-  {
-    sector: "Light engineering",
-    title: "Ask a technician about spindle vibration",
-    detail: "Fault code SP-402 · 5 approved steps",
-    tone: "bg-[#0f5f56]",
-  },
-];
-
-const stats = [
-  { label: "Sector packs", value: "3" },
-  { label: "Languages", value: "EN · FR · Kreol" },
-  { label: "Uncited answers", value: "0" },
-];
+const navigation = ["Discover", "Conversations", "Audience", "Knowledge", "Gaps", "Profile"];
 
 export default function Home() {
   return (
@@ -58,9 +22,7 @@ export default function Home() {
               <div
                 key={item}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-                  index === 0
-                    ? "bg-white/[0.07] text-zinc-100"
-                    : "text-zinc-400"
+                  index === 0 ? "bg-white/[0.07] text-zinc-100" : "text-zinc-400"
                 }`}
               >
                 <NavIcon index={index} />
@@ -81,13 +43,13 @@ export default function Home() {
             Add knowledge
           </button>
           <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500">
-            <NavIcon index={4} />
+            <NavIcon index={5} />
             More
           </div>
         </div>
       </aside>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-col gap-10 px-5 pb-16 pt-8 md:pl-64">
+      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-12 px-5 pb-20 pt-8 md:pl-64">
         <div className="flex items-center justify-between">
           <div className="w-10" />
           <div className="relative">
@@ -106,70 +68,45 @@ export default function Home() {
           <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-zinc-500">
             NPCC National AI Startups Lab
           </span>
-          <h1 className="max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-            Ask the people who&apos;ve run this line
+          <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+            Find people who&apos;ve been there
           </h1>
           <p className="max-w-xl text-base leading-7 text-zinc-400">
-            Describe the situation. Get the answer grounded in supervisor-approved
-            work instructions, in English, French or Kreol.
+            Describe your situation. Get the perspective of global industry thinkers
+            and Mauritian operators, supervisors and leaders — with the sources behind
+            every answer.
           </p>
         </header>
 
-        <AskPanel />
+        <ExpertDiscovery />
 
-        <div className="flex flex-wrap justify-center gap-2">
-          {categories.map((category, index) => (
-            <span
-              key={category}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-medium ${
-                index === 0
-                  ? "bg-orange-500 text-white"
-                  : "bg-white/[0.06] text-zinc-300"
-              }`}
-            >
-              {category}
-            </span>
-          ))}
-        </div>
-
-        <section className="flex flex-col gap-4">
-          <div className="flex items-end justify-between">
-            <h2 className="text-lg font-semibold">Ask the line</h2>
-            <span className="text-xs text-zinc-500">Synthetic demo data</span>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {prompts.map((prompt) => (
-              <article
-                key={prompt.title}
-                className={`flex min-h-[170px] flex-col justify-between rounded-2xl p-4 ${prompt.tone}`}
-              >
-                <span className="text-[11px] font-medium uppercase tracking-wide opacity-70">
-                  {prompt.sector}
-                </span>
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-semibold leading-5">{prompt.title}</h3>
-                  <p className="text-xs opacity-70">{prompt.detail}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-3">
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col gap-1">
-              <span className="text-xs uppercase tracking-wide text-zinc-500">
-                {stat.label}
-              </span>
-              <span className="text-lg font-semibold">{stat.value}</span>
+        <section className="flex flex-col gap-4 border-t border-white/10 pt-10">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-semibold">Or ask the approved line</h2>
+              <p className="text-sm text-zinc-500">
+                Answers restricted to supervisor-approved work instructions. Every
+                answer cites the SOP version; nothing matches, nothing is invented.
+              </p>
             </div>
-          ))}
+            <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-zinc-400">
+              EN · FR · Kreol, live
+            </span>
+          </div>
+          <AskPanel />
         </section>
 
-        <p className="text-center text-xs text-zinc-600">
-          Every answer cites an approved SOP version. If nothing matches, the
-          question becomes a skills gap for a supervisor to review.
-        </p>
+        <footer className="flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-zinc-600">
+          <p>
+            Sector packs: textile and apparel, food manufacturing, light engineering
+            and precision.
+          </p>
+          <p>
+            Public-record profiles are built from public material and are not
+            endorsed by the named people. Composite profiles are fictional. Claim a
+            mind to correct or remove it.
+          </p>
+        </footer>
       </main>
     </div>
   );
@@ -190,12 +127,13 @@ const navPaths = [
   "M4 5h7v7H4V5Zm9 0h7v7h-7V5ZM4 14h7v5H4v-5Zm9 0h7v5h-7v-5Z",
   "M4 19V5m5 14V9m5 10v-6m5 6V7",
   "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0",
+  "M4 6h16M4 12h16M4 18h10",
 ];
 
 function NavIcon({ index }: { index: number }) {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path d={navPaths[index]} />
+      <path d={navPaths[index] ?? navPaths[0]} />
     </svg>
   );
 }

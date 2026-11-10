@@ -611,6 +611,210 @@
         }
       }
     },
+    "/api/v1/translate": {
+      "post": {
+        "tags": [
+          "translation"
+        ],
+        "summary": "Translate",
+        "operationId": "translate_api_v1_translate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranslationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experts": {
+      "get": {
+        "tags": [
+          "experts"
+        ],
+        "summary": "Read Experts",
+        "operationId": "read_experts_api_v1_experts_get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ExpertCategory"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Expert"
+                  },
+                  "title": "Response Read Experts Api V1 Experts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experts/{expert_id}": {
+      "get": {
+        "tags": [
+          "experts"
+        ],
+        "summary": "Read Expert",
+        "operationId": "read_expert_api_v1_experts__expert_id__get",
+        "parameters": [
+          {
+            "name": "expert_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Expert Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Expert"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/experts/{expert_id}/chat": {
+      "post": {
+        "tags": [
+          "experts"
+        ],
+        "summary": "Chat",
+        "operationId": "chat_api_v1_experts__expert_id__chat_post",
+        "parameters": [
+          {
+            "name": "expert_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Expert Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpertChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpertChatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "tags": [
@@ -732,6 +936,28 @@
         ],
         "title": "ApproveRequest"
       },
+      "ChatTurn": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatTurn"
+      },
       "Citation": {
         "properties": {
           "sop_id": {
@@ -759,6 +985,273 @@
           "quote"
         ],
         "title": "Citation"
+      },
+      "Expert": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "initials": {
+            "type": "string",
+            "title": "Initials"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "organisation": {
+            "type": "string",
+            "title": "Organisation"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/ExpertCategory"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "headline": {
+            "type": "string",
+            "title": "Headline"
+          },
+          "bio": {
+            "type": "string",
+            "title": "Bio"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Languages"
+          },
+          "accent": {
+            "type": "string",
+            "title": "Accent"
+          },
+          "featured": {
+            "type": "boolean",
+            "title": "Featured",
+            "default": false
+          },
+          "mauritian": {
+            "type": "boolean",
+            "title": "Mauritian",
+            "default": false
+          },
+          "verified": {
+            "type": "boolean",
+            "title": "Verified",
+            "default": false
+          },
+          "profile_type": {
+            "type": "string",
+            "enum": [
+              "public_record",
+              "composite"
+            ],
+            "title": "Profile Type",
+            "default": "public_record"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics"
+          },
+          "sample_questions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sample Questions"
+          },
+          "knowledge": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeCard"
+            },
+            "type": "array",
+            "title": "Knowledge"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "initials",
+          "role",
+          "organisation",
+          "country",
+          "categories",
+          "headline",
+          "bio",
+          "languages",
+          "accent",
+          "disclaimer",
+          "topics",
+          "sample_questions",
+          "knowledge"
+        ],
+        "title": "Expert"
+      },
+      "ExpertCategory": {
+        "type": "string",
+        "enum": [
+          "leadership",
+          "textile",
+          "food",
+          "engineering",
+          "supply_chain",
+          "quality",
+          "maintenance",
+          "ai",
+          "finance"
+        ],
+        "title": "ExpertCategory"
+      },
+      "ExpertChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "maxLength": 1200,
+            "minLength": 2,
+            "title": "Message"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "en"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTurn"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ExpertChatRequest"
+      },
+      "ExpertChatResponse": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "source_answer": {
+            "type": "string",
+            "title": "Source Answer"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/ExpertCitation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "engine": {
+            "type": "string",
+            "title": "Engine"
+          },
+          "review_required": {
+            "type": "boolean",
+            "title": "Review Required"
+          },
+          "suggested": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suggested"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answer",
+          "source_answer",
+          "language",
+          "citations",
+          "confidence",
+          "engine",
+          "review_required",
+          "suggested",
+          "disclaimer"
+        ],
+        "title": "ExpertChatResponse"
+      },
+      "ExpertCitation": {
+        "properties": {
+          "card_id": {
+            "type": "string",
+            "title": "Card Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "type": "object",
+        "required": [
+          "card_id",
+          "title",
+          "source"
+        ],
+        "title": "ExpertCitation"
       },
       "Gap": {
         "properties": {
@@ -841,6 +1334,52 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "KnowledgeCard": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "body",
+          "source"
+        ],
+        "title": "KnowledgeCard"
+      },
       "Language": {
         "type": "string",
         "enum": [
@@ -890,6 +1429,11 @@
             "type": "string",
             "title": "Answer"
           },
+          "source_answer": {
+            "type": "string",
+            "title": "Source Answer",
+            "default": ""
+          },
           "language": {
             "$ref": "#/components/schemas/Language"
           },
@@ -916,6 +1460,16 @@
               }
             ],
             "title": "Gap Id"
+          },
+          "translation_engine": {
+            "type": "string",
+            "title": "Translation Engine",
+            "default": "identity"
+          },
+          "review_required": {
+            "type": "boolean",
+            "title": "Review Required",
+            "default": false
           },
           "disclaimer": {
             "type": "string",
@@ -1404,6 +1958,72 @@
         },
         "type": "object",
         "title": "TranslateRequest"
+      },
+      "TranslationRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "target_language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "source_language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "target_language"
+        ],
+        "title": "TranslationRequest"
+      },
+      "TranslationResponse": {
+        "properties": {
+          "source_text": {
+            "type": "string",
+            "title": "Source Text"
+          },
+          "translated_text": {
+            "type": "string",
+            "title": "Translated Text"
+          },
+          "source_language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "target_language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "engine": {
+            "type": "string",
+            "title": "Engine"
+          },
+          "review_required": {
+            "type": "boolean",
+            "title": "Review Required"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_text",
+          "translated_text",
+          "source_language",
+          "target_language",
+          "engine",
+          "review_required",
+          "confidence"
+        ],
+        "title": "TranslationResponse"
       },
       "ValidationError": {
         "properties": {

@@ -19,8 +19,11 @@ class Citation(BaseModel):
 class QueryResponse(BaseModel):
     covered: bool
     answer: str
+    source_answer: str = ""
     language: Language
     confidence: float = Field(ge=0, le=1)
     citations: list[Citation]
     gap_id: str | None = None
+    translation_engine: str = "identity"
+    review_required: bool = False
     disclaimer: str

@@ -20,6 +20,7 @@ from app.schemas.query import Citation, QueryResponse
 from app.schemas.skills import Role, SkillRequirement
 from app.schemas.sops import Sop, SopCreate, SopStep, SopSummary, SopTranslation
 from app.schemas.sources import Source, SourceCreate, SourceKind, SourceStatus
+from app.services import llm, translation
 from app.services.retrieval import Passage, rank
 
 DISCLAIMER = (
@@ -423,18 +424,17 @@ def _approved_passages() -> list[Passage]:
     for sop in _SOPS.values():
         if sop.status is not SopStatus.PUBLISHED:
             continue
-        translation = sop.translations.get(Language.EN)
-        if translation is None:
-            continue
-        passages.extend(
-            Passage(
-                sop_id=sop.id,
-                version=sop.version,
-                step=step.order,
-                text=f"{translation.title}. {step.text}",
+        for language, sop_translation in sop.translations.items():
+            passages.extend(
+                Passage(
+                    sop_id=sop.id,
+                    version=sop.version,
+                    step=step.order,
+                    text=f"{sop_translation.title}. {step.text}",
+                    language=language.value,
+                )
+                for step in sop_translation.steps
             )
-            for step in translation.steps
-        )
     return passages
 
 
@@ -486,8 +486,28 @@ def answer_question(question: str, language: Language, role_id: str | None) -> Q
     _COVERED_TOTAL += 1
     best_score, best_passage = matches[0]
     sop = _SOPS[best_passage.sop_id]
-    translation = sop.translations.get(language) or sop.translations[Language.EN]
-    answer = "\n".join(f"{step.order}. {step.text}" for step in translation.steps)
+    english = sop.translations.get(Language.EN) or next(iter(sop.translations.values()))
+    answer = "\n".join(f"{step.order}. {step.text}" for step in english.steps)
+    engine = "identity"
+    review_required = False
+
+    generated = llm.generate_answer(
+        question,
+        Language.EN,
+        english.title,
+        [(step.order, step.text) for step in english.steps],
+    )
+    if generated:
+        answer = generated
+        engine = "llm"
+
+    source_answer = answer
+    if language is not Language.EN:
+        translated = translation.translate(answer, language)
+        answer = translated.text
+        engine = translated.engine
+        review_required = translated.review_required
+
     citations = [
         Citation(
             sop_id=passage.sop_id,
@@ -500,9 +520,12 @@ def answer_question(question: str, language: Language, role_id: str | None) -> Q
     return QueryResponse(
         covered=True,
         answer=answer,
+        source_answer=source_answer,
         language=language,
         confidence=round(min(0.95, 0.5 + best_score), 2),
         citations=citations,
+        translation_engine=engine,
+        review_required=review_required,
         disclaimer=DISCLAIMER,
     )
 
@@ -528,6 +551,26 @@ def promote_gap(gap_id: str) -> Gap | None:
 
 def list_roles() -> list[Role]:
     return sorted(_ROLES.values(), key=lambda role: role.name)
+
+
+def translation_memory() -> list[tuple[str, dict[Language, str]]]:
+    """Curated EN -> FR/Kreol pairs from published SOPs, used for instant translation."""
+    pairs: list[tuple[str, dict[Language, str]]] = []
+    for sop in _SOPS.values():
+        if sop.status is not SopStatus.PUBLISHED:
+            continue
+        english = sop.translations.get(Language.EN)
+        if english is None:
+            continue
+        for language, translated in sop.translations.items():
+            if language is Language.EN:
+                continue
+            pairs.append((english.title, {language: translated.title}))
+            for source_step, target_step in zip(
+                english.steps, translated.steps, strict=False
+            ):
+                pairs.append((source_step.text, {language: target_step.text}))
+    return pairs
 
 
 def summary() -> AnalyticsSummary:

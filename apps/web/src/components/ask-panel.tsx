@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type Language = "en" | "fr" | "cr";
+import { apiPost, type Language } from "@/lib/api";
 
 type Citation = {
   sop_id: string;
@@ -14,10 +14,18 @@ type Citation = {
 type Answer = {
   covered: boolean;
   answer: string;
+  source_answer?: string;
   language: Language;
   confidence: number;
   citations: Citation[];
   gap_id?: string | null;
+  translation_engine?: string;
+  review_required?: boolean;
+};
+
+type TranslationMeta = {
+  engine: string;
+  reviewRequired: boolean;
 };
 
 const LANGUAGES: { id: Language; label: string }[] = [
@@ -30,7 +38,13 @@ export function AskPanel() {
   const [question, setQuestion] = useState("");
   const [language, setLanguage] = useState<Language>("en");
   const [loading, setLoading] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [result, setResult] = useState<Answer | null>(null);
+  const [display, setDisplay] = useState<string>("");
+  const [meta, setMeta] = useState<TranslationMeta>({
+    engine: "identity",
+    reviewRequired: false,
+  });
   const [error, setError] = useState<string | null>(null);
 
   async function ask() {
@@ -40,22 +54,57 @@ export function AskPanel() {
     setResult(null);
 
     try {
-      const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-      const response = await fetch(`${base}/api/v1/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, language }),
+      const answer = await apiPost<Answer>("/api/v1/query", {
+        question,
+        language,
       });
-      if (!response.ok) {
-        throw new Error(`API responded ${response.status}`);
-      }
-      setResult((await response.json()) as Answer);
+      setResult(answer);
+      setDisplay(answer.answer);
+      setMeta({
+        engine: answer.translation_engine ?? "identity",
+        reviewRequired: answer.review_required ?? false,
+      });
     } catch {
       setError(
         "The API is not reachable. Start it in apps/api with: uvicorn app.main:app --reload",
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function switchLanguage(next: Language) {
+    setLanguage(next);
+    if (!result) return;
+
+    const source = result.source_answer || result.answer;
+
+    if (next === "en") {
+      setDisplay(source);
+      setMeta({ engine: "identity", reviewRequired: false });
+      return;
+    }
+
+    setTranslating(true);
+    setError(null);
+    try {
+      const translated = await apiPost<{
+        translated_text: string;
+        engine: string;
+        review_required: boolean;
+      }>("/api/v1/translate", {
+        text: source,
+        target_language: next,
+      });
+      setDisplay(translated.translated_text);
+      setMeta({
+        engine: translated.engine,
+        reviewRequired: translated.review_required,
+      });
+    } catch {
+      setError("Live translation failed. Try again.");
+    } finally {
+      setTranslating(false);
     }
   }
 
@@ -81,7 +130,7 @@ export function AskPanel() {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setLanguage(item.id)}
+                onClick={() => void switchLanguage(item.id)}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition ${
                   language === item.id
                     ? "bg-white text-zinc-950"
@@ -121,7 +170,7 @@ export function AskPanel() {
 
       {result ? (
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-          <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <span
               className={`rounded-full px-2.5 py-1 text-xs font-medium ${
                 result.covered
@@ -131,12 +180,19 @@ export function AskPanel() {
             >
               {result.covered ? "Approved instruction" : "Logged as a gap"}
             </span>
-            <span className="text-xs text-zinc-500">
-              confidence {Math.round(result.confidence * 100)}%
-            </span>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+              <span>confidence {Math.round(result.confidence * 100)}%</span>
+              <span>·</span>
+              <span>{translating ? "translating…" : `engine ${meta.engine}`}</span>
+              {meta.reviewRequired ? (
+                <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-300">
+                  machine translation · review
+                </span>
+              ) : null}
+            </div>
           </div>
           <p className="whitespace-pre-line text-sm leading-7 text-zinc-200">
-            {result.answer}
+            {display || result.answer}
           </p>
           {result.citations.length > 0 ? (
             <ul className="mt-4 flex flex-col gap-2 border-t border-white/10 pt-3">

@@ -9,9 +9,20 @@ cannot answer into a live skills-gap map. The interface follows the Delphi
 pattern: a discover surface, a knowledge surface, conversations and a profile,
 with answers grounded in approved sources.
 
+On top of the line assistant, the app ships a **Delphi-style library of minds**:
+global industry thinkers (Goldratt, Deming, Ohno, Hau Lee, Andrew Ng) and
+Mauritian industry voices (Arnaud Lagesse / IBL, Jean-Pierre Dalais / CIEL,
+Hector Espitalier-Noël / ENL, plus composite textile and food practitioners).
+Each mind has curated knowledge cards, citations and sample questions. FR and
+Kreol are translated **live at request time** with the LLM, a curated
+translation memory, or a glossary fallback, and every machine translation is
+flagged for review.
+
 > **Status:** working scaffold. The API serves synthetic data from an in-memory
 > store; Supabase + pgvector and the OpenCode Go client are wired for the next
-> milestone. Nothing is published without a named supervisor.
+> milestone. Nothing is published without a named supervisor. Public-record
+> expert profiles are built from public material and are not endorsed by the
+> named people; composite profiles are fictional and labelled.
 
 ## The problem
 
@@ -80,6 +91,13 @@ uvicorn app.main:app --reload
 - Health: <http://127.0.0.1:8000/health>
 - Docs: <http://127.0.0.1:8000/docs>
 
+If port 8000 is already taken on your machine, run the API on 8010 and set
+`NEXT_PUBLIC_API_URL=http://localhost:8010` in `apps/web/.env.local`:
+
+```powershell
+uvicorn app.main:app --reload --port 8010
+```
+
 ### 3. Web
 
 In a second terminal, from the repository root:
@@ -139,6 +157,26 @@ All product routes live under `/api/v1`.
 | Gaps | `GET /gaps`; `POST /gaps/{id}/promote` |
 | Skills | `GET /skills/roles`, `/skills/roles/{id}` |
 | Analytics | `GET /analytics/summary` |
+| Experts | `GET /experts`, `/experts/{id}`; `POST /experts/{id}/chat` |
+| Translation | `POST /translate` (EN → FR / Kreol, cached) |
+
+## Expert minds
+
+| Mind | Base | Sector focus |
+| --- | --- | --- |
+| Arnaud Lagesse | IBL Group (public record) | Conglomerate, logistics, regional expansion |
+| Jean-Pierre Dalais | CIEL Group (public record) | Diversification, textile, healthcare |
+| Hector Espitalier-Noël | ENL Group (public record) | Sugar transition, property, food quality |
+| Textile Operations Veteran | Composite | Overlock faults, changeovers, multilingual training |
+| Food Quality Lead | Composite | HACCP, batch records, traceability |
+| Eliyahu M. Goldratt | Theory of Constraints | Bottlenecks and throughput |
+| W. Edwards Deming | Deming Institute | Variation and quality systems |
+| Taiichi Ohno | Toyota Production System | Waste, standard work, kaizen |
+| Hau L. Lee | Stanford GSB | Supply chains, bullwhip effect |
+| Andrew Ng | DeepLearning.AI | Applied AI adoption |
+
+Public-record profiles are built only from public material and are not authored
+or endorsed by the person. Claim a mind to correct or remove it.
 
 ## Documentation
 

@@ -34,7 +34,43 @@
 5. The API validates that every claim maps to a cited step; if not, it refuses.
 6. If nothing matches, it writes a `knowledge_gaps` row and returns `covered =
    false`.
-7. The web app renders the answer with citations, or the gap acknowledgement.
+7. If the requested language is FR or Kreol, the English answer is translated
+   live and the response carries `translation_engine` and `review_required`.
+8. The web app renders the answer with citations, or the gap acknowledgement.
+
+## Expert minds (Delphi layer)
+
+The discover surface and the line assistant share one backend but different
+trust rules.
+
+```
+GET /experts ──► curated profiles + knowledge cards
+GET /experts/{id} ──► profile, sources, sample questions
+POST /experts/{id}/chat ──► retrieve cards ──► LLM (optional) ──► translate
+```
+
+- **Retrieval** ranks the message against the mind's knowledge cards only.
+  There is no open-web access at answer time.
+- **Generation** is optional. Without a key, the reply is assembled directly
+  from the matched cards, so the demo works offline and cannot hallucinate.
+- **Scope guard**: if no card matches, the mind says so and lists the topics it
+  can cover instead of guessing.
+- **Provenance**: every answer carries the card title, source and year.
+
+### Live translation
+
+Three engines are tried in order, then cached in-process:
+
+| Engine | When | Review flag |
+| --- | --- | --- |
+| `llm` | `OPENCODE_GO_API_KEY` is set | Kreol only |
+| `memory` | Exact match in curated SOP translations | Kreol only |
+| `glossary` | Any other text | Always |
+
+English is the source of truth (`source_answer`). FR and Kreol are derived at
+request time and never stored as approved content until a supervisor publishes
+them. This keeps the "human stays accountable" rule intact while making the
+language switch feel instant.
 
 ## Why the answer is a card, not a chat bubble
 

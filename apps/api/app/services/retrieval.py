@@ -55,6 +55,7 @@ class Passage:
     version: int
     step: int
     text: str
+    language: str = "en"
 
 
 def tokenize(text: str) -> set[str]:
