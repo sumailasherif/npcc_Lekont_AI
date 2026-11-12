@@ -181,6 +181,27 @@ WHATSAPP_TOKEN=
 WHATSAPP_PHONE_NUMBER_ID=
 ```
 
+## Human in the loop
+
+High-value actions wait for a named **Head of Finance**:
+
+| Action | Rule |
+| --- | --- |
+| Invoice draft | Always |
+| Notebook posting | Total ≥ MUR 1,000 |
+| Sale | Total ≥ MUR 5,000 |
+
+The requester is told the request id; the reviewer sees the amount and the source
+document, then approves or rejects with a comment. Approval applies the action
+(invoice approved, notebook posted, sale recorded); rejection changes nothing.
+Every decision is auditable. See `docs/11-human-in-the-loop.md`.
+
+## Animated demo
+
+`/whatsapp/flow` plays the full loop: chat → invoice/PDF → board brief →
+supplier concentration → Head of Finance approval → dashboard. Replay and step
+controls included.
+
 ## Design
 
 The interface follows the Holistics pattern: a persistent workspace sidebar, a

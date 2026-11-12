@@ -165,6 +165,17 @@ never a guess.
 `GET /api/v1/dashboard/summary` returns document counts, current-month spend and
 VAT, readiness score, top supplier and the monthly series used by the chart.
 
+## Approvals
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/v1/approvals?status_filter=pending` | Review queue |
+| GET | `/api/v1/approvals/{id}` | One request |
+| POST | `/api/v1/approvals/{id}/approve` | Apply the action and notify |
+| POST | `/api/v1/approvals/{id}/reject` | Discard the action and notify |
+
+See `11-human-in-the-loop.md` for the policy and state machine.
+
 ## Conventions
 
 - Errors: `{"detail": "..."}` with standard status codes.

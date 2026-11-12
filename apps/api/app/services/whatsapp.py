@@ -17,10 +17,11 @@ import httpx
 from app.core.config import get_settings
 from app.data.ledger_source import get_ledger
 from app.db import whatsapp_store
+from app.schemas.approvals import Approval, ApprovalKind
 from app.schemas.common import Language
-from app.schemas.documents import DocumentCreate, DocumentType
+from app.schemas.documents import DocumentCreate, DocumentType, ReviewRequest
 from app.schemas.whatsapp import SimulateResponse, WhatsAppMessage
-from app.services import documents, insights
+from app.services import approvals, documents, insights
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +161,12 @@ def _stock_reply() -> tuple[str, dict]:
     return reply, {"stock": [{"name": name, **item} for name, item in _STOCK.items()]}
 
 
-def _record_sale(item: str, qty: int, price: float | None) -> tuple[str, dict]:
+def _record_sale(
+    item: str,
+    qty: int,
+    price: float | None,
+    from_number: str = "23050000000",
+) -> tuple[str, dict]:
     key = item.strip().lower()
     unit_price = price if price is not None else float(_STOCK.get(key, {}).get("price", 0))
     if unit_price <= 0:
@@ -169,6 +175,20 @@ def _record_sale(item: str, qty: int, price: float | None) -> tuple[str, dict]:
             {"needs_price": True},
         )
     total = round(qty * unit_price, 2)
+    if total >= 5000:
+        approval = approvals.request_approval(
+            ApprovalKind.SALE,
+            f"Sale: {qty} × {item.strip()}",
+            total,
+            from_number,
+            {"item": item.strip(), "qty": qty, "unit_price": unit_price},
+        )
+        return (
+            f"A sale of {_money(total)} is above the operator limit. "
+            f"Sent to the Head of Finance for approval ({approval.id}). "
+            "Nothing is recorded yet.",
+            {"approval_id": approval.id, "approval_status": "pending"},
+        )
     _SALES.append(
         {
             "date": date.today().isoformat(),
@@ -214,7 +234,11 @@ def _add_stock(item: str, qty: int) -> tuple[str, dict]:
     return reply, {"stock": {key: _STOCK[key]}}
 
 
-def _create_invoice(customer: str, amount: float) -> tuple[str, dict]:
+def _create_invoice(
+    customer: str,
+    amount: float,
+    from_number: str = "23050000000",
+) -> tuple[str, dict]:
     document = documents.create_document(
         DocumentCreate(
             filename=f"whatsapp_invoice_{customer.strip().replace(' ', '_').lower()}.txt",
@@ -232,11 +256,24 @@ def _create_invoice(customer: str, amount: float) -> tuple[str, dict]:
             ),
         )
     )
-    reply = (
-        f"Invoice draft created for {customer.strip()} at {_money(amount)}.\n"
-        f"Reference {document.id}. It is waiting in Documents for review."
+    approval = approvals.request_approval(
+        ApprovalKind.INVOICE,
+        f"Invoice for {customer.strip()}",
+        amount,
+        from_number,
+        {"document_id": document.id, "customer": customer.strip()},
     )
-    return reply, {"document_id": document.id, "total": document.total}
+    reply = (
+        f"Invoice draft {document.id} for {customer.strip()} at {_money(amount)}.\n"
+        f"Sent to the Head of Finance for approval ({approval.id}). "
+        "It stays in Documents until approved."
+    )
+    return reply, {
+        "document_id": document.id,
+        "total": document.total,
+        "approval_id": approval.id,
+        "approval_status": "pending",
+    }
 
 
 def _report() -> tuple[str, dict]:
@@ -428,6 +465,24 @@ def _post_notebook(from_number: str) -> tuple[str, dict] | None:
     if not pending or pending.get("type") != "notebook":
         return None
     lines = pending["lines"]
+    total = round(sum(float(line["amount"]) for line in lines), 2)
+    if total >= 1000:
+        approval = approvals.request_approval(
+            ApprovalKind.NOTEBOOK,
+            f"Notebook: {len(lines)} lines",
+            total,
+            from_number,
+            {"lines": lines},
+        )
+        return (
+            f"{len(lines)} notebook lines total {_money(total)}. Sent to the Head of "
+            f"Finance for approval ({approval.id}). Nothing is posted yet.",
+            {
+                "approval_id": approval.id,
+                "approval_status": "pending",
+                "notebook": {"lines": lines, "total": total},
+            },
+        )
     for line in lines:
         _SALES.append(
             {
@@ -441,7 +496,6 @@ def _post_notebook(from_number: str) -> tuple[str, dict] | None:
         whatsapp_store.persist_sale(
             line["description"], 1, float(line["amount"]), float(line["amount"])
         )
-    total = round(sum(float(line["amount"]) for line in lines), 2)
     return (
         f"Posted {len(lines)} lines for {_money(total)}. Sales today: {_money(_sale_today())}.",
         {"posted": lines, "total": total},
@@ -455,6 +509,63 @@ def _insight_reply(message: str) -> tuple[str, dict] | None:
     return (
         f"{result.answer}\n\n{result.calculation}",
         {"insight": {"intent": result.intent, "rows": result.rows}},
+    )
+
+
+def apply_approval(approval: Approval) -> None:
+    reviewer = approval.reviewer or "Head of Finance"
+    if approval.kind is ApprovalKind.INVOICE:
+        document_id = approval.payload.get("document_id")
+        if document_id:
+            documents.review_document(
+                str(document_id),
+                ReviewRequest(reviewer=reviewer, fields=[]),
+            )
+    elif approval.kind is ApprovalKind.NOTEBOOK:
+        for line in approval.payload.get("lines", []):
+            _SALES.append(
+                {
+                    "date": date.today().isoformat(),
+                    "item": line["description"],
+                    "qty": 1,
+                    "unit_price": float(line["amount"]),
+                    "total": float(line["amount"]),
+                }
+            )
+            whatsapp_store.persist_sale(
+                line["description"], 1, float(line["amount"]), float(line["amount"])
+            )
+    elif approval.kind is ApprovalKind.SALE:
+        item = str(approval.payload.get("item", "sale"))
+        qty = int(approval.payload.get("qty", 1))
+        unit_price = float(approval.payload.get("unit_price", 0))
+        total = round(qty * unit_price, 2)
+        _SALES.append(
+            {
+                "date": date.today().isoformat(),
+                "item": item,
+                "qty": qty,
+                "unit_price": unit_price,
+                "total": total,
+            }
+        )
+        whatsapp_store.persist_sale(item, qty, unit_price, total)
+
+    _log(
+        "out",
+        approval.requested_by,
+        f"Approved by {reviewer}: {approval.summary} ({approval.id}). The action is applied.",
+        "approval",
+    )
+
+
+def notify_decision(approval: Approval) -> None:
+    reviewer = approval.reviewer or "Head of Finance"
+    _log(
+        "out",
+        approval.requested_by,
+        f"Rejected by {reviewer}: {approval.summary} ({approval.id}). Nothing was applied.",
+        "approval",
     )
 
 
@@ -487,7 +598,7 @@ def handle(from_number: str, text: str, kind: str = "text") -> SimulateResponse:
         assert match is not None
         customer = match.group(1)
         amount = float(match.group(2).replace(",", ""))
-        reply, data = _create_invoice(customer, amount)
+        reply, data = _create_invoice(customer, amount, from_number)
         intent = "invoice"
     elif ALERT_RE.match(message):
         match = ALERT_RE.match(message)
@@ -502,7 +613,7 @@ def handle(from_number: str, text: str, kind: str = "text") -> SimulateResponse:
         qty = int(match.group(1))
         item = match.group(2)
         price = float(match.group(3).replace(",", "")) if match.group(3) else None
-        reply, data = _record_sale(item, qty, price)
+        reply, data = _record_sale(item, qty, price, from_number)
         intent = "sale"
     elif lowered in {"stock", "stok", "inventory", "stock?"} or "stock" in lowered:
         reply, data = _stock_reply()

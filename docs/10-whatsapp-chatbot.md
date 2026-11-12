@@ -31,7 +31,8 @@ The same command engine powers:
 | sends a photo | Reads 3 notebook lines, shows a preview, waits for "post" |
 
 The bot asks before writing irreversible data: notebook lines are only posted
-after the owner replies **post**.
+after the owner replies **post**, and a Head of Finance approves invoices, large
+sales and large notebook postings. See `11-human-in-the-loop.md`.
 
 ## Architecture
 
