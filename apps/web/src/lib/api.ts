@@ -105,3 +105,20 @@ export type DashboardSummary = {
 };
 
 export type ExportResponse = { filename: string; rows: number; csv: string };
+
+export type WhatsAppMessage = {
+  id: string;
+  direction: "in" | "out";
+  from_number: string;
+  text: string;
+  intent: string;
+  created_at: string;
+  data: Record<string, unknown> | null;
+};
+
+export type WhatsAppReply = {
+  reply: string;
+  intent: string;
+  messages: WhatsAppMessage[];
+  data: Record<string, unknown> | null;
+};

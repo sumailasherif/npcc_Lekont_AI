@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useLanguage } from "@/components/language-provider";
+import { PageHero, buttonGhost, buttonPrimary } from "@/components/motion";
 import {
   apiGet,
   apiPost,
@@ -14,6 +16,7 @@ import {
 const DOC_TYPES = ["invoice", "payslip", "contract"] as const;
 
 export default function DocumentsPage() {
+  const { t } = useLanguage();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [selected, setSelected] = useState<DocumentRecord | null>(null);
   const [edits, setEdits] = useState<Record<string, string>>({});
@@ -113,32 +116,25 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="animate-fade-in flex flex-col gap-5">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Documents</h1>
-          <p className="mt-1 max-w-xl text-sm text-[#5b5b53]">
-            Extract invoices, payslips and contracts in French and English.
-            Nothing is exported until a named reviewer approves it.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => void downloadCsv()}
-            className="rounded-lg border border-[#d1d5db] bg-white px-3 py-2 text-sm font-medium"
-          >
-            Export CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowForm((value) => !value)}
-            className="rounded-lg bg-[#171717] px-3 py-2 text-sm font-medium text-white"
-          >
-            {showForm ? "Close" : "Add document"}
-          </button>
-        </div>
-      </header>
+    <>
+      <PageHero
+        compact
+        eyebrow={t.hero.docsEyebrow}
+        title={t.hero.docsLead}
+        highlight={t.hero.docsHighlight}
+        description={t.hero.docsSub}
+        actions={
+          <>
+            <button type="button" onClick={() => setShowForm((value) => !value)} className={buttonPrimary}>
+              {showForm ? "Close" : "Add document"}
+            </button>
+            <button type="button" onClick={() => void downloadCsv()} className={buttonGhost}>
+              Export CSV
+            </button>
+          </>
+        }
+      />
+    <div className="relative z-10 mx-auto -mt-16 flex max-w-6xl flex-col gap-5 px-4 pb-24 md:px-6">
 
       {error ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -147,18 +143,18 @@ export default function DocumentsPage() {
       ) : null}
 
       {showForm ? (
-        <section className="flex flex-col gap-3 rounded-2xl border border-[#e5e7eb] bg-white p-4">
+        <section className="flex flex-col gap-3 rounded-2xl border border-line bg-card card-lift shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.12)] p-4">
           <div className="grid gap-3 sm:grid-cols-3">
-            <label className="flex flex-col gap-1 text-xs font-medium text-[#5b5b53]">
+            <label className="flex flex-col gap-1 text-xs font-medium text-muted">
               File name
               <input
                 value={form.filename}
                 onChange={(event) => setForm({ ...form, filename: event.target.value })}
                 placeholder="invoice_supplier_2026-11.pdf"
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal"
+                className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm font-normal"
               />
             </label>
-            <label className="flex flex-col gap-1 text-xs font-medium text-[#5b5b53]">
+            <label className="flex flex-col gap-1 text-xs font-medium text-muted">
               Type
               <select
                 value={form.doc_type}
@@ -168,40 +164,40 @@ export default function DocumentsPage() {
                     doc_type: event.target.value as (typeof DOC_TYPES)[number],
                   })
                 }
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal"
+                className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm font-normal"
               >
                 {DOC_TYPES.map((type) => (
                   <option key={type}>{type}</option>
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-xs font-medium text-[#5b5b53]">
+            <label className="flex flex-col gap-1 text-xs font-medium text-muted">
               Language
               <select
                 value={form.language}
                 onChange={(event) => setForm({ ...form, language: event.target.value })}
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal"
+                className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm font-normal"
               >
                 <option value="en">English</option>
                 <option value="fr">French</option>
               </select>
             </label>
           </div>
-          <label className="flex flex-col gap-1 text-xs font-medium text-[#5b5b53]">
+          <label className="flex flex-col gap-1 text-xs font-medium text-muted">
             Document text
             <textarea
               value={form.text}
               onChange={(event) => setForm({ ...form, text: event.target.value })}
               rows={6}
               placeholder={"INVOICE\nSupplier: ...\nInvoice No: ...\nTotal: ..."}
-              className="rounded-lg border border-[#d1d5db] px-3 py-2 font-mono text-xs leading-5"
+              className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 font-mono text-xs leading-5"
             />
           </label>
           <button
             type="button"
             onClick={() => void addDocument()}
             disabled={busy || form.text.trim().length < 10}
-            className="w-fit rounded-lg bg-[#4f46e5] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="w-fit rounded-lg bg-lagoon-deep px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-lagoon disabled:opacity-50"
           >
             {busy ? "Extracting…" : "Extract fields"}
           </button>
@@ -216,8 +212,8 @@ export default function DocumentsPage() {
             onClick={() => setFilter(value)}
             className={`rounded-full px-3 py-1.5 text-xs font-medium ${
               filter === value
-                ? "bg-[#171717] text-white"
-                : "border border-[#d1d5db] bg-white text-[#374151]"
+                ? "bg-ink text-card"
+                : "border border-line bg-card text-ink"
             }`}
           >
             {value === "all" ? "All documents" : "Needs review"}
@@ -226,9 +222,9 @@ export default function DocumentsPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
-        <section className="overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white">
+        <section className="overflow-hidden rounded-2xl border border-line bg-card card-lift shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.12)]">
           <table className="w-full text-left text-sm">
-            <thead className="bg-[#f9fafb] text-[11px] uppercase tracking-wide text-[#6b7280]">
+            <thead className="bg-surface text-[11px] uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-2.5 font-medium">File</th>
                 <th className="px-4 py-2.5 font-medium">Party</th>
@@ -241,19 +237,19 @@ export default function DocumentsPage() {
                 <tr
                   key={document.id}
                   onClick={() => void open(document.id)}
-                  className={`cursor-pointer border-t border-[#f1f3f5] hover:bg-[#f9fafb] ${
-                    selected?.id === document.id ? "bg-[#eef2ff]" : ""
+                  className={`cursor-pointer border-t border-line hover:bg-surface ${
+                    selected?.id === document.id ? "bg-lagoon-wash" : ""
                   }`}
                 >
                   <td className="px-4 py-3">
                     <span className="block max-w-[190px] truncate">
                       {document.filename}
                     </span>
-                    <span className="text-[11px] text-[#6b7280]">
+                    <span className="text-[11px] text-muted">
                       {document.doc_type} · {(document.confidence * 100).toFixed(0)}%
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[#374151]">{document.supplier ?? "—"}</td>
+                  <td className="px-4 py-3 text-ink">{document.supplier ?? "—"}</td>
                   <td className="px-4 py-3 text-right tabular-nums">
                     {document.total !== null
                       ? money(document.total, document.currency)
@@ -263,7 +259,7 @@ export default function DocumentsPage() {
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                         document.status === "approved"
-                          ? "bg-emerald-50 text-emerald-700"
+                          ? "bg-lagoon-wash text-lagoon-deep"
                           : "bg-amber-50 text-amber-700"
                       }`}
                     >
@@ -274,7 +270,7 @@ export default function DocumentsPage() {
               ))}
               {visible.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-[#6b7280]">
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-muted">
                     Nothing here yet.
                   </td>
                 </tr>
@@ -283,11 +279,11 @@ export default function DocumentsPage() {
           </table>
         </section>
 
-        <section className="rounded-2xl border border-[#e5e7eb] bg-white p-4">
+        <section className="rounded-2xl border border-line bg-card card-lift shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.12)] p-4">
           {selected ? (
             <div className="flex flex-col gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-[#6b7280]">
+                <p className="text-[11px] uppercase tracking-wide text-muted">
                   {selected.doc_type} · {selected.language.toUpperCase()}
                 </p>
                 <h2 className="text-base font-semibold">{selected.filename}</h2>
@@ -296,7 +292,7 @@ export default function DocumentsPage() {
               <div className="flex flex-col gap-3">
                 {selected.fields.map((field) => (
                   <label key={field.key} className="flex flex-col gap-1">
-                    <span className="flex items-center justify-between text-[11px] text-[#4b5563]">
+                    <span className="flex items-center justify-between text-[11px] text-muted">
                       {field.label}
                       <span className="font-mono text-[10px]">
                         {(field.confidence * 100).toFixed(0)}%
@@ -310,27 +306,27 @@ export default function DocumentsPage() {
                       className={`rounded-lg border px-3 py-2 text-sm ${
                         field.confidence < 0.9
                           ? "border-amber-300 bg-amber-50"
-                          : "border-[#d1d5db]"
+                          : "border-line"
                       }`}
                     />
                   </label>
                 ))}
               </div>
 
-              <div className="flex flex-wrap items-end gap-2 border-t border-[#f1f3f5] pt-3">
-                <label className="flex flex-1 flex-col gap-1 text-[11px] text-[#4b5563]">
+              <div className="flex flex-wrap items-end gap-2 border-t border-line pt-3">
+                <label className="flex flex-1 flex-col gap-1 text-[11px] text-muted">
                   Reviewed by
                   <input
                     value={reviewer}
                     onChange={(event) => setReviewer(event.target.value)}
-                    className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm"
+                    className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm"
                   />
                 </label>
                 <button
                   type="button"
                   onClick={() => void saveReview()}
                   disabled={busy}
-                  className="rounded-lg bg-[#4f46e5] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  className="rounded-lg bg-lagoon-deep px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-lagoon disabled:opacity-50"
                 >
                   {busy
                     ? "Saving…"
@@ -339,18 +335,19 @@ export default function DocumentsPage() {
                       : "Approve"}
                 </button>
               </div>
-              <p className="text-[11px] leading-5 text-[#6b7280]">
+              <p className="text-[11px] leading-5 text-muted">
                 Low-confidence fields are highlighted. The reviewer is recorded with
                 the approval and kept in the export.
               </p>
             </div>
           ) : (
-            <div className="flex h-full min-h-[220px] items-center justify-center text-center text-sm text-[#6b7280]">
+            <div className="flex h-full min-h-[220px] items-center justify-center text-center text-sm text-muted">
               Select a document to review its extracted fields.
             </div>
           )}
         </section>
       </div>
     </div>
+    </>
   );
 }

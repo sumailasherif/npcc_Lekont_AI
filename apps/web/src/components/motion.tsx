@@ -22,9 +22,8 @@ export function Reveal({
     const node = ref.current;
     if (!node) return;
     if (typeof IntersectionObserver === "undefined") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setVisible(true);
-      return;
+      const frame = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(frame);
     }
     const observer = new IntersectionObserver(
       (entries) => {
@@ -68,9 +67,8 @@ export function CountUp({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDisplay(value);
-      return;
+      const frame = requestAnimationFrame(() => setDisplay(value));
+      return () => cancelAnimationFrame(frame);
     }
     let frame = 0;
     const start = performance.now();
@@ -179,7 +177,11 @@ export function Sparkle({ delay = 0, className = "" }: { delay?: number; classNa
   );
 }
 
-/** Page header band used across every screen. */
+/**
+ * Page header band used across every screen.
+ * `aside` switches to a two-column hero (text left, visual right).
+ * Compact heroes sit on working pages and skip the entrance animation so the page is usable at once.
+ */
 export function PageHero({
   eyebrow,
   title,
@@ -187,6 +189,7 @@ export function PageHero({
   description,
   actions,
   children,
+  aside,
   compact = false,
 }: {
   eyebrow: string;
@@ -195,51 +198,70 @@ export function PageHero({
   description: string;
   actions?: ReactNode;
   children?: ReactNode;
+  aside?: ReactNode;
   compact?: boolean;
 }) {
+  const enter = compact ? "" : "hero-animated";
+  const delay = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
+  const split = Boolean(aside);
+
   return (
     <section
-      className={`relative isolate overflow-hidden bg-ink text-white ${
-        compact ? "pb-28 pt-32 md:pt-36" : "pb-36 pt-36 md:pt-44"
+      className={`relative isolate overflow-hidden bg-night text-white ${
+        compact ? "pb-28 pt-32 md:pt-36" : "pb-36 pt-32 md:pt-40"
       }`}
     >
       <HeroBackdrop />
-      <div className="relative mx-auto flex max-w-6xl flex-col items-center px-4 text-center md:px-6">
-        <span
-          className="hero-animated inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-lagoon-soft backdrop-blur"
-          style={{ "--d": "0ms" } as CSSProperties}
-        >
-          <Sparkle className="text-coral" delay={300} />
-          {eyebrow}
-        </span>
-        <h1
-          className={`hero-animated mt-5 max-w-4xl text-balance font-semibold tracking-tight ${
-            compact ? "text-4xl md:text-5xl" : "text-4xl md:text-6xl"
+      <div
+        className={`relative mx-auto max-w-6xl px-4 md:px-6 ${
+          split ? "grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]" : ""
+        }`}
+      >
+        <div
+          className={`flex flex-col ${
+            split ? "items-center text-center lg:items-start lg:text-left" : "items-center text-center"
           }`}
-          style={{ "--d": "90ms" } as CSSProperties}
         >
-          {title} {highlight ? <span className="text-gradient">{highlight}</span> : null}
-        </h1>
-        <p
-          className="hero-animated mt-5 max-w-[60ch] text-pretty text-base leading-7 text-slate-300 md:text-lg"
-          style={{ "--d": "180ms" } as CSSProperties}
-        >
-          {description}
-        </p>
-        {actions ? (
-          <div
-            className="hero-animated mt-8 flex flex-wrap items-center justify-center gap-3"
-            style={{ "--d": "270ms" } as CSSProperties}
+          <span
+            className={`${enter} inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-lagoon-soft backdrop-blur`}
+            style={delay(0)}
           >
-            {actions}
-          </div>
-        ) : null}
-        {children ? (
-          <div
-            className="hero-animated mt-10 w-full"
-            style={{ "--d": "360ms" } as CSSProperties}
+            <Sparkle className="text-coral" delay={300} />
+            {eyebrow}
+          </span>
+          <h1
+            className={`${enter} mt-5 max-w-4xl text-balance font-semibold tracking-tight ${
+              compact ? "text-4xl md:text-5xl" : split ? "text-4xl md:text-5xl xl:text-6xl" : "text-4xl md:text-6xl"
+            }`}
+            style={delay(90)}
           >
-            {children}
+            {title} {highlight ? <span className="text-gradient">{highlight}</span> : null}
+          </h1>
+          <p
+            className={`${enter} mt-5 max-w-[60ch] text-pretty text-base leading-7 text-slate-300 md:text-lg`}
+            style={delay(180)}
+          >
+            {description}
+          </p>
+          {actions ? (
+            <div
+              className={`${enter} mt-8 flex flex-wrap items-center gap-3 ${
+                split ? "justify-center lg:justify-start" : "justify-center"
+              }`}
+              style={delay(270)}
+            >
+              {actions}
+            </div>
+          ) : null}
+          {children ? (
+            <div className={`${enter} mt-10 w-full`} style={delay(360)}>
+              {children}
+            </div>
+          ) : null}
+        </div>
+        {aside ? (
+          <div className={enter} style={delay(420)}>
+            {aside}
           </div>
         ) : null}
       </div>
@@ -263,15 +285,15 @@ export function Marquee({ items }: { items: ReactNode[] }) {
 }
 
 export const buttonPrimary =
-  "inline-flex items-center justify-center gap-2 rounded-xl bg-lagoon px-5 py-2.5 text-sm font-semibold text-ink shadow-[0_8px_30px_-8px_rgba(20,184,166,0.7)] transition hover:-translate-y-0.5 hover:bg-[#2dd4bf] disabled:translate-y-0 disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-xl bg-lagoon px-5 py-2.5 text-sm font-semibold text-night shadow-[0_8px_30px_-8px_rgba(20,184,166,0.7)] transition hover:-translate-y-0.5 hover:bg-[#2dd4bf] disabled:translate-y-0 disabled:opacity-60";
 export const buttonGhost =
   "inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/10";
 export const buttonDark =
-  "inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-ink-3 disabled:translate-y-0 disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-card transition hover:-translate-y-0.5 hover:opacity-90 disabled:translate-y-0 disabled:opacity-50";
 export const buttonLagoon =
   "inline-flex items-center justify-center gap-2 rounded-xl bg-lagoon-deep px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-lagoon disabled:translate-y-0 disabled:opacity-50";
 export const buttonOutline =
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:-translate-y-0.5 hover:border-lagoon";
-export const card = "rounded-2xl border border-line bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.12)]";
+  "inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-card px-4 py-2 text-sm font-semibold text-ink transition hover:-translate-y-0.5 hover:border-lagoon";
+export const card = "rounded-2xl border border-line bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.12)]";
 export const input =
-  "rounded-xl border border-line bg-white px-3 py-2 text-sm font-normal text-ink outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15";
+  "rounded-xl border border-line bg-card px-3 py-2 text-sm font-normal text-ink outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15";

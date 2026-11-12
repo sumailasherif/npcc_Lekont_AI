@@ -33,8 +33,8 @@ export function SpendChart({
       <svg viewBox={`0 0 ${width} ${height}`} className="h-44 w-full" preserveAspectRatio="none">
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.24" />
-            <stop offset="100%" stopColor="#4f46e5" stopOpacity="0" />
+            <stop offset="0%" stopColor="#0d9488" stopOpacity="0.24" />
+            <stop offset="100%" stopColor="#0d9488" stopOpacity="0" />
           </linearGradient>
         </defs>
         {[0.25, 0.5, 0.75].map((ratio) => (
@@ -44,7 +44,7 @@ export function SpendChart({
             x2={width - padX}
             y1={padY + ratio * (height - padY * 2)}
             y2={padY + ratio * (height - padY * 2)}
-            stroke="#eef0f6"
+            stroke="#e3e8ef"
             strokeWidth="1"
           />
         ))}
@@ -52,10 +52,11 @@ export function SpendChart({
         <polyline
           points={line}
           fill="none"
-          stroke="#4f46e5"
+          stroke="#0d9488"
           strokeWidth="2.2"
           strokeLinejoin="round"
           strokeLinecap="round"
+          pathLength={1}
           className="animate-draw"
           vectorEffect="non-scaling-stroke"
         />
@@ -66,14 +67,14 @@ export function SpendChart({
             cy={point.y}
             r="3"
             fill="#ffffff"
-            stroke="#4f46e5"
+            stroke="#0d9488"
             strokeWidth="2"
             className="animate-scale-in"
             style={{ animationDelay: `${400 + index * 45}ms` }}
           />
         ))}
       </svg>
-      <div className="mt-1 flex justify-between px-1 text-[10px] text-[#94a3b8]">
+      <div className="mt-1 flex justify-between px-1 text-[10px] text-muted">
         {data.map((point) => (
           <span key={point.month}>{point.month.slice(5)}</span>
         ))}

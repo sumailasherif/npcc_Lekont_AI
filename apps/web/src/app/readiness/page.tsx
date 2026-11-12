@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 
+import { useLanguage } from "@/components/language-provider";
+import { CountUp, PageHero } from "@/components/motion";
 import { apiPost, type DiagnosticResponse } from "@/lib/api";
 
 const TOOLS = ["excel", "whatsapp", "paper", "accounting software", "erp"];
@@ -16,6 +18,7 @@ const PAINS = [
 ];
 
 export default function ReadinessPage() {
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     sector: "Distribution",
     employees: 12,
@@ -52,24 +55,24 @@ export default function ReadinessPage() {
   }
 
   return (
-    <div className="animate-fade-in flex flex-col gap-5">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Automation readiness</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[#5b5b53]">
-          A short diagnostic that scores six back-office processes on effort and
-          impact, then tells you which one to automate first. Evidence base: HRDC
-          S1, S2 and S4.
-        </p>
-      </header>
+    <>
+      <PageHero
+        compact
+        eyebrow={t.hero.readyEyebrow}
+        title={t.hero.readyLead}
+        highlight={t.hero.readyHighlight}
+        description={t.hero.readySub}
+      />
+    <div className="relative z-10 mx-auto -mt-16 flex max-w-6xl flex-col gap-5 px-4 pb-24 md:px-6">
 
       <section className="grid gap-4 lg:grid-cols-[1fr_1.15fr]">
-        <div className="flex flex-col gap-4 rounded-2xl border border-[#e5e7eb] bg-white p-5">
+        <div className="flex flex-col gap-4 rounded-2xl border border-line bg-card card-lift shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.12)] p-5">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Sector">
               <input
                 value={form.sector}
                 onChange={(event) => setForm({ ...form, sector: event.target.value })}
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal text-[#171717]"
+                className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm font-normal text-ink"
               />
             </Field>
             <Field label="Employees">
@@ -79,7 +82,7 @@ export default function ReadinessPage() {
                 onChange={(event) =>
                   setForm({ ...form, employees: Number(event.target.value) })
                 }
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal text-[#171717]"
+                className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm font-normal text-ink"
               />
             </Field>
             <Field label="Invoices / month">
@@ -89,7 +92,7 @@ export default function ReadinessPage() {
                 onChange={(event) =>
                   setForm({ ...form, monthly_invoices: Number(event.target.value) })
                 }
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal text-[#171717]"
+                className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm font-normal text-ink"
               />
             </Field>
             <Field label="Payslips / month">
@@ -99,7 +102,7 @@ export default function ReadinessPage() {
                 onChange={(event) =>
                   setForm({ ...form, monthly_payslips: Number(event.target.value) })
                 }
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal text-[#171717]"
+                className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm font-normal text-ink"
               />
             </Field>
             <Field label="Admin hours / month">
@@ -109,13 +112,13 @@ export default function ReadinessPage() {
                 onChange={(event) =>
                   setForm({ ...form, admin_hours: Number(event.target.value) })
                 }
-                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal text-[#171717]"
+                className="rounded-xl border border-line bg-card px-3 py-2 outline-none transition focus:border-lagoon focus:ring-4 focus:ring-lagoon/15 text-sm font-normal text-ink"
               />
             </Field>
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-muted">
               Tools today
             </span>
             <div className="flex flex-wrap gap-2">
@@ -132,7 +135,7 @@ export default function ReadinessPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-[#6b7280]">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-muted">
               Where it hurts
             </span>
             <div className="flex flex-wrap gap-2">
@@ -152,7 +155,7 @@ export default function ReadinessPage() {
             type="button"
             onClick={() => void submit()}
             disabled={loading}
-            className="mt-2 w-fit rounded-lg bg-[#4f46e5] px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+            className="mt-2 w-fit rounded-lg bg-lagoon-deep px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-lagoon disabled:opacity-60"
           >
             {loading ? "Scoring…" : "Run the check"}
           </button>
@@ -167,13 +170,13 @@ export default function ReadinessPage() {
 
           {result ? (
             <>
-              <div className="rounded-2xl border border-[#e5e7eb] bg-[#4f46e5] p-5 text-white">
+              <div className="rounded-2xl border border-line bg-lagoon-deep p-5 text-white">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-[11px] uppercase tracking-wide text-white/60">
                       Readiness score
                     </p>
-                    <p className="text-4xl font-semibold">{result.readiness_score}/100</p>
+                    <p className="text-4xl font-semibold"><span className="text-gradient"><CountUp value={result.readiness_score} /></span><span className="text-xl text-slate-400">/100</span></p>
                     <p className="mt-1 text-sm text-white/80">{result.band}</p>
                   </div>
                   <div className="rounded-xl bg-white/10 px-3 py-2 text-right">
@@ -186,7 +189,7 @@ export default function ReadinessPage() {
                 <p className="mt-4 text-sm leading-6 text-white/85">{result.summary}</p>
               </div>
 
-              <div className="flex flex-col gap-3 rounded-2xl border border-[#e5e7eb] bg-white p-5">
+              <div className="flex flex-col gap-3 rounded-2xl border border-line bg-card card-lift shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.12)] p-5">
                 <h2 className="text-sm font-semibold">Process scores</h2>
                 {result.scores.map((score) => (
                   <div key={score.process} className="flex flex-col gap-1">
@@ -195,26 +198,26 @@ export default function ReadinessPage() {
                       <span className="flex gap-1">
                         <Tag tone={score.impact}>{score.impact}</Tag>
                         <Tag tone={score.effort}>{score.effort} effort</Tag>
-                        <span className="tabular-nums text-[#4b5563]">{score.score}</span>
+                        <span className="tabular-nums text-muted">{score.score}</span>
                       </span>
                     </div>
-                    <span className="h-2 overflow-hidden rounded-full bg-[#f1f3f5]">
+                    <span className="h-2 overflow-hidden rounded-full bg-lagoon-wash">
                       <span
-                        className="grow-bar block h-full rounded-full bg-[#4f46e5]"
+                        className="grow-bar block h-full rounded-full bg-lagoon-deep"
                         style={{ width: `${score.score}%` }}
                       />
                     </span>
-                    <span className="text-[11px] text-[#6b7280]">{score.reason}</span>
+                    <span className="text-[11px] text-muted">{score.reason}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="rounded-2xl border border-[#e5e7eb] bg-white p-5">
+              <div className="rounded-2xl border border-line bg-card card-lift shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.12)] p-5">
                 <h2 className="text-sm font-semibold">Next steps</h2>
-                <ol className="mt-2 flex flex-col gap-2 text-sm text-[#374151]">
+                <ol className="mt-2 flex flex-col gap-2 text-sm text-ink">
                   {result.next_steps.map((step, index) => (
                     <li key={step} className="flex gap-2">
-                      <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#eef2ff] text-[11px] font-semibold text-[#4f46e5]">
+                      <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-lagoon-wash text-[11px] font-semibold text-lagoon-deep">
                         {index + 1}
                       </span>
                       {step}
@@ -224,9 +227,9 @@ export default function ReadinessPage() {
               </div>
             </>
           ) : (
-            <div className="flex min-h-[260px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-[#d1d5db] bg-white p-6 text-center">
+            <div className="flex min-h-[260px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-line bg-card p-6 text-center">
               <p className="text-sm font-medium">No assessment yet</p>
-              <p className="max-w-sm text-xs leading-5 text-[#6b7280]">
+              <p className="max-w-sm text-xs leading-5 text-muted">
                 Answer the six inputs and run the check. The recommendation is
                 rule-based and explainable; it is a starting point for interviews,
                 not a prediction.
@@ -236,12 +239,13 @@ export default function ReadinessPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-[11px] font-medium text-[#4b5563]">
+    <label className="flex flex-col gap-1 text-[11px] font-medium text-muted">
       {label}
       {children}
     </label>
@@ -263,8 +267,8 @@ function Chip({
       onClick={onClick}
       className={`rounded-full px-3 py-1.5 text-xs capitalize ${
         active
-          ? "bg-[#171717] text-white"
-          : "border border-[#d1d5db] bg-white text-[#374151]"
+          ? "bg-ink text-card"
+          : "border border-line bg-card text-ink"
       }`}
     >
       {children}
@@ -275,10 +279,10 @@ function Chip({
 function Tag({ children, tone }: { children: ReactNode; tone: string }) {
   const color =
     tone === "high"
-      ? "bg-emerald-50 text-emerald-700"
+      ? "bg-lagoon-wash text-lagoon-deep"
       : tone === "medium"
         ? "bg-amber-50 text-amber-700"
-        : "bg-[#f7f8fa] text-[#4b5563]";
+        : "bg-surface text-muted";
   return (
     <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${color}`}>
       {children}
