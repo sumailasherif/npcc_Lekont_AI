@@ -1,13 +1,8 @@
 from fastapi import APIRouter
 
-from app.api.routes import analytics, experts, gaps, query, skills, sops, sources, translation
+from app.api.routes import dashboard, documents, insights
 
 api_router = APIRouter(prefix="/api/v1")
-api_router.include_router(sources.router)
-api_router.include_router(query.router)
-api_router.include_router(sops.router)
-api_router.include_router(gaps.router)
-api_router.include_router(skills.router)
-api_router.include_router(analytics.router)
-api_router.include_router(translation.router)
-api_router.include_router(experts.router)
+api_router.include_router(documents.router)
+api_router.include_router(insights.router)
+api_router.include_router(dashboard.router)

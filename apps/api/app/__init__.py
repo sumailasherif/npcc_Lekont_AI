@@ -1,1 +1,1 @@
-"""Retenou AI API package."""
+"""Lekont API package."""

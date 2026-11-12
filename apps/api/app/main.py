@@ -20,8 +20,9 @@ app = FastAPI(
     title=settings.app_name,
     version=settings.api_version,
     description=(
-        "Multilingual shop-floor capability API. Grounded answers only from "
-        "supervisor-approved work instructions."
+        "Lekont turns invoices, payslips and contracts into human-checked data, "
+        "then answers plain-language questions about the numbers and recommends "
+        "what an SME should automate first."
     ),
     lifespan=lifespan,
 )

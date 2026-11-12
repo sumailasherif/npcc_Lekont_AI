@@ -12,7 +12,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "Retenou AI API"
+    app_name: str = "Lekont API"
     api_version: str = "0.1.0"
     api_env: str = "development"
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
