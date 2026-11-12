@@ -1,0 +1,287 @@
+@import "tailwindcss";
+
+/*
+ * Lekont design tokens - "Lagoon" palette.
+ * Deep-ocean ink for hero bands, lagoon teal as primary, coral as accent.
+ */
+:root {
+  --background: #f6f8fb;
+  --foreground: #0f172a;
+  --hero-cell: 64px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  --color-ink: #071426;
+  --color-ink-2: #0c1f3a;
+  --color-ink-3: #13294a;
+  --color-lagoon: #14b8a6;
+  --color-lagoon-deep: #0d9488;
+  --color-lagoon-soft: #ccfbf1;
+  --color-lagoon-wash: #effcf9;
+  --color-coral: #ff6b4a;
+  --color-coral-soft: #ffe4dc;
+  --color-sun: #f59e0b;
+  --color-sun-soft: #fef3c7;
+  --color-surface: #f6f8fb;
+  --color-line: #e3e8ef;
+  --color-muted: #5b6678;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: rgba(20, 184, 166, 0.3);
+}
+
+/* ---------- Gradient text ---------- */
+.text-gradient {
+  background: linear-gradient(100deg, #5eead4 0%, #ffffff 45%, #ffb199 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Entrance: fade in with blur (staggered via --d) ---------- */
+@keyframes fadeInBlur {
+  0% { opacity: 0; filter: blur(10px); transform: translateY(20%); }
+  100% { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+@keyframes fadeInBlurQuick {
+  0% { opacity: 0; filter: blur(10px); transform: translateY(10%); }
+  100% { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+
+.hero-animated {
+  opacity: 0;
+  animation: fadeInBlur 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.animate-fade-in,
+.animate-fade-up {
+  animation: fadeInBlurQuick 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* Scroll reveal: toggled by <Reveal> */
+.reveal {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(32px);
+  transition:
+    opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
+}
+
+/* ---------- Hero grid with travelling beams ---------- */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(148, 197, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 197, 255, 0.07) 1px, transparent 1px);
+  background-size: var(--hero-cell) var(--hero-cell);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 100%);
+}
+
+.hero-grid-beam {
+  position: absolute;
+  pointer-events: none;
+}
+.hero-grid-beam--h {
+  height: 1px;
+  width: 180px;
+  left: -200px;
+  background: linear-gradient(90deg, transparent, var(--beam, #5eead4), transparent);
+  animation: hero-grid-beam-h 19.2s linear infinite;
+  animation-delay: var(--d, 0s);
+}
+.hero-grid-beam--v {
+  width: 1px;
+  height: 180px;
+  top: -200px;
+  background: linear-gradient(180deg, transparent, var(--beam, #5eead4), transparent);
+  animation: hero-grid-beam-v 19.2s linear infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes hero-grid-beam-h {
+  0% { transform: translateX(0); opacity: 0; }
+  5% { opacity: 1; }
+  45% { opacity: 1; }
+  50% { transform: translateX(calc(100vw + 400px)); opacity: 0; }
+  100% { transform: translateX(calc(100vw + 400px)); opacity: 0; }
+}
+@keyframes hero-grid-beam-v {
+  0% { transform: translateY(0); opacity: 0; }
+  5% { opacity: 1; }
+  45% { opacity: 1; }
+  50% { transform: translateY(1400px); opacity: 0; }
+  100% { transform: translateY(1400px); opacity: 0; }
+}
+
+@keyframes glow {
+  0% { opacity: 0.45; }
+  100% { opacity: 1; }
+}
+.animate-glow {
+  animation: glow 3.2s ease-in-out infinite alternate;
+}
+
+/* ---------- Marquee ---------- */
+@keyframes logoSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: logoSlide 60s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+.marquee {
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+/* ---------- Sparkles ---------- */
+@keyframes ai-sparkle-pop {
+  0% { opacity: 0; transform: scale(0) rotate(-45deg); }
+  70% { opacity: 1; transform: scale(1.06) rotate(10deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes ai-sparkle-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  40% { opacity: 0.3; transform: scale(0.7); }
+}
+.sparkle {
+  animation:
+    ai-sparkle-pop 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+    ai-sparkle-twinkle 2.4s ease-in-out 0.8s infinite;
+  animation-delay: var(--d, 0ms), calc(var(--d, 0ms) + 800ms);
+}
+
+/* ---------- Flow diagram: marching dashes and travelling dots ---------- */
+@keyframes dash-march {
+  100% { stroke-dashoffset: -20px; }
+}
+.dash-march {
+  stroke-dasharray: 4 6;
+  animation: dash-march 0.9s linear infinite;
+}
+@keyframes dot-move {
+  0% { offset-distance: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+.flow-dot {
+  offset-rotate: 0deg;
+  animation: dot-move 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-delay: var(--d, 0s);
+}
+
+/* ---------- Bars and progress ---------- */
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes grow-y {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.grow-bar {
+  transform-origin: left center;
+  animation: grow-x 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+.grow-col {
+  transform-origin: bottom center;
+  animation: grow-y 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes tab-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.tab-progress {
+  transform-origin: left center;
+  animation: tab-progress var(--dur, 7s) linear both;
+}
+
+/* Typewriter caret */
+@keyframes caret {
+  50% { opacity: 0; }
+}
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: currentColor;
+  animation: caret 1s step-end infinite;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #e9eef4;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  .hero-animated {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+  .hero-grid-beam,
+  .flow-dot {
+    display: none;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "lekont",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lekont - SME back-office intelligence for Mauritius",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @lekont/web",
+    "build": "npm run build --workspace @lekont/web",
+    "lint": "npm run lint --workspace @lekont/web",
+    "typecheck": "npm run typecheck --workspace @lekont/web"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

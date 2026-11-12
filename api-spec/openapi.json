@@ -1,0 +1,1130 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Lekont API",
+    "description": "Lekont turns invoices, payslips and contracts into human-checked data, then answers plain-language questions about the numbers and recommends what an SME should automate first.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/documents": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Read Documents",
+        "operationId": "read_documents_api_v1_documents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentSummary"
+                  },
+                  "type": "array",
+                  "title": "Response Read Documents Api V1 Documents Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Add Document",
+        "operationId": "add_document_api_v1_documents_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/export": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Export",
+        "operationId": "export_api_v1_documents_export_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{document_id}": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Read Document",
+        "operationId": "read_document_api_v1_documents__document_id__get",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{document_id}/review": {
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Review",
+        "operationId": "review_api_v1_documents__document_id__review_post",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/insights/ask": {
+      "post": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "Ask",
+        "operationId": "ask_api_v1_insights_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/insights/readiness": {
+      "post": {
+        "tags": [
+          "insights"
+        ],
+        "summary": "Readiness",
+        "operationId": "readiness_api_v1_insights_readiness_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiagnosticRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/summary": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Summary",
+        "operationId": "summary_api_v1_dashboard_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Root  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AskRequest": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Question"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "AskRequest"
+      },
+      "AskResponse": {
+        "properties": {
+          "intent": {
+            "type": "string",
+            "title": "Intent"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "calculation": {
+            "type": "string",
+            "title": "Calculation"
+          },
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/Column"
+            },
+            "type": "array",
+            "title": "Columns"
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "chart": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Chart"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Caveats"
+          },
+          "suggested": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suggested"
+          }
+        },
+        "type": "object",
+        "required": [
+          "intent",
+          "answer",
+          "calculation",
+          "columns",
+          "rows",
+          "confidence",
+          "caveats",
+          "suggested"
+        ],
+        "title": "AskResponse"
+      },
+      "Chart": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "bar",
+              "line"
+            ],
+            "title": "Type",
+            "default": "bar"
+          },
+          "x": {
+            "type": "string",
+            "title": "X"
+          },
+          "y": {
+            "type": "string",
+            "title": "Y"
+          }
+        },
+        "type": "object",
+        "required": [
+          "x",
+          "y"
+        ],
+        "title": "Chart"
+      },
+      "Column": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label"
+        ],
+        "title": "Column"
+      },
+      "DashboardSummary": {
+        "properties": {
+          "documents_total": {
+            "type": "integer",
+            "title": "Documents Total"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "approved": {
+            "type": "integer",
+            "title": "Approved"
+          },
+          "monthly_spend": {
+            "type": "number",
+            "title": "Monthly Spend"
+          },
+          "monthly_vat": {
+            "type": "number",
+            "title": "Monthly Vat"
+          },
+          "readiness_score": {
+            "type": "integer",
+            "title": "Readiness Score"
+          },
+          "top_supplier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Supplier"
+          },
+          "top_supplier_spend": {
+            "type": "number",
+            "title": "Top Supplier Spend"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "monthly": {
+            "items": {
+              "$ref": "#/components/schemas/MonthlyPoint"
+            },
+            "type": "array",
+            "title": "Monthly"
+          }
+        },
+        "type": "object",
+        "required": [
+          "documents_total",
+          "needs_review",
+          "approved",
+          "monthly_spend",
+          "monthly_vat",
+          "readiness_score",
+          "top_supplier",
+          "top_supplier_spend",
+          "currency",
+          "monthly"
+        ],
+        "title": "DashboardSummary"
+      },
+      "DiagnosticRequest": {
+        "properties": {
+          "sector": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Sector"
+          },
+          "employees": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Employees"
+          },
+          "monthly_invoices": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Monthly Invoices"
+          },
+          "monthly_payslips": {
+            "type": "integer",
+            "maximum": 5000.0,
+            "minimum": 0.0,
+            "title": "Monthly Payslips"
+          },
+          "admin_hours": {
+            "type": "integer",
+            "maximum": 400.0,
+            "minimum": 0.0,
+            "title": "Admin Hours"
+          },
+          "tools": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tools"
+          },
+          "pain_points": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pain Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sector",
+          "employees",
+          "monthly_invoices",
+          "monthly_payslips",
+          "admin_hours"
+        ],
+        "title": "DiagnosticRequest"
+      },
+      "DiagnosticResponse": {
+        "properties": {
+          "readiness_score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Readiness Score"
+          },
+          "band": {
+            "type": "string",
+            "title": "Band"
+          },
+          "recommended_first": {
+            "type": "string",
+            "title": "Recommended First"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "scores": {
+            "items": {
+              "$ref": "#/components/schemas/ProcessScore"
+            },
+            "type": "array",
+            "title": "Scores"
+          },
+          "next_steps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Next Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "readiness_score",
+          "band",
+          "recommended_first",
+          "summary",
+          "scores",
+          "next_steps"
+        ],
+        "title": "DiagnosticResponse"
+      },
+      "Document": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "doc_type": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "supplier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DocumentStatus"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploaded At"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ExtractedField"
+            },
+            "type": "array",
+            "title": "Fields"
+          },
+          "reviewer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewer"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "doc_type",
+          "language",
+          "supplier",
+          "total",
+          "currency",
+          "status",
+          "confidence",
+          "needs_review",
+          "uploaded_at",
+          "text",
+          "fields"
+        ],
+        "title": "Document"
+      },
+      "DocumentCreate": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "Filename"
+          },
+          "doc_type": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "en"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 20000,
+            "minLength": 10,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "doc_type",
+          "text"
+        ],
+        "title": "DocumentCreate"
+      },
+      "DocumentStatus": {
+        "type": "string",
+        "enum": [
+          "needs_review",
+          "approved",
+          "exported"
+        ],
+        "title": "DocumentStatus"
+      },
+      "DocumentSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "doc_type": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "supplier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DocumentStatus"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploaded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "doc_type",
+          "language",
+          "supplier",
+          "total",
+          "currency",
+          "status",
+          "confidence",
+          "needs_review",
+          "uploaded_at"
+        ],
+        "title": "DocumentSummary"
+      },
+      "DocumentType": {
+        "type": "string",
+        "enum": [
+          "invoice",
+          "payslip",
+          "contract"
+        ],
+        "title": "DocumentType"
+      },
+      "ExportResponse": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "rows": {
+            "type": "integer",
+            "title": "Rows"
+          },
+          "csv": {
+            "type": "string",
+            "title": "Csv"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "rows",
+          "csv"
+        ],
+        "title": "ExportResponse"
+      },
+      "ExtractedField": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1
+          },
+          "corrected": {
+            "type": "boolean",
+            "title": "Corrected",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "value",
+          "confidence"
+        ],
+        "title": "ExtractedField"
+      },
+      "FieldCorrection": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "FieldCorrection"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "en",
+          "fr",
+          "cr"
+        ],
+        "title": "Language"
+      },
+      "MonthlyPoint": {
+        "properties": {
+          "month": {
+            "type": "string",
+            "title": "Month"
+          },
+          "spend": {
+            "type": "number",
+            "title": "Spend"
+          },
+          "vat": {
+            "type": "number",
+            "title": "Vat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month",
+          "spend",
+          "vat"
+        ],
+        "title": "MonthlyPoint"
+      },
+      "ProcessScore": {
+        "properties": {
+          "process": {
+            "type": "string",
+            "title": "Process"
+          },
+          "score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "effort": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Effort"
+          },
+          "impact": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Impact"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "process",
+          "score",
+          "effort",
+          "impact",
+          "reason"
+        ],
+        "title": "ProcessScore"
+      },
+      "ReviewRequest": {
+        "properties": {
+          "reviewer": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Reviewer"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/FieldCorrection"
+            },
+            "type": "array",
+            "title": "Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reviewer"
+        ],
+        "title": "ReviewRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
