@@ -68,20 +68,14 @@ def _monthly_rows() -> list[dict[str, str | float]]:
     totals: dict[str, float] = defaultdict(float)
     for row in LEDGER:
         totals[row["month"]] += row["amount"]
-    return [
-        {"month": month, "amount": round(value, 2)}
-        for month, value in sorted(totals.items())
-    ]
+    return [{"month": month, "amount": round(value, 2)} for month, value in sorted(totals.items())]
 
 
 def _vat_rows() -> list[dict[str, str | float]]:
     totals: dict[str, float] = defaultdict(float)
     for row in LEDGER:
         totals[row["month"]] += row["vat"]
-    return [
-        {"month": month, "vat": round(value, 2)}
-        for month, value in sorted(totals.items())
-    ]
+    return [{"month": month, "vat": round(value, 2)} for month, value in sorted(totals.items())]
 
 
 def _category_rows() -> list[dict[str, str | float]]:
@@ -128,7 +122,9 @@ def _detect(question: str) -> tuple[str, str | None]:
         return "largest", None
     if any(token in q for token in ("automate", "automation", "readiness", "what should i")):
         return "automation", None
-    if any(token in q for token in ("month", "trend", "over time", "cash flow", "cashflow", "spend")):
+    if any(
+        token in q for token in ("month", "trend", "over time", "cash flow", "cashflow", "spend")
+    ):
         return "monthly", None
     return "unknown", None
 
@@ -147,12 +143,21 @@ def ask(question: str, language: Language = Language.EN) -> AskResponse:
         return AskResponse(
             intent=intent,
             answer=answer,
-            calculation="SUM(amount) GROUP BY supplier ORDER BY amount DESC LIMIT 5; payroll excluded",
-            columns=[Column(key="supplier", label="Supplier"), Column(key="amount", label="Spend (MUR)")],
+            calculation=(
+                "SUM(amount) GROUP BY supplier ORDER BY amount DESC LIMIT 5; "
+                "payroll excluded"
+            ),
+            columns=[
+                Column(key="supplier", label="Supplier"),
+                Column(key="amount", label="Spend (MUR)"),
+            ],
             rows=rows,
             chart=Chart(type="bar", x="supplier", y="amount"),
             confidence=0.92,
-            caveats=["Based on the 20 synthetic ledger rows.", "Payroll is excluded from supplier rankings."],
+            caveats=[
+                "Based on the 20 synthetic ledger rows.",
+                "Payroll is excluded from supplier rankings.",
+            ],
             suggested=SUGGESTED,
         )
 
@@ -181,9 +186,10 @@ def ask(question: str, language: Language = Language.EN) -> AskResponse:
     if intent == "vat":
         rows = _vat_rows()
         total = sum(float(row["vat"]) for row in rows)
+        october_vat = _money(float(rows[-2]["vat"])) if len(rows) > 1 else _money(total)
         answer = (
             f"You recorded {_money(total)} of input VAT from {rows[0]['month']} to "
-            f"{rows[-1]['month']}. October is {_money(float(rows[-2]['vat'])) if len(rows) > 1 else _money(total)}."
+            f"{rows[-1]['month']}. October is {october_vat}."
         )
         return AskResponse(
             intent=intent,
@@ -226,8 +232,7 @@ def ask(question: str, language: Language = Language.EN) -> AskResponse:
             if row["category"] == "Payroll":
                 totals[row["month"]] += row["amount"]
         rows = [
-            {"month": month, "amount": round(value, 2)}
-            for month, value in sorted(totals.items())
+            {"month": month, "amount": round(value, 2)} for month, value in sorted(totals.items())
         ]
         total = sum(totals.values())
         answer = (
@@ -238,7 +243,10 @@ def ask(question: str, language: Language = Language.EN) -> AskResponse:
             intent=intent,
             answer=answer,
             calculation="SUM(amount) WHERE category = 'Payroll' GROUP BY month",
-            columns=[Column(key="month", label="Month"), Column(key="amount", label="Payroll (MUR)")],
+            columns=[
+                Column(key="month", label="Month"),
+                Column(key="amount", label="Payroll (MUR)"),
+            ],
             rows=rows,
             chart=Chart(type="line", x="month", y="amount"),
             confidence=0.9,
@@ -370,7 +378,13 @@ def diagnose(payload: DiagnosticRequest) -> DiagnosticResponse:
     elif payload.monthly_invoices <= 20:
         base += 5
     readiness = _clamp(base)
-    band = "Starting point" if readiness < 40 else "Ready for a first automation" if readiness < 70 else "Ready to scale"
+    band = (
+        "Starting point"
+        if readiness < 40
+        else "Ready for a first automation"
+        if readiness < 70
+        else "Ready to scale"
+    )
 
     has_invoice_pain = "invoices" in pains or "invoice" in pains
     has_payroll_pain = "payroll" in pains or "payslips" in pains
@@ -381,25 +395,43 @@ def diagnose(payload: DiagnosticRequest) -> DiagnosticResponse:
 
     high_invoices = payload.monthly_invoices >= 40
     high_payslips = payload.monthly_payslips >= 15
+    invoice_pain_note = "a named pain" if has_invoice_pain else "no named pain"
 
     scores = [
         ProcessScore(
             process="Invoice capture",
-            score=_clamp(40 + (15 if high_invoices else 0) + (15 if has_invoice_pain else 0) + (10 if "excel" in tools else 0) - (10 if "accounting software" in tools else 0)),
+            score=_clamp(
+                40
+                + (15 if high_invoices else 0)
+                + (15 if has_invoice_pain else 0)
+                + (10 if "excel" in tools else 0)
+                - (10 if "accounting software" in tools else 0)
+            ),
             effort="low" if payload.monthly_invoices <= 60 else "medium",
             impact=_impact(has_invoice_pain, high_invoices),
-            reason=f"{payload.monthly_invoices} invoices/month and {'a named pain' if has_invoice_pain else 'no named pain'}.",
+            reason=f"{payload.monthly_invoices} invoices/month and {invoice_pain_note}.",
         ),
         ProcessScore(
             process="Payroll",
-            score=_clamp(35 + (15 if high_payslips else 0) + (20 if has_payroll_pain else 0) + (10 if "excel" in tools else 0) - (10 if "accounting software" in tools else 0)),
+            score=_clamp(
+                35
+                + (15 if high_payslips else 0)
+                + (20 if has_payroll_pain else 0)
+                + (10 if "excel" in tools else 0)
+                - (10 if "accounting software" in tools else 0)
+            ),
             effort="low" if payload.monthly_payslips <= 15 else "medium",
             impact=_impact(has_payroll_pain, high_payslips),
             reason=f"{payload.monthly_payslips} payslips/month.",
         ),
         ProcessScore(
             process="Reporting",
-            score=_clamp(30 + (20 if payload.admin_hours >= 20 else 0) + (25 if has_report_pain else 0) + (10 if "excel" in tools else 0)),
+            score=_clamp(
+                30
+                + (20 if payload.admin_hours >= 20 else 0)
+                + (25 if has_report_pain else 0)
+                + (10 if "excel" in tools else 0)
+            ),
             effort="low" if "excel" in tools else "medium",
             impact=_impact(has_report_pain, payload.admin_hours >= 20),
             reason=f"{payload.admin_hours} admin hours/month.",

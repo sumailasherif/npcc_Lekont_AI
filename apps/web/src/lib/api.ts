@@ -20,61 +20,87 @@ export function apiGet<T>(path: string): Promise<T> {
 }
 
 export function apiPost<T>(path: string, body: unknown): Promise<T> {
-  return request<T>(path, {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
+  return request<T>(path, { method: "POST", body: JSON.stringify(body) });
 }
 
-export type Language = "en" | "fr" | "cr";
+export function money(value: number, currency = "MUR"): string {
+  return `${currency} ${Math.round(value).toLocaleString("en-GB")}`;
+}
 
-export type KnowledgeCard = {
+export type DocumentType = "invoice" | "payslip" | "contract";
+export type DocumentStatus = "needs_review" | "approved" | "exported";
+
+export type DocumentSummary = {
   id: string;
-  title: string;
-  body: string;
-  source: string;
-  year?: number | null;
-  topics: string[];
-};
-
-export type Expert = {
-  id: string;
-  name: string;
-  initials: string;
-  role: string;
-  organisation: string;
-  country: string;
-  city?: string | null;
-  categories: string[];
-  headline: string;
-  bio: string;
-  languages: string[];
-  accent: string;
-  featured: boolean;
-  mauritian: boolean;
-  verified: boolean;
-  profile_type: "public_record" | "composite";
-  disclaimer: string;
-  topics: string[];
-  sample_questions: string[];
-  knowledge: KnowledgeCard[];
-};
-
-export type ExpertCitation = {
-  card_id: string;
-  title: string;
-  source: string;
-  year?: number | null;
-};
-
-export type ExpertAnswer = {
-  answer: string;
-  source_answer: string;
-  language: Language;
-  citations: ExpertCitation[];
+  filename: string;
+  doc_type: DocumentType;
+  language: "en" | "fr";
+  supplier: string | null;
+  total: number | null;
+  currency: string;
+  status: DocumentStatus;
   confidence: number;
-  engine: string;
-  review_required: boolean;
-  suggested: string[];
-  disclaimer: string;
+  needs_review: number;
+  uploaded_at: string;
 };
+
+export type ExtractedField = {
+  key: string;
+  label: string;
+  value: string;
+  confidence: number;
+  page: number;
+  corrected: boolean;
+};
+
+export type DocumentRecord = DocumentSummary & {
+  text: string;
+  fields: ExtractedField[];
+  reviewer: string | null;
+  reviewed_at: string | null;
+};
+
+export type Column = { key: string; label: string };
+
+export type AskResponse = {
+  intent: string;
+  answer: string;
+  calculation: string;
+  columns: Column[];
+  rows: Record<string, string | number>[];
+  chart: { type: "bar" | "line"; x: string; y: string } | null;
+  confidence: number;
+  caveats: string[];
+  suggested: string[];
+};
+
+export type ProcessScore = {
+  process: string;
+  score: number;
+  effort: "low" | "medium" | "high";
+  impact: "low" | "medium" | "high";
+  reason: string;
+};
+
+export type DiagnosticResponse = {
+  readiness_score: number;
+  band: string;
+  recommended_first: string;
+  summary: string;
+  scores: ProcessScore[];
+  next_steps: string[];
+};
+
+export type DashboardSummary = {
+  documents_total: number;
+  needs_review: number;
+  approved: number;
+  monthly_spend: number;
+  monthly_vat: number;
+  readiness_score: number;
+  top_supplier: string | null;
+  top_supplier_spend: number;
+  currency: string;
+};
+
+export type ExportResponse = { filename: string; rows: number; csv: string };

@@ -90,7 +90,12 @@ def _regex_fields(text: str, doc_type: DocumentType) -> dict[str, tuple[str, flo
 
     if doc_type is DocumentType.INVOICE:
         put("supplier", _search(r"(?:Supplier|Fournisseur)\s*[:\-]\s*(.+)", text))
-        put("invoice_no", _search(r"(?:Invoice\s*(?:No|Number)|Num[eé]ro de facture)\s*[:\-]\s*([A-Z0-9\-/]+)", text))
+        put(
+            "invoice_no",
+            _search(
+                r"(?:Invoice\s*(?:No|Number)|Num[eé]ro de facture)\s*[:\-]\s*([A-Z0-9\-/]+)", text
+            ),
+        )
         put("date", _search(r"(?:Invoice date|Date)\s*[:\-]\s*([0-9]{2}/[0-9]{2}/[0-9]{4})", text))
         put("subtotal", _search(rf"(?:Subtotal|Sous-total)\s*[:\-]\s*{NUM}", text))
         put("vat", _search(rf"(?:VAT|TVA)[^\n:]*[:\-]\s*{NUM}", text))
@@ -172,9 +177,15 @@ def extract(
         )
         for key, (value, confidence) in found.items()
     ]
-    fields.sort(key=lambda item: list(LABELS[doc_type]).index(item.key) if item.key in LABELS[doc_type] else 99)
+    fields.sort(
+        key=lambda item: (
+            list(LABELS[doc_type]).index(item.key) if item.key in LABELS[doc_type] else 99
+        )
+    )
 
-    confidence = round(sum(field.confidence for field in fields) / len(fields), 2) if fields else 0.0
+    confidence = (
+        round(sum(field.confidence for field in fields) / len(fields), 2) if fields else 0.0
+    )
     if missing:
         confidence = round(max(0.0, confidence - 0.05 * len(missing)), 2)
 

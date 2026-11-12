@@ -1,16 +1,16 @@
 {
-  "name": "npcc-retenou-ai",
+  "name": "lekont",
   "version": "0.1.0",
   "private": true,
-  "description": "Retenou AI - multilingual shop-floor capability for Mauritian manufacturing",
+  "description": "Lekont - SME back-office intelligence for Mauritius",
   "workspaces": [
     "apps/web"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace @retenou/web",
-    "build": "npm run build --workspace @retenou/web",
-    "lint": "npm run lint --workspace @retenou/web",
-    "typecheck": "npm run typecheck --workspace @retenou/web"
+    "dev": "npm run dev --workspace @lekont/web",
+    "build": "npm run build --workspace @lekont/web",
+    "lint": "npm run lint --workspace @lekont/web",
+    "typecheck": "npm run typecheck --workspace @lekont/web"
   },
   "engines": {
     "node": ">=20.9.0"

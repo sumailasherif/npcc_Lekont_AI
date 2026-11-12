@@ -154,9 +154,11 @@ def review_document(document_id: str, payload: ReviewRequest) -> Document | None
         document.status = DocumentStatus.APPROVED
         document.reviewer = payload.reviewer
         document.reviewed_at = _now()
-        document.confidence = round(
-            sum(field.confidence for field in document.fields) / len(document.fields), 2
-        ) if document.fields else 0.0
+        document.confidence = (
+            round(sum(field.confidence for field in document.fields) / len(document.fields), 2)
+            if document.fields
+            else 0.0
+        )
         return document
 
 
