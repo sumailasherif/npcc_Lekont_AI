@@ -60,6 +60,12 @@ class DiagnosticResponse(BaseModel):
     next_steps: list[str]
 
 
+class MonthlyPoint(BaseModel):
+    month: str
+    spend: float
+    vat: float
+
+
 class DashboardSummary(BaseModel):
     documents_total: int
     needs_review: int
@@ -70,3 +76,4 @@ class DashboardSummary(BaseModel):
     top_supplier: str | None
     top_supplier_spend: float
     currency: str
+    monthly: list[MonthlyPoint]

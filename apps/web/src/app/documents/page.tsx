@@ -34,7 +34,9 @@ export default function DocumentsPage() {
   }
 
   useEffect(() => {
-    refresh().catch(() => setError("API not reachable. Start it on port 8010."));
+    apiGet<DocumentSummary[]>("/api/v1/documents")
+      .then(setDocuments)
+      .catch(() => setError("API not reachable. Start it on port 8010."));
   }, []);
 
   const visible = useMemo(
@@ -111,7 +113,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="animate-fade-in flex flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Documents</h1>
@@ -124,7 +126,7 @@ export default function DocumentsPage() {
           <button
             type="button"
             onClick={() => void downloadCsv()}
-            className="rounded-lg border border-[#d8d8cf] bg-white px-3 py-2 text-sm font-medium"
+            className="rounded-lg border border-[#d1d5db] bg-white px-3 py-2 text-sm font-medium"
           >
             Export CSV
           </button>
@@ -145,7 +147,7 @@ export default function DocumentsPage() {
       ) : null}
 
       {showForm ? (
-        <section className="flex flex-col gap-3 rounded-2xl border border-[#e2e2da] bg-white p-4">
+        <section className="flex flex-col gap-3 rounded-2xl border border-[#e5e7eb] bg-white p-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="flex flex-col gap-1 text-xs font-medium text-[#5b5b53]">
               File name
@@ -153,7 +155,7 @@ export default function DocumentsPage() {
                 value={form.filename}
                 onChange={(event) => setForm({ ...form, filename: event.target.value })}
                 placeholder="invoice_supplier_2026-11.pdf"
-                className="rounded-lg border border-[#d8d8cf] px-3 py-2 text-sm font-normal"
+                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-[#5b5b53]">
@@ -166,7 +168,7 @@ export default function DocumentsPage() {
                     doc_type: event.target.value as (typeof DOC_TYPES)[number],
                   })
                 }
-                className="rounded-lg border border-[#d8d8cf] px-3 py-2 text-sm font-normal"
+                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal"
               >
                 {DOC_TYPES.map((type) => (
                   <option key={type}>{type}</option>
@@ -178,7 +180,7 @@ export default function DocumentsPage() {
               <select
                 value={form.language}
                 onChange={(event) => setForm({ ...form, language: event.target.value })}
-                className="rounded-lg border border-[#d8d8cf] px-3 py-2 text-sm font-normal"
+                className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm font-normal"
               >
                 <option value="en">English</option>
                 <option value="fr">French</option>
@@ -192,14 +194,14 @@ export default function DocumentsPage() {
               onChange={(event) => setForm({ ...form, text: event.target.value })}
               rows={6}
               placeholder={"INVOICE\nSupplier: ...\nInvoice No: ...\nTotal: ..."}
-              className="rounded-lg border border-[#d8d8cf] px-3 py-2 font-mono text-xs leading-5"
+              className="rounded-lg border border-[#d1d5db] px-3 py-2 font-mono text-xs leading-5"
             />
           </label>
           <button
             type="button"
             onClick={() => void addDocument()}
             disabled={busy || form.text.trim().length < 10}
-            className="w-fit rounded-lg bg-[#0f5f56] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="w-fit rounded-lg bg-[#4f46e5] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
             {busy ? "Extracting…" : "Extract fields"}
           </button>
@@ -215,7 +217,7 @@ export default function DocumentsPage() {
             className={`rounded-full px-3 py-1.5 text-xs font-medium ${
               filter === value
                 ? "bg-[#171717] text-white"
-                : "border border-[#d8d8cf] bg-white text-[#4b4b45]"
+                : "border border-[#d1d5db] bg-white text-[#374151]"
             }`}
           >
             {value === "all" ? "All documents" : "Needs review"}
@@ -224,9 +226,9 @@ export default function DocumentsPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
-        <section className="overflow-hidden rounded-2xl border border-[#e2e2da] bg-white">
+        <section className="overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white">
           <table className="w-full text-left text-sm">
-            <thead className="bg-[#fafaf7] text-[11px] uppercase tracking-wide text-[#8a8a80]">
+            <thead className="bg-[#f9fafb] text-[11px] uppercase tracking-wide text-[#6b7280]">
               <tr>
                 <th className="px-4 py-2.5 font-medium">File</th>
                 <th className="px-4 py-2.5 font-medium">Party</th>
@@ -239,19 +241,19 @@ export default function DocumentsPage() {
                 <tr
                   key={document.id}
                   onClick={() => void open(document.id)}
-                  className={`cursor-pointer border-t border-[#efefe9] hover:bg-[#fafaf7] ${
-                    selected?.id === document.id ? "bg-[#f0f6f4]" : ""
+                  className={`cursor-pointer border-t border-[#f1f3f5] hover:bg-[#f9fafb] ${
+                    selected?.id === document.id ? "bg-[#eef2ff]" : ""
                   }`}
                 >
                   <td className="px-4 py-3">
                     <span className="block max-w-[190px] truncate">
                       {document.filename}
                     </span>
-                    <span className="text-[11px] text-[#8a8a80]">
+                    <span className="text-[11px] text-[#6b7280]">
                       {document.doc_type} · {(document.confidence * 100).toFixed(0)}%
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[#4b4b45]">{document.supplier ?? "—"}</td>
+                  <td className="px-4 py-3 text-[#374151]">{document.supplier ?? "—"}</td>
                   <td className="px-4 py-3 text-right tabular-nums">
                     {document.total !== null
                       ? money(document.total, document.currency)
@@ -272,7 +274,7 @@ export default function DocumentsPage() {
               ))}
               {visible.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-[#8a8a80]">
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-[#6b7280]">
                     Nothing here yet.
                   </td>
                 </tr>
@@ -281,11 +283,11 @@ export default function DocumentsPage() {
           </table>
         </section>
 
-        <section className="rounded-2xl border border-[#e2e2da] bg-white p-4">
+        <section className="rounded-2xl border border-[#e5e7eb] bg-white p-4">
           {selected ? (
             <div className="flex flex-col gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-[#8a8a80]">
+                <p className="text-[11px] uppercase tracking-wide text-[#6b7280]">
                   {selected.doc_type} · {selected.language.toUpperCase()}
                 </p>
                 <h2 className="text-base font-semibold">{selected.filename}</h2>
@@ -294,7 +296,7 @@ export default function DocumentsPage() {
               <div className="flex flex-col gap-3">
                 {selected.fields.map((field) => (
                   <label key={field.key} className="flex flex-col gap-1">
-                    <span className="flex items-center justify-between text-[11px] text-[#6b6b63]">
+                    <span className="flex items-center justify-between text-[11px] text-[#4b5563]">
                       {field.label}
                       <span className="font-mono text-[10px]">
                         {(field.confidence * 100).toFixed(0)}%
@@ -308,27 +310,27 @@ export default function DocumentsPage() {
                       className={`rounded-lg border px-3 py-2 text-sm ${
                         field.confidence < 0.9
                           ? "border-amber-300 bg-amber-50"
-                          : "border-[#d8d8cf]"
+                          : "border-[#d1d5db]"
                       }`}
                     />
                   </label>
                 ))}
               </div>
 
-              <div className="flex flex-wrap items-end gap-2 border-t border-[#efefe9] pt-3">
-                <label className="flex flex-1 flex-col gap-1 text-[11px] text-[#6b6b63]">
+              <div className="flex flex-wrap items-end gap-2 border-t border-[#f1f3f5] pt-3">
+                <label className="flex flex-1 flex-col gap-1 text-[11px] text-[#4b5563]">
                   Reviewed by
                   <input
                     value={reviewer}
                     onChange={(event) => setReviewer(event.target.value)}
-                    className="rounded-lg border border-[#d8d8cf] px-3 py-2 text-sm"
+                    className="rounded-lg border border-[#d1d5db] px-3 py-2 text-sm"
                   />
                 </label>
                 <button
                   type="button"
                   onClick={() => void saveReview()}
                   disabled={busy}
-                  className="rounded-lg bg-[#0f5f56] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                  className="rounded-lg bg-[#4f46e5] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                 >
                   {busy
                     ? "Saving…"
@@ -337,13 +339,13 @@ export default function DocumentsPage() {
                       : "Approve"}
                 </button>
               </div>
-              <p className="text-[11px] leading-5 text-[#8a8a80]">
+              <p className="text-[11px] leading-5 text-[#6b7280]">
                 Low-confidence fields are highlighted. The reviewer is recorded with
                 the approval and kept in the export.
               </p>
             </div>
           ) : (
-            <div className="flex h-full min-h-[220px] items-center justify-center text-center text-sm text-[#8a8a80]">
+            <div className="flex h-full min-h-[220px] items-center justify-center text-center text-sm text-[#6b7280]">
               Select a document to review its extracted fields.
             </div>
           )}

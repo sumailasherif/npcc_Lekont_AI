@@ -101,6 +101,7 @@ export type DashboardSummary = {
   top_supplier: string | null;
   top_supplier_spend: number;
   currency: string;
+  monthly: { month: string; spend: number; vat: number }[];
 };
 
 export type ExportResponse = { filename: string; rows: number; csv: string };

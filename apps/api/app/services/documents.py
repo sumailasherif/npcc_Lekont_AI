@@ -8,7 +8,9 @@ import uuid
 from datetime import UTC, datetime
 from threading import Lock
 
-from app.data.backoffice import CURRENCY, DOCUMENTS, LEDGER
+from app.data.backoffice import CURRENCY, DOCUMENTS
+from app.data.ledger_source import get_ledger
+from app.db import postgres
 from app.schemas.common import Language
 from app.schemas.documents import (
     Document,
@@ -17,6 +19,7 @@ from app.schemas.documents import (
     DocumentSummary,
     DocumentType,
     ExportResponse,
+    ExtractedField,
     ReviewRequest,
 )
 from app.schemas.insights import DashboardSummary
@@ -61,6 +64,28 @@ def _summary(document: Document) -> DocumentSummary:
 
 
 def _seed() -> None:
+    loaded = postgres.load_documents()
+    if loaded:
+        for row in loaded:
+            _DOCUMENTS[row["id"]] = Document(
+                id=row["id"],
+                filename=row["filename"],
+                doc_type=DocumentType(row["doc_type"]),
+                language=Language(row["language"]),
+                supplier=row["supplier"],
+                total=row["total"],
+                currency=row["currency"],
+                status=DocumentStatus(row["status"]),
+                confidence=row["confidence"],
+                needs_review=0,
+                uploaded_at=row["uploaded_at"],
+                text=row["text"],
+                fields=[ExtractedField(**field) for field in row["fields"]],
+                reviewer=row["reviewer"],
+                reviewed_at=row["reviewed_at"],
+            )
+        return
+
     for item in DOCUMENTS:
         doc_type = DocumentType(item["doc_type"])
         language = Language(item["language"])
@@ -118,6 +143,7 @@ def create_document(payload: DocumentCreate) -> Document:
             fields=result.fields,
         )
         _DOCUMENTS[document.id] = document
+        postgres.persist_document(document.model_dump(mode="json"))
         return document
 
 
@@ -158,6 +184,13 @@ def review_document(document_id: str, payload: ReviewRequest) -> Document | None
             round(sum(field.confidence for field in document.fields) / len(document.fields), 2)
             if document.fields
             else 0.0
+        )
+        postgres.persist_review(
+            document.id,
+            payload.reviewer,
+            document.total,
+            document.supplier,
+            [field.model_dump(mode="json") for field in document.fields],
         )
         return document
 
@@ -214,19 +247,28 @@ def set_readiness(score: int) -> None:
 
 
 def dashboard_summary() -> DashboardSummary:
-    latest_month = max(row["month"] for row in LEDGER)
-    month_rows = [row for row in LEDGER if row["month"] == latest_month]
+    from app.schemas.insights import MonthlyPoint
+
+    ledger = get_ledger()
+    latest_month = max(row["month"] for row in ledger)
+    month_rows = [row for row in ledger if row["month"] == latest_month]
     monthly_spend = round(sum(row["amount"] for row in month_rows), 2)
     monthly_vat = round(sum(row["vat"] for row in month_rows), 2)
 
     suppliers: dict[str, float] = {}
-    for row in LEDGER:
+    for row in ledger:
         if row["category"] == "Payroll":
             continue
         suppliers[row["supplier"]] = suppliers.get(row["supplier"], 0.0) + row["amount"]
     top_supplier = max(suppliers, key=suppliers.get) if suppliers else None
 
     documents = list(_DOCUMENTS.values())
+    monthly: dict[str, dict[str, float]] = {}
+    for row in ledger:
+        bucket = monthly.setdefault(row["month"], {"spend": 0.0, "vat": 0.0})
+        bucket["spend"] += row["amount"]
+        bucket["vat"] += row["vat"]
+
     return DashboardSummary(
         documents_total=len(documents),
         needs_review=sum(1 for doc in documents if doc.status is DocumentStatus.NEEDS_REVIEW),
@@ -237,4 +279,8 @@ def dashboard_summary() -> DashboardSummary:
         top_supplier=top_supplier,
         top_supplier_spend=round(suppliers.get(top_supplier, 0.0), 2) if top_supplier else 0.0,
         currency=CURRENCY,
+        monthly=[
+            MonthlyPoint(month=month, spend=round(values["spend"], 2), vat=round(values["vat"], 2))
+            for month, values in sorted(monthly.items())
+        ],
     )

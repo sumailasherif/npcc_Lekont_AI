@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from app.data.backoffice import LEDGER
+from app.data.ledger_source import get_ledger
 from app.schemas.common import Language
 from app.schemas.insights import (
     AskResponse,
@@ -19,6 +19,9 @@ from app.schemas.insights import (
     DiagnosticResponse,
     ProcessScore,
 )
+from app.services.localization import localize_response
+
+LEDGER = get_ledger()
 
 MONTHS = {
     "january": "2026-01",
@@ -130,6 +133,12 @@ def _detect(question: str) -> tuple[str, str | None]:
 
 
 def ask(question: str, language: Language = Language.EN) -> AskResponse:
+    """Answer in English, then translate the prose into the requested language."""
+    response = _ask_english(question)
+    return localize_response(response, language)
+
+
+def _ask_english(question: str) -> AskResponse:
     intent, month = _detect(question)
 
     if intent == "suppliers":
