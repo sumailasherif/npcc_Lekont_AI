@@ -59,10 +59,10 @@ function connector(node: (typeof NODES)[number]) {
 function BubbleGlyph({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden>
-      <path d="M12 3.5c-4.7 0-8.5 3.3-8.5 7.5 0 2.2 1.1 4.2 2.8 5.6L5.5 20.5l4.2-2.1c.7.2 1.5.3 2.3.3 4.7 0 8.5-3.3 8.5-7.5S16.7 3.5 12 3.5Z" fill="white" />
-      <circle cx="8.6" cy="11" r="1.1" fill="var(--c3, #128c7e)" />
-      <circle cx="12" cy="11" r="1.1" fill="var(--c3, #128c7e)" />
-      <circle cx="15.4" cy="11" r="1.1" fill="var(--c3, #128c7e)" />
+      <path d="M12 3.5c-4.7 0-8.5 3.3-8.5 7.5 0 2.2 1.1 4.2 2.8 5.6L5.5 20.5l4.2-2.1c.7.2 1.5.3 2.3.3 4.7 0 8.5-3.3 8.5-7.5S16.7 3.5 12 3.5Z" fill="var(--c2, #25d366)" />
+      <circle cx="8.6" cy="11" r="1.1" fill="white" />
+      <circle cx="12" cy="11" r="1.1" fill="white" />
+      <circle cx="15.4" cy="11" r="1.1" fill="white" />
     </svg>
   );
 }
@@ -257,8 +257,8 @@ function Devices({ copy, step }: { copy: Hub; step: number }) {
 function Node({ title, body, index }: { title: string; body: string; index: number }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <span className="wa-blob float-y grid h-14 w-14 place-items-center text-white" style={{ ...paint(index), animationDelay: `${index * 0.5}s` }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <span className="wa-icon float-y grid h-12 w-12 place-items-center" style={{ ...paint(index), animationDelay: `${index * 0.5}s` }}>
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d={NODE_ICONS[index % NODE_ICONS.length]} />
         </svg>
       </span>
@@ -329,10 +329,10 @@ export function WhatsAppHub({ copy }: { copy: Hub }) {
               <span
                 key={orb.className}
                 aria-hidden
-                className={`wa-orb float-y absolute grid place-items-center rounded-full ${orb.className}`}
+                className={`wa-orb float-y absolute grid place-items-center ${orb.className}`}
                 style={{ ...paint(orb.color), animationDelay: orb.delay }}
               >
-                <BubbleGlyph className="h-[58%] w-[58%]" />
+                <BubbleGlyph className="h-full w-full" />
               </span>
             ))}
 

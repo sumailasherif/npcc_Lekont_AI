@@ -2,15 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 
 import { useLanguage } from "@/components/language-provider";
 import { HeroBackdrop } from "@/components/motion";
 import { BOOKING_HREF, HAS_BOOKING } from "@/lib/site";
 
+const noopSubscribe = () => () => {};
+
 export function SiteFooter() {
   const { t } = useLanguage();
   const f = t.site.footer;
-  const year = new Date().getFullYear();
+  // cacheComponents forbids new Date() during prerender; resolve the year after mount.
+  const year = useSyncExternalStore(noopSubscribe, () => new Date().getFullYear(), () => 2026);
   const external = HAS_BOOKING ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
   const product = [

@@ -88,7 +88,7 @@ function MiniPhone({ script }: { script: ScriptLine[] }) {
   );
 }
 
-function ChatScreen({ script }: { script: ScriptLine[] }) {
+export function ChatScreen({ script }: { script: ScriptLine[] }) {
   const [shown, setShown] = useState(2);
   const [typing, setTyping] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);

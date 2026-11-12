@@ -372,7 +372,7 @@ export default function OverviewPage() {
       </section>
 
       {/* Horizontal photo gallery driven by vertical scroll */}
-      <PhotoGallery copy={t.story.gallery} />
+      <PhotoGallery copy={t.story.gallery} script={t.hero.wa.script} />
 
       {/* FAQ */}
       <Faq copy={t.site.faq} footer={t.site.footer} />

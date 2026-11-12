@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { useLanguage } from "@/components/language-provider";
-import Link from "next/link";
 
 import { PageHero, buttonGhost, buttonPrimary, card } from "@/components/motion";
-import { FLOW_STAGES, useAutoplayChat } from "@/components/whatsapp-autoplay";
+import { FLOW_STAGES, TYPE_MS, useAutoplayChat } from "@/components/whatsapp-autoplay";
 import { WhatsAppHub } from "@/components/whatsapp-hub";
 import { NotebookPhoto, type LedgerLine } from "@/components/notebook-photo";
 import {
@@ -431,15 +431,29 @@ function Composer({
         <span className="grid h-8 w-8 place-items-center text-[#54656f]" aria-hidden>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01" /></svg>
         </span>
-        <input
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          placeholder="Message"
-          aria-label="Message"
-          readOnly={demo}
-          tabIndex={demo ? -1 : undefined}
-          className="min-w-0 flex-1 bg-transparent py-1.5 text-sm text-[#111b21] outline-none placeholder:text-[#8696a0]"
-        />
+        {demo ? (
+          <span className="flex min-w-0 flex-1 items-center overflow-hidden py-1.5 text-sm text-[#111b21]" aria-hidden>
+            {input ? (
+              <span
+                key={input}
+                className="demo-type whitespace-nowrap"
+                style={{ "--n": input.length, animationDuration: `${input.length * TYPE_MS}ms` } as CSSProperties}
+              >
+                {input}
+              </span>
+            ) : (
+              <span className="text-[#8696a0]">Message</span>
+            )}
+          </span>
+        ) : (
+          <input
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="Message"
+            aria-label="Message"
+            className="min-w-0 flex-1 bg-transparent py-1.5 text-sm text-[#111b21] outline-none placeholder:text-[#8696a0]"
+          />
+        )}
         <button
           type="button"
           onClick={() => void send("", "image")}

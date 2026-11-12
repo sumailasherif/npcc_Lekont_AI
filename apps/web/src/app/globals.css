@@ -13,7 +13,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
   --font-hand: var(--font-caveat);
 }
@@ -107,7 +107,25 @@ html.theme-fade body * {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+}
+
+/* Headings in the display face; highlighted words switch to an italic serif. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  letter-spacing: -0.025em;
+  font-optical-sizing: auto;
+}
+:is(h1, h2) :is(.text-gradient, .wa-gradient-text, [class*="text-lagoon"], [class*="text-coral"]) {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: 1.08em;
+  line-height: 1;
+  padding-right: 0.06em;
 }
 
 ::selection {
@@ -626,19 +644,20 @@ body {
     inset 0 -5px 10px rgba(7, 60, 40, 0.3),
     inset 0 4px 8px rgba(255, 255, 255, 0.35);
 }
+/* Feature icons: the glyph itself, coloured, no blob behind it. */
+.wa-icon {
+  color: var(--c2, #25d366);
+  filter: drop-shadow(0 8px 14px color-mix(in srgb, var(--c3, #128c7e) 45%, transparent));
+}
 .wa-orb {
-  background: radial-gradient(circle at 30% 25%, var(--c1, #6ee7a0), var(--c2, #25d366) 50%, var(--c3, #0f9f6e) 100%);
-  box-shadow:
-    0 18px 36px -12px color-mix(in srgb, var(--c3, #128c7e) 80%, transparent),
-    inset 0 -6px 12px rgba(7, 60, 40, 0.3),
-    inset 0 5px 10px rgba(255, 255, 255, 0.4);
+  filter: drop-shadow(0 10px 16px color-mix(in srgb, var(--c3, #128c7e) 50%, transparent));
 }
 .wa-phone-wrap {
   perspective: 1200px;
 }
 @keyframes wa-phone-float {
-  0%, 100% { transform: rotateY(-18deg) rotateX(8deg) rotateZ(-5deg) translateY(0); }
-  50% { transform: rotateY(-12deg) rotateX(5deg) rotateZ(-3deg) translateY(-10px); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 .wa-phone {
   width: 196px;
@@ -720,6 +739,58 @@ body {
 .mac-float {
   animation: mac-rise 8s ease-in-out infinite;
 }
+
+/* Demo composer: text "types" itself in CSS, one step per character, with a caret. */
+@keyframes demo-type {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.demo-type {
+  position: relative;
+  animation-name: demo-type;
+  animation-timing-function: steps(var(--n, 20), end);
+  animation-fill-mode: both;
+}
+.demo-type::after {
+  content: "";
+  display: inline-block;
+  width: 1.5px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: -2px;
+  background: #00a884;
+  animation: caret 0.9s steps(1) infinite;
+}
+
+/* ---------- Deck cards: bento glow + mini widgets ---------- */
+.deck-card[data-role="owner"] { --glow: rgba(20, 184, 166, 0.28); }
+.deck-card[data-role="staff"] { --glow: rgba(245, 158, 11, 0.26); }
+.deck-card[data-role="accountant"] { --glow: rgba(255, 107, 74, 0.24); }
+.deck-glow { background: radial-gradient(closest-side, var(--glow), transparent); }
+.deck-card { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s; }
+.deck-card:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -24px rgba(7, 20, 38, 0.45); }
+@keyframes deck-float { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-4px) rotate(-4deg); } }
+.deck-float { animation: deck-float 4s ease-in-out infinite; }
+@keyframes deck-flash { 0%, 86%, 100% { opacity: 0; } 90% { opacity: 0.9; } }
+.deck-flash { animation: deck-flash 3.2s ease-out infinite; }
+@keyframes deck-draw { from { stroke-dashoffset: 260; } to { stroke-dashoffset: 0; } }
+.deck-draw { stroke-dasharray: 260; animation: deck-draw 2.4s ease-out infinite alternate; }
+@keyframes deck-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.4); } }
+.deck-pulse { transform-box: fill-box; transform-origin: center; animation: deck-pulse 1.6s ease-in-out infinite; }
+@keyframes deck-pop { 0% { opacity: 0; transform: translateY(6px) scale(0.9); } 20%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.deck-pop { animation: deck-pop 3.6s ease-out infinite; animation-delay: var(--d, 0ms); }
+@keyframes deck-grow { 0% { transform: scaleY(0); } 40%, 100% { transform: scaleY(1); } }
+.deck-grow { transform-origin: bottom; animation: deck-grow 3.4s cubic-bezier(0.22, 1, 0.36, 1) infinite; animation-delay: var(--d, 0ms); }
+@keyframes deck-grow-x { from { width: 10%; } to { width: 100%; } }
+.deck-grow-x { animation: deck-grow-x 2.6s ease-in-out infinite alternate; }
+@keyframes deck-ring { from { stroke-dasharray: 0 200; } }
+.deck-ring { animation: deck-ring 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate; }
+@keyframes deck-toggle { 0%, 40% { background: #cbd5e1; } 55%, 100% { background: #0d9488; } }
+.deck-toggle { animation: deck-toggle 3s ease-in-out infinite; }
+.deck-toggle > span { animation: deck-knob 3s ease-in-out infinite; }
+@keyframes deck-knob { 0%, 40% { transform: translateX(-20px); } 55%, 100% { transform: none; } }
+@keyframes deck-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+.deck-bounce { animation: deck-bounce 1.4s ease-in-out infinite; }
 
 /* ---------- FAQ accordion ---------- */
 .faq-panel {

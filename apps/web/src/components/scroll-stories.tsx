@@ -6,7 +6,10 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 import { CountUp } from "@/components/count-up";
+import { DeckVisual } from "@/components/deck-visuals";
 import { Reveal, card } from "@/components/motion";
+import { ScreenComposite } from "@/components/screen-composite";
+import { ChatScreen } from "@/components/whatsapp-teaser";
 import type { Messages } from "@/lib/i18n";
 
 type Story = Messages["story"];
@@ -583,15 +586,19 @@ const ROLE_STYLES = {
 
 function DeckCard({ item, roles, index }: { item: Story["deck"]["cards"][number]; roles: Story["deck"]["roles"]; index: number }) {
   return (
-    <div className={`${card} flex h-full flex-col p-4`}>
-      <div className="flex items-center justify-between">
+    <div className={`${card} deck-card group relative flex h-full flex-col overflow-hidden p-4`} data-role={item.role}>
+      <span aria-hidden className="deck-glow pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full transition-transform duration-700 group-hover:scale-125" />
+      <div className="relative flex items-center justify-between">
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${ROLE_STYLES[item.role]}`}>
           {roles[item.role]}
         </span>
         <span className="font-mono text-[11px] text-muted">{String(index + 1).padStart(2, "0")}</span>
       </div>
-      <p className="mt-auto pt-4 font-semibold leading-snug">{item.title}</p>
-      <p className="mt-1 text-xs leading-5 text-muted">{item.body}</p>
+      <div className="relative my-2 min-h-[96px] flex-1 rounded-xl bg-surface/60 ring-1 ring-line/60">
+        <DeckVisual index={index} />
+      </div>
+      <p className="relative font-semibold leading-snug">{item.title}</p>
+      <p className="relative mt-1 text-xs leading-5 text-muted">{item.body}</p>
     </div>
   );
 }
@@ -631,7 +638,7 @@ export function DealtDeck({ copy }: { copy: Story["deck"] }) {
   const rows = Math.ceil(cards.length / cols);
   const gap = 16;
   const cardW = Math.min(250, (width - gap * (cols - 1)) / cols);
-  const cardH = 176;
+  const cardH = 236;
   const stageH = rows * cardH + (rows - 1) * gap;
 
   return (
@@ -684,12 +691,54 @@ export function DealtDeck({ copy }: { copy: Story["deck"] }) {
 
 const GALLERY = [
   { src: "/photos/owner-apron.jpg", w: 1400, h: 933 },
-  { src: "/photos/hand-phone.jpg", w: 1400, h: 933 },
+  { src: "/photos/hand-phone.jpg", w: 1400, h: 1400, chat: true },
   { src: "/photos/manager-laptop.jpg", w: 1400, h: 788 },
   { src: "/photos/celebrating-suit.jpg", w: 1600, h: 900 },
 ];
 
-function GalleryPhoto({ photo, caption, index }: { photo: (typeof GALLERY)[number]; caption: string; index: number }) {
+type ChatScript = Messages["hero"]["wa"]["script"];
+
+function GalleryPhoto({
+  photo,
+  caption,
+  index,
+  script,
+}: {
+  photo: (typeof GALLERY)[number];
+  caption: string;
+  index: number;
+  script: ChatScript;
+}) {
+  if ("chat" in photo && photo.chat) {
+    return (
+      <figure className="group relative h-full shrink-0 overflow-hidden rounded-[28px] bg-white shadow-[0_30px_70px_-35px_rgba(7,20,38,0.55)]">
+        <div className="absolute inset-0 grid place-items-center">
+          <ScreenComposite
+            src={photo.src}
+            alt={caption}
+            width={photo.w}
+            height={photo.h}
+            quad={[
+              [33.57, 8.86],
+              [69.0, 9.29],
+              [68.21, 86.29],
+              [32.71, 85.93],
+            ]}
+            screen={{ width: 360, height: 784 }}
+            radius={34}
+            className="aspect-square h-full w-auto"
+          >
+            <ChatScreen script={script} />
+          </ScreenComposite>
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-night/80 via-transparent to-transparent" aria-hidden />
+        <figcaption className="absolute inset-x-5 bottom-5 flex items-end gap-3 text-white">
+          <span className="font-mono text-xs text-lagoon-soft">{String(index + 1).padStart(2, "0")}</span>
+          <span className="text-balance text-lg font-semibold leading-snug">{caption}</span>
+        </figcaption>
+      </figure>
+    );
+  }
   return (
     <figure className="group relative h-full shrink-0 overflow-hidden rounded-[28px] shadow-[0_30px_70px_-35px_rgba(7,20,38,0.55)]">
       <Image
@@ -709,7 +758,7 @@ function GalleryPhoto({ photo, caption, index }: { photo: (typeof GALLERY)[numbe
   );
 }
 
-export function PhotoGallery({ copy }: { copy: Story["gallery"] }) {
+export function PhotoGallery({ copy, script }: { copy: Story["gallery"]; script: ChatScript }) {
   const desktop = useMedia("(min-width: 768px)");
   const [ref, progress] = useScrollProgress<HTMLElement>(desktop);
   const track = useRef<HTMLDivElement | null>(null);
@@ -755,7 +804,7 @@ export function PhotoGallery({ copy }: { copy: Story["gallery"] }) {
         <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none]">
           {GALLERY.map((photo, index) => (
             <div key={photo.src} className="h-[60svh] w-[85vw] shrink-0 snap-center">
-              <GalleryPhoto photo={photo} caption={copy.captions[index]} index={index} />
+              <GalleryPhoto photo={photo} caption={copy.captions[index]} index={index} script={script} />
             </div>
           ))}
           <div className="snap-center">{outro}</div>
@@ -781,7 +830,7 @@ export function PhotoGallery({ copy }: { copy: Story["gallery"] }) {
           {intro}
           {GALLERY.map((photo, index) => (
             <div key={photo.src} className="aspect-[4/3] h-full">
-              <GalleryPhoto photo={photo} caption={copy.captions[index]} index={index} />
+              <GalleryPhoto photo={photo} caption={copy.captions[index]} index={index} script={script} />
             </div>
           ))}
           {outro}

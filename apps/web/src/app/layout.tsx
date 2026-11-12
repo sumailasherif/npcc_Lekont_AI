@@ -1,15 +1,29 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Caveat, Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Caveat, DM_Sans, Geist_Mono, Instrument_Serif } from "next/font/google";
 
 import { AppShell } from "@/components/app-shell";
 import { LanguageProvider } from "@/components/language-provider";
 import { THEME_BOOT_SCRIPT } from "@/components/theme-toggle";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/* Type system: DM Sans for reading, Bricolage Grotesque for headings,
+   Instrument Serif italic for the highlighted words in headings. */
+const body = DM_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
+});
+
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["latin"],
+});
+
+const serif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
 const geistMono = Geist_Mono({
@@ -34,7 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} h-full antialiased`}
+      className={`${body.variable} ${display.variable} ${serif.variable} ${geistMono.variable} ${caveat.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />

@@ -42,8 +42,14 @@ const TURNS: Turn[] = [
 
 const PHONE = "23050000000";
 
-function message(id: string, direction: "in" | "out", text: string): WhatsAppMessage {
-  return { id, direction, from_number: PHONE, text, intent: "demo", created_at: new Date().toISOString(), data: null };
+/** Milliseconds per typed character in the composer animation. */
+export const TYPE_MS = 55;
+
+// Fixed timestamp for the prerendered first frame: cacheComponents forbids new Date() during render.
+const INITIAL_AT = "2026-01-01T09:41:00Z";
+
+function message(id: string, direction: "in" | "out", text: string, at?: string): WhatsAppMessage {
+  return { id, direction, from_number: PHONE, text, intent: "demo", created_at: at ?? new Date().toISOString(), data: null };
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -53,7 +59,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * sent, the bot "types", then replies. Read-only: nothing is sent to the API.
  */
 export function useAutoplayChat(enabled: boolean) {
-  const [messages, setMessages] = useState<WhatsAppMessage[]>(() => [message("welcome", "out", WELCOME)]);
+  const [messages, setMessages] = useState<WhatsAppMessage[]>(() => [message("welcome", "out", WELCOME, INITIAL_AT)]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [stage, setStage] = useState(-1);
@@ -74,12 +80,11 @@ export function useAutoplayChat(enabled: boolean) {
           if (cancelled) return;
           setStage(turn.stage);
           if (turn.user !== "[photo]" && !reduce) {
-            for (let i = 1; i <= turn.user.length; i += 1) {
-              if (cancelled) return;
-              setInput(turn.user.slice(0, i));
-              await wait(55);
-            }
-            await wait(350);
+            // One state change per message; the composer animates the typing in CSS
+            // (re-rendering the page per character froze the browser).
+            setInput(turn.user);
+            await wait(turn.user.length * TYPE_MS + 450);
+            if (cancelled) return;
           }
           setInput("");
           setMessages((current) => [...current, message(`u${index}`, "in", turn.user)]);
