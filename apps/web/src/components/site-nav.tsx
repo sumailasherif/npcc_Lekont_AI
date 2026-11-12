@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useLanguage } from "@/components/language-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useWidgetCopy } from "@/components/widget-copy";
 import { LOCALES } from "@/lib/i18n";
 
 const NAV = [
@@ -259,6 +260,7 @@ function MobileMenu({ pathname, open, onClose }: { pathname: string; open: boole
 /* ---------- The bar ---------- */
 
 export function SiteNav() {
+  const w = useWidgetCopy();
   const pathname = usePathname();
   const { scrolled, progress } = useScroll();
   // The menu belongs to the page it was opened on, so navigating closes it.
@@ -275,8 +277,8 @@ export function SiteNav() {
             : "border-b border-transparent bg-transparent lg:mt-0 lg:max-w-7xl"
         }`}
       >
-        <nav className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 md:px-6" aria-label="Main">
-          <Link href="/" aria-label="Lekont home" className="flex shrink-0 items-center">
+        <nav className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 md:px-6" aria-label={w.mainNav}>
+          <Link href="/" aria-label={w.home} className="flex shrink-0 items-center">
             <Image src="/brand/lekont-icon.svg" alt="" width={32} height={32} unoptimized priority className="h-8 w-8 sm:hidden" />
             <Image src="/brand/lekont-logo-white.svg" alt="" width={534} height={146} unoptimized priority className="hidden h-8 w-auto sm:block" />
           </Link>
@@ -294,7 +296,7 @@ export function SiteNav() {
             type="button"
             onClick={() => setMenuFor(menuOpen ? null : pathname)}
             aria-expanded={menuOpen}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={menuOpen ? w.closeMenu : w.openMenu}
             className="grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-white/5 text-white transition hover:bg-white/10 lg:hidden"
           >
             <span className="relative block h-3 w-4" aria-hidden>

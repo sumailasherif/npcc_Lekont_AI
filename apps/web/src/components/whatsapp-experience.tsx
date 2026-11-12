@@ -8,7 +8,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { useLanguage } from "@/components/language-provider";
 
 import { PageHero, buttonGhost, buttonPrimary, card } from "@/components/motion";
-import { FLOW_STAGES, TYPE_MS, useAutoplayChat } from "@/components/whatsapp-autoplay";
+import { TYPE_MS, useAutoplayChat } from "@/components/whatsapp-autoplay";
+import { useWaCopy } from "@/components/whatsapp-copy";
 import { WhatsAppHub } from "@/components/whatsapp-hub";
 import { NotebookPhoto, type LedgerLine } from "@/components/notebook-photo";
 import {
@@ -21,43 +22,20 @@ import {
 
 const PHONE = "23050000000";
 
-const QUICK = [
-  "invoice Ramesh 2500",
-  "how much did I sell this month?",
-  "what is low in stock?",
-  "sold 3 bags at 250",
-  "remind me to call the supplier Friday",
-];
 
-const WELCOME_TEXT = `Hi 👋 I'm Lekont, your back office on WhatsApp. Invoices, payslips and your numbers, all from this chat.
 
-🧾 Invoices: "invoice Ramesh 2500" and I draft it, ready to send as a PDF
-📊 Know your numbers: sales, spend, VAT and profit, with a live dashboard
-💸 Sales and stock: "sold 3 bags at 250", "what is low in stock?"
-👥 Payslips: prepare your team's monthly pay in minutes
-📥 Imports: send an Excel, CSV or CRM export and I'll bring it in
-📤 Exports: PDF, CSV or Excel, whenever you need them
-📒 Your notebook: snap a page and I'll read it for you
+function welcomeMessage(text: string): WhatsAppMessage {
+  // Fixed timestamp: cacheComponents forbids new Date() during prerender.
+  return { id: "welcome", direction: "out", from_number: PHONE, text, intent: "greeting", created_at: "2026-01-01T09:41:00Z", data: null };
+}
 
-Just type what you need. Nothing is saved until you confirm.`;
-
-const WELCOME: WhatsAppMessage = {
-  id: "welcome",
-  direction: "out",
-  from_number: PHONE,
-  text: WELCOME_TEXT,
-  intent: "greeting",
-  created_at: new Date().toISOString(),
-  data: null,
-};
-
-const FEATURES: { title: string; detail: string; icon: string }[] = [
-  { title: "Invoices", detail: "“invoice Ramesh 2500” → a draft, ready as PDF", icon: "M6 3h9l4 4v14H6V3Zm8 1v4h4M9 13h6M9 17h4" },
-  { title: "Business intelligence", detail: "sales, spend, VAT and profit with a live dashboard", icon: "M4 19V9m5 10V5m5 14v-7m5 7V7" },
-  { title: "Sales and stock", detail: "record a sale, see what is running low", icon: "M4 8l8-4 8 4v8l-8 4-8-4V8Zm0 0 8 4 8-4M12 12v8" },
-  { title: "Payslips", detail: "prepare the team's monthly pay", icon: "M4 6h16v12H4V6Zm0 4h16M8 15h3" },
-  { title: "Imports and exports", detail: "Excel, CSV and CRM exports in; PDF, CSV and Excel out", icon: "M12 3v12m0 0-4-4m4 4 4-4M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2" },
-  { title: "Notebook photo", detail: "send a page, Lekont reads it and asks before saving", icon: "M4 7h3l2-3h6l2 3h3v13H4V7Zm8 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" },
+const FEATURE_ICONS = [
+  "M6 3h9l4 4v14H6V3Zm8 1v4h4M9 13h6M9 17h4",
+  "M4 19V9m5 10V5m5 14v-7m5 7V7",
+  "M4 8l8-4 8 4v8l-8 4-8-4V8Zm0 0 8 4 8-4M12 12v8",
+  "M4 6h16v12H4V6Zm0 4h16M8 15h3",
+  "M12 3v12m0 0-4-4m4 4 4-4M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2",
+  "M4 7h3l2-3h6l2 3h3v13H4V7Zm8 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
 ];
 
 /**
@@ -68,11 +46,12 @@ const FEATURES: { title: string; detail: string; icon: string }[] = [
 export function WhatsAppExperience({ mode }: { mode: "demo" | "live" }) {
   const live = mode === "live";
   const { t } = useLanguage();
-  const [messages, setMessages] = useState<WhatsAppMessage[]>([WELCOME]);
+  const c = useWaCopy();
+  const [messages, setMessages] = useState<WhatsAppMessage[]>(() => [welcomeMessage(c.welcome)]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const autoplay = useAutoplayChat(!live);
+  const autoplay = useAutoplayChat(!live, c.script);
 
   useEffect(() => {
     if (!live) return;
@@ -80,8 +59,8 @@ export function WhatsAppExperience({ mode }: { mode: "demo" | "live" }) {
       .then((data) => {
         if (data.length > 0) setMessages(data);
       })
-      .catch(() => setError("API not reachable. Start it on port 8010."));
-  }, [live]);
+      .catch(() => setError(c.errApi));
+  }, [live, c.errApi]);
 
   async function send(text: string, kind: "text" | "image" = "text") {
     if (sending) return;
@@ -98,7 +77,7 @@ export function WhatsAppExperience({ mode }: { mode: "demo" | "live" }) {
       await new Promise((resolve) => setTimeout(resolve, 420));
       setMessages(reply.messages);
     } catch {
-      setError("The bot did not answer. Check the API and try again.");
+      setError(c.errReply);
     } finally {
       setSending(false);
     }
@@ -107,9 +86,9 @@ export function WhatsAppExperience({ mode }: { mode: "demo" | "live" }) {
   async function reset() {
     try {
       await fetch(`${API_BASE}/api/v1/whatsapp/reset`, { method: "POST" });
-      setMessages([WELCOME]);
+      setMessages([welcomeMessage(c.welcome)]);
     } catch {
-      setError("Could not reset the conversation.");
+      setError(c.errReset);
     }
   }
 
@@ -129,26 +108,26 @@ export function WhatsAppExperience({ mode }: { mode: "demo" | "live" }) {
       {live ? (
         <PageHero
           compact
-          eyebrow="Try it live · WhatsApp chatbot"
-          title="Talk to Lekont"
-          highlight="yourself."
-          description="This is the real bot engine. Type your own request, tap a suggestion, or send a notebook photo and see what comes back."
+          eyebrow={c.live.eyebrow}
+          title={c.live.title}
+          highlight={c.live.highlight}
+          description={c.live.description}
           actions={
             <button type="button" onClick={() => void reset()} className={buttonGhost}>
-              Reset conversation
+              {c.live.reset}
             </button>
           }
         />
       ) : (
         <PageHero
           compact
-          eyebrow="Business automation and intelligence · on WhatsApp"
-          title="Run the business"
-          highlight="from a chat."
-          description="Watch one morning in the shop: an invoice, a notebook photo, an approval, the month's numbers and the daily report, all in one thread."
+          eyebrow={c.demo.eyebrow}
+          title={c.demo.title}
+          highlight={c.demo.highlight}
+          description={c.demo.description}
           actions={
             <Link href="/try" className={buttonPrimary}>
-              Try it live yourself
+              {c.demo.cta}
             </Link>
           }
         />
@@ -161,7 +140,7 @@ export function WhatsAppExperience({ mode }: { mode: "demo" | "live" }) {
             {error}
           </p>
         ) : null}
-        {live ? null : <FlowStages stage={autoplay.stage} />}
+        {live ? null : <FlowStages stage={autoplay.stage} labels={c.stages} />}
         <div className="relative grid items-center gap-8 pb-16 lg:grid-cols-[1fr_340px_1fr] lg:gap-10">
           <FloatingDecor />
           <SideCards side="left" />
@@ -178,18 +157,18 @@ export function WhatsAppExperience({ mode }: { mode: "demo" | "live" }) {
       {/* What the bot handles */}
       <section className="mx-auto max-w-6xl px-4 pb-24 md:px-6">
         <div className={`${card} p-6`}>
-          <h2 className="text-base font-semibold">What the bot handles</h2>
+          <h2 className="text-base font-semibold">{c.handles}</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((feature) => (
-              <div key={feature.title} className="card-lift group flex gap-3 rounded-2xl border border-line bg-surface p-4">
+            {c.features.map(([title, detail], index) => (
+              <div key={title} className="card-lift group flex gap-3 rounded-2xl border border-line bg-surface p-4">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#00a884]/10 text-[#008069] transition group-hover:bg-[#00a884] group-hover:text-white">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d={feature.icon} />
+                    <path d={FEATURE_ICONS[index]} />
                   </svg>
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold">{feature.title}</span>
-                  <span className="mt-0.5 block text-xs leading-5 text-muted">{feature.detail}</span>
+                  <span className="block text-sm font-semibold">{title}</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-muted">{detail}</span>
                 </span>
               </div>
             ))}
@@ -203,10 +182,10 @@ export function WhatsAppExperience({ mode }: { mode: "demo" | "live" }) {
 
 /* ---------- Flow stages above the phone (demo mode) ---------- */
 
-function FlowStages({ stage }: { stage: number }) {
+function FlowStages({ stage, labels }: { stage: number; labels: string[] }) {
   return (
     <ol className="relative z-20 mx-auto mb-8 flex max-w-3xl flex-wrap items-center justify-center gap-2" aria-label="Flow">
-      {FLOW_STAGES.map((label, index) => {
+      {labels.map((label, index) => {
         const state = index < stage ? "done" : index === stage ? "active" : "next";
         return (
           <li key={label} className="flex items-center gap-2">
@@ -228,7 +207,7 @@ function FlowStages({ stage }: { stage: number }) {
               </span>
               {label}
             </span>
-            {index < FLOW_STAGES.length - 1 ? (
+            {index < labels.length - 1 ? (
               <span className={`hidden h-px w-5 transition-colors duration-500 sm:block ${index < stage ? "bg-[#00a884]" : "bg-line"}`} />
             ) : null}
           </li>
@@ -294,6 +273,7 @@ function ChatThread({
   sending: boolean;
   size?: "phone" | "desktop";
 }) {
+  const c = useWaCopy();
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -309,10 +289,10 @@ function ChatThread({
       className={`wa-wallpaper flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto py-3 ${size === "desktop" ? "px-[6%]" : "px-3"}`}
     >
       <span className="mx-auto mb-1 rounded-lg bg-card/90 px-3 py-1 text-[10px] font-medium uppercase tracking-wide text-[#54656f] shadow-sm">
-        Today
+        {c.today}
       </span>
       <p className="mx-auto mb-2 max-w-[92%] rounded-lg bg-[#ffeecd] px-3 py-1.5 text-center text-[10px] leading-4 text-[#54656f] shadow-sm">
-        🔒 Synthetic demo. Messages stay on this machine; no real customer data.
+        {c.synthetic}
       </p>
       {messages.map((message, index) => {
         const outgoing = message.direction === "in"; // "in" = sent by the owner to the bot
@@ -394,9 +374,10 @@ function Tail({ outgoing }: { outgoing: boolean }) {
 }
 
 function QuickReplies({ send, sending }: Pick<ChatProps, "send" | "sending">) {
+  const c = useWaCopy();
   return (
     <div className="flex gap-1.5 overflow-x-auto bg-[#efeae2] px-3 pb-2 pt-1 [scrollbar-width:none]">
-      {QUICK.map((item) => (
+      {c.quick.map((item) => (
         <button
           key={item}
           type="button"
@@ -419,6 +400,7 @@ function Composer({
   className = "",
   demo = false,
 }: Omit<ChatProps, "messages"> & { className?: string }) {
+  const c = useWaCopy();
   return (
     <form
       onSubmit={(event) => {
@@ -442,23 +424,23 @@ function Composer({
                 {input}
               </span>
             ) : (
-              <span className="text-[#8696a0]">Message</span>
+              <span className="text-[#8696a0]">{c.message}</span>
             )}
           </span>
         ) : (
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Message"
-            aria-label="Message"
+            placeholder={c.message}
+            aria-label={c.message}
             className="min-w-0 flex-1 bg-transparent py-1.5 text-sm text-[#111b21] outline-none placeholder:text-[#8696a0]"
           />
         )}
         <button
           type="button"
           onClick={() => void send("", "image")}
-          title="Send a notebook photo"
-          aria-label="Send a notebook photo"
+          title={c.sendPhoto}
+          aria-label={c.sendPhoto}
           className="grid h-8 w-8 place-items-center rounded-full text-[#54656f] transition hover:bg-[#f0f2f5]"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"><path d="M4 7h3l2-3h6l2 3h3v13H4V7Z" /><circle cx="12" cy="13" r="4" /></svg>
@@ -477,10 +459,11 @@ function Composer({
 }
 
 function BusinessName({ className = "" }: { className?: string }) {
+  const c = useWaCopy();
   return (
     <span className={`flex items-center gap-1 truncate font-semibold leading-tight ${className}`}>
       Lekont Business
-      <svg width="14" height="14" viewBox="0 0 24 24" aria-label="Verified business" className="shrink-0">
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-label={c.verified} className="shrink-0">
         <path fill="#25d366" d="m12 1 2.6 2.2 3.4-.4.9 3.3 3 1.7-1.2 3.2 1.2 3.2-3 1.7-.9 3.3-3.4-.4L12 23l-2.6-2.2-3.4.4-.9-3.3-3-1.7L3.3 13 2.1 9.8l3-1.7.9-3.3 3.4.4L12 1Z" />
         <path d="m8 12 3 3 5-6" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -517,6 +500,7 @@ function StatusIcons() {
 /* ---------- iPhone ---------- */
 
 function IPhone(chat: ChatProps) {
+  const c = useWaCopy();
   const { messages, sending } = chat;
   return (
     <div className="relative">
@@ -542,7 +526,7 @@ function IPhone(chat: ChatProps) {
                 <Avatar size={36} ring="#008069" />
                 <div className="min-w-0 flex-1">
                   <BusinessName className="text-[15px]" />
-                  <p className="text-[11px] text-white/80">{sending ? "typing…" : "online"}</p>
+                  <p className="text-[11px] text-white/80">{sending ? c.typing : c.online}</p>
                 </div>
                 <span className="flex items-center gap-4 pr-1 text-white/90" aria-hidden>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="m16 10 5-3v10l-5-3" /></svg>
@@ -600,23 +584,25 @@ function SideShell({ icon, title, meta, children }: { icon: string; title: strin
 }
 
 function InvoiceCard() {
+  const c = useWaCopy();
   return (
-    <SideShell icon="🧾" title="Invoice INV-0418" meta="Ramesh Traders · MUR 2,500">
+    <SideShell icon="🧾" title={c.cards.invoice[0]} meta={c.cards.invoice[1]}>
       <div className="flex items-center gap-2">
         <span className="pdf-pop rounded-md bg-coral px-1.5 py-0.5 text-[10px] font-bold text-white">PDF</span>
         <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-line">
           <span className="progress-loop block h-full rounded-full bg-coral" />
         </span>
-        <span className="text-[10px] font-semibold text-[#00a884]">ready</span>
+        <span className="text-[10px] font-semibold text-[#00a884]">{c.cards.invoice[2]}</span>
       </div>
     </SideShell>
   );
 }
 
 function DashboardCard() {
+  const c = useWaCopy();
   const bars = [38, 52, 44, 66, 58, 80, 92];
   return (
-    <SideShell icon="📊" title="Know your numbers" meta="This month · MUR 91,900">
+    <SideShell icon="📊" title={c.cards.numbers[0]} meta={c.cards.numbers[1]}>
       <div className="flex h-14 items-end gap-1.5">
         {bars.map((height, index) => (
           <span
@@ -626,14 +612,15 @@ function DashboardCard() {
           />
         ))}
       </div>
-      <p className="mt-2 text-[11px] font-semibold text-[#00a884]">▲ 12% vs last month</p>
+      <p className="mt-2 text-[11px] font-semibold text-[#00a884]">{c.cards.numbers[2]}</p>
     </SideShell>
   );
 }
 
 function PayslipCard() {
+  const c = useWaCopy();
   return (
-    <SideShell icon="👥" title="Payslips · November" meta="6 employees · MUR 141,600">
+    <SideShell icon="👥" title={c.cards.payslips[0]} meta={c.cards.payslips[1]}>
       <div className="flex -space-x-1">
         {["AR", "MB", "KJ", "SP", "NL", "DV"].map((initials, index) => (
           <span
@@ -644,15 +631,16 @@ function PayslipCard() {
             {initials}
           </span>
         ))}
-        <span className="ml-3 self-center pl-3 text-[11px] font-semibold text-ink">ready to review</span>
+        <span className="ml-3 self-center pl-3 text-[11px] font-semibold text-ink">{c.cards.payslips[2]}</span>
       </div>
     </SideShell>
   );
 }
 
 function ImportCard() {
+  const c = useWaCopy();
   return (
-    <SideShell icon="📥" title="Importing sales.xlsx" meta="Excel · 248 rows">
+    <SideShell icon="📥" title={c.cards.importing[0]} meta={c.cards.importing[1]}>
       <div className="h-1.5 overflow-hidden rounded-full bg-line">
         <span className="progress-loop block h-full rounded-full bg-[#00a884]" />
       </div>
@@ -668,22 +656,24 @@ function ImportCard() {
 }
 
 function CrmCard() {
+  const c = useWaCopy();
   return (
-    <SideShell icon="🔄" title="CRM contacts synced" meta="1,204 customers · just now">
+    <SideShell icon="🔄" title={c.cards.crm[0]} meta={c.cards.crm[1]}>
       <div className="flex items-center gap-2 text-[11px] text-muted">
         <span className="relative flex h-2.5 w-2.5">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00a884] opacity-60" />
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#00a884]" />
         </span>
-        Live sync with your CRM and spreadsheets
+        {c.cards.crm[2]}
       </div>
     </SideShell>
   );
 }
 
 function NotebookCard() {
+  const c = useWaCopy();
   return (
-    <SideShell icon="📒" title="Notebook page read" meta="5 lines · MUR 3,450">
+    <SideShell icon="📒" title={c.cards.notebook[0]} meta={c.cards.notebook[1]}>
       <div className="relative overflow-hidden rounded-lg bg-[#fffbeb] px-2.5 py-2">
         <span aria-hidden className="note-scan" />
         {["3 sacs riz · 750", "Huile 2L · 420", "Savon x6 · 180"].map((line) => (
@@ -697,6 +687,7 @@ function NotebookCard() {
 }
 
 function DataCard({ data }: { data: Record<string, unknown> | null }) {
+  const c = useWaCopy();
   if (!data) return null;
 
   const sale = data.sale as { item: string; qty: number; total: number } | undefined;
@@ -705,7 +696,7 @@ function DataCard({ data }: { data: Record<string, unknown> | null }) {
       <div className="mt-1.5 overflow-hidden rounded-lg border border-[#00a884]/25 bg-[#f7fdfb] text-[11px]">
         <p className="flex items-center gap-1.5 bg-[#00a884] px-2.5 py-1 font-semibold text-white">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 12 5 5 9-10" /></svg>
-          Sale recorded
+          {c.data.sale}
         </p>
         <div className="flex items-center justify-between gap-3 px-2.5 py-1.5 text-[#3b4a54]">
           <span>{sale.qty} × {sale.item}</span>
@@ -720,8 +711,8 @@ function DataCard({ data }: { data: Record<string, unknown> | null }) {
     return (
       <div className="mt-1.5 overflow-hidden rounded-lg border border-sun/40 bg-[#fffbeb] text-[11px] text-[#5b4a2a]">
         <p className="flex items-center justify-between bg-sun-soft px-2.5 py-1 font-semibold">
-          Notebook preview
-          <span className="rounded-full bg-sun px-1.5 text-[9px] text-white">needs review</span>
+          {c.data.notebook}
+          <span className="rounded-full bg-sun px-1.5 text-[9px] text-white">{c.data.needsReview}</span>
         </p>
         <div className="px-2.5 py-1.5 font-mono">
           {notebook.lines.map((line) => (
@@ -731,11 +722,11 @@ function DataCard({ data }: { data: Record<string, unknown> | null }) {
             </p>
           ))}
           <p className="mt-1 flex justify-between border-t border-sun/40 pt-1 font-semibold">
-            <span>Total</span>
+            <span>{c.data.total}</span>
             <span className="tabular-nums">MUR {notebook.total}</span>
           </p>
         </div>
-        <p className="px-2.5 pb-1.5 italic">Reply “post” to add these sales.</p>
+        <p className="px-2.5 pb-1.5 italic">{c.data.replyPost}</p>
       </div>
     );
   }

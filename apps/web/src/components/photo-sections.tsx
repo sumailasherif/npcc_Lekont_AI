@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 
 import { Reveal, buttonLagoon } from "@/components/motion";
+import { useWidgetCopy } from "@/components/widget-copy";
 import type { Messages } from "@/lib/i18n";
 
 /* ---------- "Built for the counter" photo strip (photos 2 and 12) ---------- */
@@ -86,6 +87,7 @@ export function BuiltFor({ copy }: { copy: Messages["hero"]["built"] }) {
 /* ---------- Monthly report: celebrating owner + floating Lekont report panel ---------- */
 
 export function AccountantShowcase({ copy }: { copy: Messages["hero"]["acct"] }) {
+  const w = useWidgetCopy();
   return (
     <section className="mx-auto max-w-6xl px-4 pb-24 pt-24 md:px-6">
       <div className="grid items-center gap-10 lg:grid-cols-[0.8fr_1.2fr]">
@@ -117,7 +119,7 @@ export function AccountantShowcase({ copy }: { copy: Messages["hero"]["acct"] })
             <figure className="relative overflow-hidden rounded-[28px] shadow-[0_40px_90px_-40px_rgba(7,20,38,0.7)]">
               <Image
                 src="/photos/celebrating-suit.jpg"
-                alt="A business owner in a suit celebrating at his laptop after Lekont produced his monthly report"
+                alt={w.celebrateAlt}
                 width={1600}
                 height={900}
                 sizes="(min-width: 1024px) 680px, 100vw"
@@ -139,29 +141,30 @@ export function AccountantShowcase({ copy }: { copy: Messages["hero"]["acct"] })
 
 /** Compact "today" dashboard floating out of the boutique owner's laptop. */
 function ShopDashboard() {
+  const w = useWidgetCopy();
   const bars = [32, 46, 38, 58, 52, 70, 88];
   return (
     <div className="report-pop light-scope rounded-2xl border border-white/70 bg-white/90 p-3 text-[#071426] shadow-[0_30px_60px_-20px_rgba(7,20,38,0.6)] backdrop-blur-md">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <span className="grid h-5 w-5 place-items-center rounded-md bg-[#0d9488] text-[9px] font-bold text-white">L</span>
-          <span className="text-[11px] font-semibold">Lekont · Today</span>
+          <span className="text-[11px] font-semibold">{w.today}</span>
         </div>
         <span className="flex items-center gap-1 rounded-full bg-[#ccfbf1] px-1.5 py-0.5 text-[9px] font-semibold text-[#0d9488]">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#0d9488]" />
-          Live
+          {w.live}
         </span>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-1.5">
         <div className="rounded-lg bg-[#f6f8fb] px-2 py-1.5">
-          <p className="text-[9px] uppercase tracking-wide text-[#5b6678]">Sales</p>
+          <p className="text-[9px] uppercase tracking-wide text-[#5b6678]">{w.sales}</p>
           <p className="text-[13px] font-semibold tabular-nums">MUR 48,250</p>
-          <p className="text-[9px] font-semibold text-[#0d9488]">▲ 12% vs last Thu</p>
+          <p className="text-[9px] font-semibold text-[#0d9488]">{w.vsThu}</p>
         </div>
         <div className="rounded-lg bg-[#f6f8fb] px-2 py-1.5">
-          <p className="text-[9px] uppercase tracking-wide text-[#5b6678]">Margin</p>
+          <p className="text-[9px] uppercase tracking-wide text-[#5b6678]">{w.margin}</p>
           <p className="text-[13px] font-semibold tabular-nums">41%</p>
-          <p className="text-[9px] text-[#5b6678]">VAT due MUR 6,290</p>
+          <p className="text-[9px] text-[#5b6678]">{w.vatDueAmount}</p>
         </div>
       </div>
       <div className="mt-2 flex h-10 items-end gap-1">
@@ -175,26 +178,27 @@ function ShopDashboard() {
       </div>
       <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-[#fef3c7] px-2 py-1 text-[10px] font-medium text-[#b45309]">
         <span>⚠</span>
-        <span className="truncate">Denim size 38 · 3 left</span>
+        <span className="truncate">{w.lowStock}</span>
       </div>
     </div>
   );
 }
 
 function ReportPanel() {
+  const w = useWidgetCopy();
   const rows = [
-    ["Sales", "122,600"],
-    ["Spend", "91,900"],
-    ["VAT", "5,085"],
-    ["Payroll", "141,600"],
+    [w.sales, "122,600"],
+    [w.spend, "91,900"],
+    [w.vat, "5,085"],
+    [w.payroll, "141,600"],
   ];
   return (
     <div className="report-pop light-scope rounded-2xl border border-white/70 bg-white/90 p-3.5 text-[#071426] shadow-[0_30px_60px_-20px_rgba(7,20,38,0.6)] backdrop-blur-md">
       <div className="flex items-center gap-2">
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-coral text-[9px] font-bold text-white">PDF</span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[12px] font-semibold">October report.pdf</p>
-          <p className="text-[10px] text-[#5b6678]">46 documents · 4 seconds</p>
+          <p className="truncate text-[12px] font-semibold">{w.report}</p>
+          <p className="text-[10px] text-[#5b6678]">{w.reportMeta}</p>
         </div>
         <span className="grid h-6 w-6 place-items-center rounded-full bg-[#0d9488] text-white">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -227,7 +231,7 @@ function ReportPanel() {
         ))}
       </div>
       <div className="mt-2.5 grid grid-cols-2 gap-1.5 text-[10px] font-semibold">
-        <span className="rounded-lg bg-[#071426] py-1.5 text-center text-white">Download PDF</span>
+        <span className="rounded-lg bg-[#071426] py-1.5 text-center text-white">{w.download}</span>
         <span className="rounded-lg border border-[#e3e8ef] bg-white py-1.5 text-center">Excel</span>
       </div>
     </div>

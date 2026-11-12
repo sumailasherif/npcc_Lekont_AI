@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
 import { Reveal } from "@/components/motion";
+import { useWidgetCopy } from "@/components/widget-copy";
 import type { Messages } from "@/lib/i18n";
 
 type Hub = Messages["site"]["waHub"];
@@ -85,6 +86,7 @@ function useChatLoop(length: number) {
 }
 
 function Phone({ chat, step }: { chat: Hub["chat"]; step: number }) {
+  const w = useWidgetCopy();
   return (
     <div className="wa-phone-wrap">
       <div className="wa-phone">
@@ -99,7 +101,7 @@ function Phone({ chat, step }: { chat: Hub["chat"]; step: number }) {
                   <path d="m8 12 3 3 5-6" stroke="white" strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </p>
-              <p className="text-[9px] text-white/75">online</p>
+              <p className="text-[9px] text-white/75">{w.online}</p>
             </div>
           </div>
           <div className="wa-wallpaper flex flex-1 flex-col justify-end gap-1.5 p-2.5">
@@ -157,6 +159,7 @@ const LEDGER = [
 
 /** MacBook showing the Lekont web dashboard; reacts to the chat on the phone. */
 function MacBook({ step, chatLength }: { step: number; chatLength: number }) {
+  const w = useWidgetCopy();
   const invoiceIn = step >= 2; // the bot has drafted the invoice
   const salesIn = step >= Math.min(4, chatLength * 2); // the bot has answered today's sales
   const bars = [34, 48, 40, 58, 52, 66, salesIn ? 92 : 70];
@@ -173,21 +176,21 @@ function MacBook({ step, chatLength }: { step: number; chatLength: number }) {
           <div className="flex min-w-0 flex-1 flex-col gap-[3%] bg-[#f6f8fb] p-[3.5%]">
             <div className="flex items-center justify-between">
               <div className="min-w-0 leading-tight">
-                <p className="text-[9px] font-semibold">Lekont · Today</p>
+                <p className="text-[9px] font-semibold">{w.today}</p>
                 <p className="truncate text-[6.5px] font-medium uppercase tracking-[0.12em] text-[#0d9488]">
-                  Business automation &amp; intelligence
+                  {w.tagline}
                 </p>
               </div>
               <span className="flex items-center gap-1 rounded-full bg-[#ccfbf1] px-1.5 py-[1px] text-[7px] font-semibold text-[#0d9488]">
                 <span className="h-1 w-1 animate-pulse rounded-full bg-[#0d9488]" />
-                Live
+                {w.live}
               </span>
             </div>
             <div className="grid grid-cols-3 gap-[3%]">
               {[
-                { label: "Sales", value: salesIn ? "48,250" : "41,900", tone: "text-[#0d9488]" },
-                { label: "Invoices", value: invoiceIn ? "13" : "12", tone: "text-[#071426]" },
-                { label: "VAT due", value: "6,290", tone: "text-[#b45309]" },
+                { label: w.sales, value: salesIn ? "48,250" : "41,900", tone: "text-[#0d9488]" },
+                { label: w.invoices, value: invoiceIn ? "13" : "12", tone: "text-[#071426]" },
+                { label: w.vatDue, value: "6,290", tone: "text-[#b45309]" },
               ].map((kpi) => (
                 <div key={kpi.label} className="rounded-md bg-white px-[8%] py-[6%] shadow-[0_1px_2px_rgba(7,20,38,0.08)]">
                   <p className="text-[6px] uppercase tracking-wide text-[#5b6678]">{kpi.label}</p>
@@ -197,7 +200,7 @@ function MacBook({ step, chatLength }: { step: number; chatLength: number }) {
             </div>
             <div className="grid min-h-0 flex-1 grid-cols-[1.1fr_1fr] gap-[3%]">
               <div className="flex flex-col rounded-md bg-white p-[5%] shadow-[0_1px_2px_rgba(7,20,38,0.08)]">
-                <p className="text-[7px] font-semibold text-[#5b6678]">Sales · 7 days</p>
+                <p className="text-[7px] font-semibold text-[#5b6678]">{w.sales7}</p>
                 <div className="mt-auto flex h-[70%] items-end gap-[6%]">
                   {bars.map((height, index) => (
                     <span
@@ -213,7 +216,7 @@ function MacBook({ step, chatLength }: { step: number; chatLength: number }) {
                 </div>
               </div>
               <div className="flex flex-col gap-[4%] rounded-md bg-white p-[5%] shadow-[0_1px_2px_rgba(7,20,38,0.08)]">
-                <p className="text-[7px] font-semibold text-[#5b6678]">Ledger</p>
+                <p className="text-[7px] font-semibold text-[#5b6678]">{w.ledger}</p>
                 <div
                   className="flex items-center justify-between rounded-[3px] px-[4%] py-[2%] text-[7px] transition-all duration-500"
                   style={{

@@ -8,6 +8,7 @@ import type { CSSProperties } from "react";
 import { HeroBackdrop, Reveal, buttonPrimary } from "@/components/motion";
 import { NotebookPhoto, type LedgerLine } from "@/components/notebook-photo";
 import { ScreenComposite } from "@/components/screen-composite";
+import { useWidgetCopy } from "@/components/widget-copy";
 import type { Messages } from "@/lib/i18n";
 
 /**
@@ -62,13 +63,14 @@ const STEP_MS = 1700;
 
 /** Photo 1 (hand holding a blank iPhone) with the scripted Lekont chat composited onto its screen. */
 function MiniPhone({ script }: { script: ScriptLine[] }) {
+  const w = useWidgetCopy();
   return (
     <div className="relative transition duration-500 group-hover:-translate-y-2">
       <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[40px] bg-[radial-gradient(closest-side,rgba(37,211,102,0.35),transparent)] blur-2xl" aria-hidden />
       <div className="relative aspect-[4/5] rotate-[-2deg] overflow-hidden rounded-[28px] bg-white shadow-[0_40px_80px_-30px_rgba(0,0,0,0.8)] ring-1 ring-white/20">
         <ScreenComposite
           src="/photos/hand-phone.jpg"
-          alt="A hand holding a phone with the Lekont WhatsApp chat open"
+          alt={w.phoneAlt}
           width={1400}
           height={1400}
           quad={[
@@ -89,6 +91,7 @@ function MiniPhone({ script }: { script: ScriptLine[] }) {
 }
 
 export function ChatScreen({ script }: { script: ScriptLine[] }) {
+  const w = useWidgetCopy();
   const [shown, setShown] = useState(2);
   const [typing, setTyping] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -165,7 +168,7 @@ export function ChatScreen({ script }: { script: ScriptLine[] }) {
         ) : null}
       </div>
       <div className="flex items-center gap-2 bg-[#efeae2] px-3 pb-7 pt-1">
-        <span className="flex-1 rounded-full bg-white px-4 py-2.5 text-[14px] text-[#8696a0] shadow-sm">Message</span>
+        <span className="flex-1 rounded-full bg-white px-4 py-2.5 text-[14px] text-[#8696a0] shadow-sm">{w.message}</span>
         <span className="grid h-11 w-11 place-items-center rounded-full bg-[#00a884] text-white" aria-hidden>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2v6Z" /></svg>
         </span>
@@ -187,6 +190,7 @@ const PAGE_LINES: (LedgerLine & { confidence: number })[] = [
 ];
 
 function Bubble({ line }: { line: ScriptLine }) {
+  const w = useWidgetCopy();
   const mine = line.from === "me";
   const base = `bubble-in-${mine ? "right" : "left"} max-w-[86%] rounded-2xl shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] ${
     mine ? "rounded-tr-none bg-[#d9fdd3]" : "rounded-tl-none bg-white"
@@ -223,20 +227,20 @@ function Bubble({ line }: { line: ScriptLine }) {
             );
           })}
           <div className="flex justify-between bg-[#f6f8fb] px-2.5 py-1.5 font-semibold">
-            <span>Total</span>
+            <span>{w.total}</span>
             <span className="tabular-nums">MUR 3,450</span>
           </div>
         </div>
-        <p className="mt-1.5 text-[13px] text-[#667781]">Reply “post” to save, or correct a line.</p>
+        <p className="mt-1.5 text-[13px] text-[#667781]">{w.replyPost}</p>
       </div>
     );
   }
 
   if (line.kind === "logged") {
     const writes = [
-      ["Sales", "4 entries", "+ MUR 2,010"],
-      ["Receivables", "Ramesh", "+ MUR 1,440"],
-      ["Stock", "rice −3 · oil −2 · soap −6 · milk −12", ""],
+      [w.writes[0][0], w.writes[0][1], "+ MUR 2,010"],
+      [w.writes[1][0], w.writes[1][1], "+ MUR 1,440"],
+      [w.writes[2][0], w.writes[2][1], ""],
     ];
     return (
       <div className={`${base} px-3 py-2 text-[#111b21]`}>
@@ -254,7 +258,7 @@ function Bubble({ line }: { line: ScriptLine }) {
             </div>
           ))}
         </div>
-        <p className="mt-1.5 text-[12px] text-[#667781]">Today: MUR 3,450 sales · stock and debts updated</p>
+        <p className="mt-1.5 text-[12px] text-[#667781]">{w.loggedFoot}</p>
       </div>
     );
   }
@@ -273,7 +277,7 @@ function Bubble({ line }: { line: ScriptLine }) {
           <span className="grid h-9 w-8 shrink-0 place-items-center rounded-md bg-[#ff6b4a] text-[10px] font-bold text-white">PDF</span>
           <div className="min-w-0">
             <p className="truncate text-[14px] font-semibold text-[#111b21]">{line.text}</p>
-            <p className="text-[12px] text-[#667781]">2 pages · PDF · 84 kB</p>
+            <p className="text-[12px] text-[#667781]">{w.pdfMeta}</p>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { useWidgetCopy } from "@/components/widget-copy";
 
 export type ThemeChoice = "light" | "dark" | "system";
 
@@ -75,9 +76,10 @@ function subscribeEffective(callback: () => void) {
  * the change is a short cross-fade rather than a wipe.
  */
 export function ThemeToggle() {
+  const w = useWidgetCopy();
   const theme = useSyncExternalStore(subscribeEffective, readEffective, () => "light" as const);
   const next = theme === "dark" ? "light" : "dark";
-  const label = next === "dark" ? "Switch to dark mode" : "Switch to light mode";
+  const label = next === "dark" ? w.toDark : w.toLight;
 
   function toggle() {
     const deviceTheme = window.matchMedia(DARK_QUERY).matches ? "dark" : "light";
