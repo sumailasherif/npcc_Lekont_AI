@@ -23,6 +23,8 @@ import { SpendChart } from "@/components/spend-chart";
 import { TiltCard } from "@/components/tilt-card";
 import { WhatsAppTeaser } from "@/components/whatsapp-teaser";
 import { AccountantShowcase, BuiltFor } from "@/components/photo-sections";
+import { ProblemSection, WhyLekontWins } from "@/components/problem-wins";
+import { DealtDeck, OrbitTools, PhotoGallery, PinnedStory, StoryStats } from "@/components/scroll-stories";
 import {
   apiGet,
   apiPost,
@@ -238,11 +240,18 @@ export default function OverviewPage() {
         </div>
       </section>
 
+      {/* The problem, then why Lekont wins */}
+      <ProblemSection copy={t.story.problem} />
+      <WhyLekontWins copy={t.story.wins} />
+
       {/* WhatsApp: the value proposition */}
       <WhatsAppTeaser copy={t.hero.wa} />
 
       {/* Real owners */}
       <BuiltFor copy={t.hero.built} />
+
+      {/* Count-up stats */}
+      <StoryStats copy={t.story.stats} />
 
       {/* Bilingual document vocabulary */}
       <section className="mx-auto max-w-6xl px-4 pt-16 md:px-6">
@@ -280,8 +289,17 @@ export default function OverviewPage() {
         </Reveal>
       </section>
 
+      {/* Pinned scroll story: one invoice, four steps */}
+      <PinnedStory copy={t.story.pinned} />
+
       {/* For accountants */}
       <AccountantShowcase copy={t.hero.acct} />
+
+      {/* Six tools orbiting the ledger */}
+      <OrbitTools copy={t.story.orbit} />
+
+      {/* Cards dealt from a deck as you scroll */}
+      <DealtDeck copy={t.story.deck} />
 
       {/* Live tabbed showcase */}
       <section className="border-y border-line bg-card py-24">
@@ -351,6 +369,9 @@ export default function OverviewPage() {
           </div>
         </div>
       </section>
+
+      {/* Horizontal photo gallery driven by vertical scroll */}
+      <PhotoGallery copy={t.story.gallery} />
 
       {/* Call to action */}
       <section className="mx-auto max-w-6xl px-4 py-24 md:px-6">

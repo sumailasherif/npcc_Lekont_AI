@@ -132,6 +132,77 @@ export type Messages = {
     built: { eyebrow: string; title: string; sub: string; chips: string[] };
     acct: { eyebrow: string; title: string; highlight: string; sub: string; points: string[]; cta: string };
   };
+  story: {
+    problem: {
+      eyebrow: string;
+      title: string;
+      sub: string;
+      items: { title: string; body: string; cost: string }[];
+    };
+    wins: {
+      eyebrow: string;
+      title: string;
+      highlight: string;
+      sub: string;
+      reasons: { title: string; body: string }[];
+      columns: string[];
+      /** Each value is "yes", "no", "partial" or a short text. */
+      rows: { label: string; values: string[] }[];
+      partialLabel: string;
+    };
+    stats: {
+      eyebrow: string;
+      title: string;
+      items: { value: number; decimals?: number; prefix?: string; suffix?: string; label: string }[];
+    };
+    pinned: {
+      eyebrow: string;
+      title: string;
+      sub: string;
+      hint: string;
+      joined: string;
+      steps: { tag: string; title: string; body: string }[];
+      visual: {
+        online: string;
+        received: string;
+        reading: string;
+        confidence: string;
+        fields: { supplier: string; date: string; net: string; vat: string; total: string };
+        review: string;
+        vatCheck: string;
+        edit: string;
+        approve: string;
+        approved: string;
+        ledger: string;
+        report: string;
+        reportSub: string;
+      };
+    };
+    orbit: {
+      eyebrow: string;
+      title: string;
+      sub: string;
+      hint: string;
+      items: { title: string; body: string; href: string }[];
+    };
+    deck: {
+      eyebrow: string;
+      title: string;
+      sub: string;
+      hint: string;
+      roles: { owner: string; accountant: string; staff: string };
+      cards: { role: "owner" | "accountant" | "staff"; title: string; body: string }[];
+    };
+    gallery: {
+      eyebrow: string;
+      title: string;
+      sub: string;
+      hint: string;
+      captions: string[];
+      endTitle: string;
+      endCta: string;
+    };
+  };
 };
 
 export const messages: Record<Locale, Messages> = {
@@ -286,6 +357,122 @@ export const messages: Record<Locale, Messages> = {
       built: { eyebrow: "Built for the people who run the shop", title: "Built for the counter, not the back office.", sub: "Record a sale between customers. Check stock before the supplier calls. All from the phone already in your pocket.", chips: ["✓ Sale recorded · MUR 750", "📊 Today · MUR 2,030", "🧾 Invoice INV-0418 · PDF ready", "👥 Payslips · 6 ready"] },
       acct: { eyebrow: "Reports in one tap", title: "A month of paperwork,", highlight: "one PDF.", sub: "Lekont pulls every reviewed invoice, payslip and VAT line into one clean report. Download it as PDF or Excel and send it to your accountant. What took a weekend now takes seconds.", points: ["Monthly report in seconds", "PDF and Excel, ready to send", "Only reviewed numbers go in"], cta: "See the documents →" },
     },
+    story: {
+      problem: {
+        eyebrow: "The problem",
+        title: "Small businesses run on paper, memory and WhatsApp.",
+        sub: "The shop is busy all day. The books get done at midnight, if at all. And when the bank or the accountant asks for numbers, nobody has them.",
+        items: [
+          { title: "Books in a notebook", body: "Sales are scribbled in a notebook and receipts go in a shoebox. Nobody knows today's profit until the month is over.", cost: "Profit is a guess" },
+          { title: "Paper in two languages", body: "Invoices arrive in French, payslips in English, VAT at 15%. Typing it all into Excel eats evenings and weekends.", cost: "Evenings lost to typing" },
+          { title: "No clean numbers, no loan", body: "Banks and accountants want tidy records. Without them, owners pay more for credit, or get turned away.", cost: "Growth on hold" },
+        ],
+      },
+      wins: {
+        eyebrow: "Why Lekont wins",
+        title: "Built for the counter,",
+        highlight: "not for accountants only.",
+        sub: "Other tools expect you to sit at a desk and type. Lekont works where you already are and reads what you already have.",
+        reasons: [
+          { title: "No new app", body: "It lives in WhatsApp, on the phone already in your pocket." },
+          { title: "Reads your paper", body: "French and English invoices and payslips, answers in Kreol too." },
+          { title: "You stay in control", body: "Nothing reaches the ledger until a person approves it." },
+        ],
+        columns: ["Notebook", "Excel", "Accounting software", "Lekont"],
+        rows: [
+          { label: "Works from WhatsApp", values: ["no", "no", "no", "yes"] },
+          { label: "Reads invoices and payslips for you", values: ["no", "no", "partial", "yes"] },
+          { label: "Answers in English, French or Kreol", values: ["no", "no", "no", "yes"] },
+          { label: "Human approval before it counts", values: ["no", "no", "partial", "yes"] },
+          { label: "Monthly PDF for your accountant", values: ["no", "partial", "yes", "yes"] },
+          { label: "Time to get started", values: ["—", "Hours", "Weeks", "Minutes"] },
+        ],
+        partialLabel: "Partly, or with add-ons and training",
+      },
+      stats: {
+        eyebrow: "By the numbers",
+        title: "Small numbers that change a working day.",
+        items: [
+          { value: 4, suffix: " s", label: "to read a supplier invoice" },
+          { value: 3, label: "languages understood: English, French, Kreol" },
+          { value: 15, suffix: "%", label: "VAT checked on every line" },
+          { value: 1, suffix: " tap", label: "to your monthly PDF report" },
+        ],
+      },
+      pinned: {
+        eyebrow: "Follow one invoice",
+        title: "From the counter to your accountant, in four steps.",
+        sub: "One supplier invoice, photographed at the till. Scroll to follow it.",
+        hint: "Scroll to follow the invoice",
+        joined: "One invoice · four steps · zero typing",
+        steps: [
+          { tag: "WhatsApp", title: "Snap and send", body: "Take a photo of the invoice and send it to Lekont on WhatsApp. No app to install." },
+          { tag: "AI reading", title: "Lekont reads it", body: "Supplier, date, amounts and 15% VAT come out of French or English paper in seconds." },
+          { tag: "You decide", title: "You approve", body: "Nothing counts until you say so. Check the numbers, fix anything, approve with one tap." },
+          { tag: "Ledger + PDF", title: "Logged and reported", body: "The line lands in your ledger and in this month's PDF for your accountant." },
+        ],
+        visual: {
+          online: "online",
+          received: "Got it 👍 Reading Facture_0418…",
+          reading: "Reading invoice",
+          confidence: "Confidence",
+          fields: { supplier: "Supplier", date: "Date", net: "Net", vat: "VAT 15%", total: "Total" },
+          review: "Review before it counts",
+          vatCheck: "VAT = 15% of 4,200",
+          edit: "Edit",
+          approve: "Approve",
+          approved: "Approved by you",
+          ledger: "Ledger · November",
+          report: "November report.pdf",
+          reportSub: "Ready for your accountant",
+        },
+      },
+      orbit: {
+        eyebrow: "One ledger",
+        title: "Six tools, one orbit.",
+        sub: "Everything Lekont does feeds the same ledger, so every answer comes from the same numbers.",
+        hint: "Hover to pause · click a tool to open it",
+        items: [
+          { title: "Documents", body: "Invoices and payslips, read for you", href: "/documents" },
+          { title: "Ask", body: "Questions in plain words", href: "/ask" },
+          { title: "Readiness", body: "Your finance-readiness score", href: "/readiness" },
+          { title: "WhatsApp", body: "Run the shop from a chat", href: "/whatsapp" },
+          { title: "VAT", body: "15% checked on every line", href: "/ask" },
+          { title: "Payroll", body: "Payslips and payroll ratio", href: "/ask" },
+        ],
+      },
+      deck: {
+        eyebrow: "For the whole team",
+        title: "Eight jobs, dealt from one deck.",
+        sub: "Owners, staff and accountants each get the tools they need, on the same numbers.",
+        hint: "Scroll to deal the deck",
+        roles: { owner: "Owner", accountant: "Accountant", staff: "Staff" },
+        cards: [
+          { role: "owner", title: "Snap a receipt", body: "Photo on WhatsApp, logged in seconds." },
+          { role: "owner", title: "Today's sales", body: "Ask “how much today?” and get the total." },
+          { role: "staff", title: "Record a sale", body: "Between customers, in one message." },
+          { role: "staff", title: "Stock check", body: "See what is running low before the supplier calls." },
+          { role: "accountant", title: "VAT at 15%", body: "Every line checked against the invoice." },
+          { role: "accountant", title: "Approve first", body: "Nothing reaches the ledger without a human OK." },
+          { role: "owner", title: "Payslips", body: "Payslips ready, payroll ratio tracked." },
+          { role: "accountant", title: "Monthly PDF", body: "One report, PDF or Excel, ready to send." },
+        ],
+      },
+      gallery: {
+        eyebrow: "In pictures",
+        title: "Where Lekont works.",
+        sub: "Counters, cafés and back rooms. Real businesses, real paperwork.",
+        hint: "Keep scrolling",
+        captions: [
+          "Checking today's sales between customers",
+          "One photo of the notebook, and the page is logged",
+          "Open for business, books up to date",
+          "Month closed. Report sent.",
+        ],
+        endTitle: "Try it on WhatsApp.",
+        endCta: "Open the simulator",
+      },
+    },
   },
   fr: {
     nav: { overview: "Aperçu", documents: "Documents", ask: "Demander", readiness: "Préparation", whatsapp: "WhatsApp" },
@@ -439,6 +626,122 @@ export const messages: Record<Locale, Messages> = {
       built: { eyebrow: "Pensé pour ceux qui tiennent la boutique", title: "Fait pour le comptoir, pas pour le bureau.", sub: "Enregistrez une vente entre deux clients. Vérifiez le stock avant l’appel du fournisseur. Tout depuis le téléphone déjà dans votre poche.", chips: ["✓ Vente enregistrée · MUR 750", "📊 Aujourd’hui · MUR 2 030", "🧾 Facture INV-0418 · PDF prêt", "👥 Bulletins de paie · 6 prêts"] },
       acct: { eyebrow: "Rapports en un geste", title: "Un mois de paperasse,", highlight: "un seul PDF.", sub: "Lekont rassemble chaque facture, bulletin de paie et ligne de TVA vérifiés dans un rapport clair. Téléchargez-le en PDF ou Excel et envoyez-le à votre comptable. Ce qui prenait un week-end prend quelques secondes.", points: ["Rapport mensuel en quelques secondes", "PDF et Excel, prêts à envoyer", "Seuls les chiffres vérifiés y figurent"], cta: "Voir les documents →" },
     },
+    story: {
+      problem: {
+        eyebrow: "Le problème",
+        title: "Les petites entreprises tournent au papier, à la mémoire et à WhatsApp.",
+        sub: "La boutique tourne toute la journée. La comptabilité se fait à minuit, quand elle se fait. Et quand la banque ou le comptable demande des chiffres, personne ne les a.",
+        items: [
+          { title: "Des comptes dans un cahier", body: "Les ventes sont notées dans un cahier, les reçus finissent dans une boîte à chaussures. Personne ne connaît le bénéfice du jour avant la fin du mois.", cost: "Un bénéfice deviné" },
+          { title: "Des papiers en deux langues", body: "Factures en français, bulletins en anglais, TVA à 15 %. Tout ressaisir dans Excel dévore les soirées et les week-ends.", cost: "Des soirées à ressaisir" },
+          { title: "Pas de chiffres propres, pas de prêt", body: "Banques et comptables veulent des comptes clairs. Sans eux, le crédit coûte plus cher, ou il est refusé.", cost: "Croissance en pause" },
+        ],
+      },
+      wins: {
+        eyebrow: "Pourquoi Lekont gagne",
+        title: "Pensé pour le comptoir,",
+        highlight: "pas seulement pour les comptables.",
+        sub: "Les autres outils vous veulent assis à un bureau, à taper. Lekont travaille là où vous êtes déjà et lit ce que vous avez déjà.",
+        reasons: [
+          { title: "Aucune nouvelle appli", body: "Tout se passe sur WhatsApp, sur le téléphone déjà dans votre poche." },
+          { title: "Il lit vos papiers", body: "Factures et bulletins en français et en anglais, réponses en kreol aussi." },
+          { title: "Vous gardez la main", body: "Rien n’entre au grand livre sans validation humaine." },
+        ],
+        columns: ["Cahier", "Excel", "Logiciel comptable", "Lekont"],
+        rows: [
+          { label: "Fonctionne depuis WhatsApp", values: ["no", "no", "no", "yes"] },
+          { label: "Lit factures et bulletins pour vous", values: ["no", "no", "partial", "yes"] },
+          { label: "Répond en anglais, français ou kreol", values: ["no", "no", "no", "yes"] },
+          { label: "Validation humaine avant de compter", values: ["no", "no", "partial", "yes"] },
+          { label: "PDF mensuel pour le comptable", values: ["no", "partial", "yes", "yes"] },
+          { label: "Temps de mise en route", values: ["—", "Des heures", "Des semaines", "Quelques minutes"] },
+        ],
+        partialLabel: "En partie, ou avec modules et formation",
+      },
+      stats: {
+        eyebrow: "En chiffres",
+        title: "De petits chiffres qui changent une journée de travail.",
+        items: [
+          { value: 4, suffix: " s", label: "pour lire une facture fournisseur" },
+          { value: 3, label: "langues comprises : anglais, français, kreol" },
+          { value: 15, suffix: " %", label: "de TVA vérifiée sur chaque ligne" },
+          { value: 1, suffix: " geste", label: "pour votre rapport PDF mensuel" },
+        ],
+      },
+      pinned: {
+        eyebrow: "Suivez une facture",
+        title: "Du comptoir à votre comptable, en quatre étapes.",
+        sub: "Une facture fournisseur, photographiée à la caisse. Faites défiler pour la suivre.",
+        hint: "Faites défiler pour suivre la facture",
+        joined: "Une facture · quatre étapes · zéro saisie",
+        steps: [
+          { tag: "WhatsApp", title: "Photographiez et envoyez", body: "Prenez la facture en photo et envoyez-la à Lekont sur WhatsApp. Aucune appli à installer." },
+          { tag: "Lecture IA", title: "Lekont la lit", body: "Fournisseur, date, montants et TVA à 15 % sont extraits du papier, en français ou en anglais, en quelques secondes." },
+          { tag: "Vous décidez", title: "Vous validez", body: "Rien ne compte sans votre accord. Vérifiez, corrigez si besoin, validez d’un geste." },
+          { tag: "Grand livre + PDF", title: "Enregistrée et rapportée", body: "La ligne arrive dans votre grand livre et dans le PDF du mois pour votre comptable." },
+        ],
+        visual: {
+          online: "en ligne",
+          received: "Bien reçu 👍 Lecture de Facture_0418…",
+          reading: "Lecture de la facture",
+          confidence: "Confiance",
+          fields: { supplier: "Fournisseur", date: "Date", net: "HT", vat: "TVA 15 %", total: "TTC" },
+          review: "À vérifier avant de compter",
+          vatCheck: "TVA = 15 % de 4 200",
+          edit: "Modifier",
+          approve: "Valider",
+          approved: "Validée par vous",
+          ledger: "Grand livre · novembre",
+          report: "Rapport novembre.pdf",
+          reportSub: "Prêt pour votre comptable",
+        },
+      },
+      orbit: {
+        eyebrow: "Un seul grand livre",
+        title: "Six outils, une seule orbite.",
+        sub: "Tout ce que fait Lekont alimente le même grand livre : chaque réponse vient des mêmes chiffres.",
+        hint: "Survolez pour mettre en pause · cliquez pour ouvrir",
+        items: [
+          { title: "Documents", body: "Factures et bulletins, lus pour vous", href: "/documents" },
+          { title: "Question", body: "Des questions en langage simple", href: "/ask" },
+          { title: "Préparation", body: "Votre score de préparation financière", href: "/readiness" },
+          { title: "WhatsApp", body: "Gérez la boutique depuis un chat", href: "/whatsapp" },
+          { title: "TVA", body: "15 % vérifiés sur chaque ligne", href: "/ask" },
+          { title: "Paie", body: "Bulletins et ratio de masse salariale", href: "/ask" },
+        ],
+      },
+      deck: {
+        eyebrow: "Pour toute l’équipe",
+        title: "Huit tâches, tirées d’un seul jeu.",
+        sub: "Gérants, employés et comptables ont chacun leurs outils, sur les mêmes chiffres.",
+        hint: "Faites défiler pour distribuer les cartes",
+        roles: { owner: "Gérant", accountant: "Comptable", staff: "Employé" },
+        cards: [
+          { role: "owner", title: "Photographier un reçu", body: "Une photo sur WhatsApp, enregistrée en quelques secondes." },
+          { role: "owner", title: "Ventes du jour", body: "Demandez « combien aujourd’hui ? » et obtenez le total." },
+          { role: "staff", title: "Enregistrer une vente", body: "Entre deux clients, en un message." },
+          { role: "staff", title: "Vérifier le stock", body: "Voyez ce qui manque avant l’appel du fournisseur." },
+          { role: "accountant", title: "TVA à 15 %", body: "Chaque ligne comparée à la facture." },
+          { role: "accountant", title: "Valider d’abord", body: "Rien n’entre au grand livre sans un accord humain." },
+          { role: "owner", title: "Bulletins de paie", body: "Bulletins prêts, ratio de paie suivi." },
+          { role: "accountant", title: "PDF mensuel", body: "Un rapport, PDF ou Excel, prêt à envoyer." },
+        ],
+      },
+      gallery: {
+        eyebrow: "En images",
+        title: "Là où Lekont travaille.",
+        sub: "Comptoirs, cafés et arrière-boutiques. De vraies entreprises, de vrais papiers.",
+        hint: "Continuez à défiler",
+        captions: [
+          "Les ventes du jour, vérifiées entre deux clients",
+          "Une photo du cahier, et la page est enregistrée",
+          "Ouvert, avec une comptabilité à jour",
+          "Mois clôturé. Rapport envoyé.",
+        ],
+        endTitle: "Essayez-le sur WhatsApp.",
+        endCta: "Ouvrir le simulateur",
+      },
+    },
   },
   cr: {
     nav: { overview: "Virmont", documents: "Dokiman", ask: "Demann", readiness: "Preparasion", whatsapp: "WhatsApp" },
@@ -589,6 +892,122 @@ export const messages: Record<Locale, Messages> = {
       },
       built: { eyebrow: "Fer pou bann dimoun ki tini laboutik", title: "Fer pou kontwar, pa pou biro.", sub: "Anrezistre enn lavant ant de klian. Gete stok avan fourniser la telefone. Tou depi telefonn ki deza dan ou pos.", chips: ["✓ Lavant anrezistre · MUR 750", "📊 Zordi · MUR 2,030", "🧾 Faktir INV-0418 · PDF pare", "👥 Fis lapey · 6 pare"] },
       acct: { eyebrow: "Rapor an enn sel klik", title: "Enn mwa paperas,", highlight: "enn sel PDF.", sub: "Lekont ramas sak faktir, fis lapey ek linn TVA verifie dan enn rapor prop. Telesarz li an PDF ouswa Excel ek avoy li ou kontab. Seki ti pran enn wikenn, aster pran enn de segonn.", points: ["Rapor mansiel an enn de segonn", "PDF ek Excel, pare pou avoy", "Zis sif verifie ki rantre"], cta: "Get bann dokiman →" },
+    },
+    story: {
+      problem: {
+        eyebrow: "Problem la",
+        title: "Ti biznes marse lor papie, memwar ek WhatsApp.",
+        sub: "Laboutik okipe tou lazourne. Bann kont fer a minwi, si zot fer ditou. Ek kan labank ouswa kontab demann sif, personn pena zot.",
+        items: [
+          { title: "Kont dan enn kaye", body: "Lavant ekrir dan enn kaye, resi al dan enn bwat soulie. Personn pa kone profi zordi avan lafin mwa.", cost: "Profi enn devinet" },
+          { title: "Papie an de lang", body: "Faktir an Franse, fis lapey an Angle, TVA 15%. Tap tou dan Excel manz ou bann aswar ek wikenn.", cost: "Aswar perdi pou tape" },
+          { title: "Pena sif prop, pena prete", body: "Labank ek kontab anvi kont prop. San sa, kredi kout pli ser, ouswa zot refiz.", cost: "Kroisans bloke" },
+        ],
+      },
+      wins: {
+        eyebrow: "Kifer Lekont gagne",
+        title: "Fer pou kontwar,",
+        highlight: "pa zis pou kontab.",
+        sub: "Lezot zouti anvi ou asiz dan enn biro ek tape. Lekont travay kot ou deza ete ek lir seki ou deza ena.",
+        reasons: [
+          { title: "Pena nouvo aplikasion", body: "Tou pas lor WhatsApp, lor telefonn ki deza dan ou pos." },
+          { title: "Li lir ou papie", body: "Faktir ek fis lapey an Franse ek Angle, repons an Kreol osi." },
+          { title: "Ou gard kontrol", body: "Nanyin pa rant dan ledzer san enn dimoun aprouve." },
+        ],
+        columns: ["Kaye", "Excel", "Logisiel kontab", "Lekont"],
+        rows: [
+          { label: "Marse depi WhatsApp", values: ["no", "no", "no", "yes"] },
+          { label: "Lir faktir ek fis lapey pou ou", values: ["no", "no", "partial", "yes"] },
+          { label: "Reponn an Angle, Franse ouswa Kreol", values: ["no", "no", "no", "yes"] },
+          { label: "Enn dimoun aprouve avan li konte", values: ["no", "no", "partial", "yes"] },
+          { label: "PDF mansiel pou ou kontab", values: ["no", "partial", "yes", "yes"] },
+          { label: "Letan pou koumanse", values: ["—", "Plizir erdtan", "Plizir semenn", "Enn de minit"] },
+        ],
+        partialLabel: "Enn parti, ouswa avek modil ek formasion",
+      },
+      stats: {
+        eyebrow: "An sif",
+        title: "Ti sif ki sanz enn zournee travay.",
+        items: [
+          { value: 4, suffix: " s", label: "pou lir enn faktir fourniser" },
+          { value: 3, label: "lang konpran: Angle, Franse, Kreol" },
+          { value: 15, suffix: "%", label: "TVA verifie lor sak linn" },
+          { value: 1, suffix: " klik", label: "pou ou rapor PDF mansiel" },
+        ],
+      },
+      pinned: {
+        eyebrow: "Swiv enn faktir",
+        title: "Depi kontwar ziska ou kontab, an kat etap.",
+        sub: "Enn faktir fourniser, pran an foto kot lakes. Defil pou swiv li.",
+        hint: "Defil pou swiv faktir la",
+        joined: "Enn faktir · kat etap · zero tapaz",
+        steps: [
+          { tag: "WhatsApp", title: "Pran foto ek avoy", body: "Pran enn foto faktir la ek avoy li Lekont lor WhatsApp. Pena aplikasion pou instale." },
+          { tag: "Lektir IA", title: "Lekont lir li", body: "Fourniser, dat, montan ek TVA 15% sorti depi papie an Franse ouswa Angle an enn de segonn." },
+          { tag: "Ou ki deside", title: "Ou aprouve", body: "Nanyin pa konte san ou dakor. Gete bann sif, koriz si bizin, aprouve an enn klik." },
+          { tag: "Ledzer + PDF", title: "Anrezistre ek rapor", body: "Linn la rant dan ou ledzer ek dan PDF sa mwa la pou ou kontab." },
+        ],
+        visual: {
+          online: "an lign",
+          received: "Gagne 👍 Pe lir Facture_0418…",
+          reading: "Pe lir faktir la",
+          confidence: "Konfians",
+          fields: { supplier: "Fourniser", date: "Dat", net: "San TVA", vat: "TVA 15%", total: "Total" },
+          review: "Verifie avan li konte",
+          vatCheck: "TVA = 15% lor 4,200",
+          edit: "Modifie",
+          approve: "Aprouve",
+          approved: "Ou finn aprouve",
+          ledger: "Ledzer · Novam",
+          report: "Rapor Novam.pdf",
+          reportSub: "Pare pou ou kontab",
+        },
+      },
+      orbit: {
+        eyebrow: "Enn sel ledzer",
+        title: "Sis zouti, enn sel lorbit.",
+        sub: "Tou seki Lekont fer al dan mem ledzer, alor sak repons sorti depi mem bann sif.",
+        hint: "Pas lasouri pou pose · klik lor enn zouti pou ouver li",
+        items: [
+          { title: "Dokiman", body: "Faktir ek fis lapey, lir pou ou", href: "/documents" },
+          { title: "Demande", body: "Kestion an langaz sinp", href: "/ask" },
+          { title: "Preparasion", body: "Ou skor preparasion finansie", href: "/readiness" },
+          { title: "WhatsApp", body: "Get laboutik depi enn chat", href: "/whatsapp" },
+          { title: "TVA", body: "15% verifie lor sak linn", href: "/ask" },
+          { title: "Lapey", body: "Fis lapey ek ratio lapey", href: "/ask" },
+        ],
+      },
+      deck: {
+        eyebrow: "Pou tou lekip",
+        title: "Wit travay, tir depi enn sel pake kart.",
+        sub: "Patron, staf ek kontab sakenn gagn so zouti, lor mem bann sif.",
+        hint: "Defil pou distribie bann kart",
+        roles: { owner: "Patron", accountant: "Kontab", staff: "Staf" },
+        cards: [
+          { role: "owner", title: "Foto enn resi", body: "Enn foto lor WhatsApp, anrezistre an enn de segonn." },
+          { role: "owner", title: "Lavant zordi", body: "Demann “konbien zordi?” ek gagn total la." },
+          { role: "staff", title: "Anrezistre enn lavant", body: "Ant de klian, an enn mesaz." },
+          { role: "staff", title: "Gete stok", body: "Trouv seki pe fini avan fourniser la telefone." },
+          { role: "accountant", title: "TVA 15%", body: "Sak linn konpare ar faktir la." },
+          { role: "accountant", title: "Aprouve avan", body: "Nanyin pa rant dan ledzer san enn dimoun dakor." },
+          { role: "owner", title: "Fis lapey", body: "Fis lapey pare, ratio lapey swivi." },
+          { role: "accountant", title: "PDF mansiel", body: "Enn rapor, PDF ouswa Excel, pare pou avoy." },
+        ],
+      },
+      gallery: {
+        eyebrow: "An zimaz",
+        title: "Kot Lekont travay.",
+        sub: "Kontwar, kafe ek lakour deryer. Vre biznes, vre paperas.",
+        hint: "Kontinie defile",
+        captions: [
+          "Gete lavant zordi ant de klian",
+          "Enn foto kaye la, ek paz la anrezistre",
+          "Louver, ek bann kont azour",
+          "Mwa fini. Rapor avoye.",
+        ],
+        endTitle: "Esey li lor WhatsApp.",
+        endCta: "Ouver similater la",
+      },
     },
   },
 };

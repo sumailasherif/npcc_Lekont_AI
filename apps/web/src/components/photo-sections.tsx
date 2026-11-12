@@ -12,7 +12,12 @@ import type { Messages } from "@/lib/i18n";
 export function BuiltFor({ copy }: { copy: Messages["hero"]["built"] }) {
   const photos = [
     { src: "/photos/owner-apron.jpg", alt: "A shop owner in an apron checking his phone at the counter", chips: [copy.chips[0], copy.chips[1]] },
-    { src: "/photos/shop-open.jpg", alt: "A café owner holding a Yes, we're open sign behind her counter", chips: [copy.chips[2], copy.chips[3]] },
+    {
+      src: "/photos/manager-laptop.jpg",
+      alt: "A smiling boutique owner checking her Lekont dashboard on her laptop",
+      chips: [copy.chips[2], copy.chips[3]],
+      dashboard: true,
+    },
   ];
   return (
     <section className="mx-auto max-w-6xl px-4 pt-24 md:px-6">
@@ -29,16 +34,36 @@ export function BuiltFor({ copy }: { copy: Messages["hero"]["built"] }) {
                 src={photo.src}
                 alt={photo.alt}
                 width={1400}
-                height={933}
+                height={photo.dashboard ? 788 : 933}
                 sizes="(min-width: 768px) 560px, 100vw"
                 className="aspect-[4/3] h-auto w-full object-cover transition duration-700 group-hover:scale-[1.04]"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-night/70 via-night/10 to-transparent" aria-hidden />
+              {photo.dashboard ? (
+                <>
+                  {/* Beam from the laptop up into the floating dashboard */}
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 hidden h-full w-full md:block" aria-hidden>
+                    <path d="M 24 71 C 22 66, 20 63, 21 57" fill="none" stroke="#5eead4" strokeWidth="0.5" strokeDasharray="1.2 1.6" className="dash-march" vectorEffect="non-scaling-stroke" />
+                  </svg>
+                  <span className="pointer-events-none absolute left-[23%] top-[70%] hidden h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-lagoon shadow-[0_0_14px_#14b8a6] md:block" aria-hidden>
+                    <span className="orbit-pulse absolute inset-0 rounded-full border border-lagoon" />
+                  </span>
+                  <div className="absolute left-[4%] top-[5%] hidden w-[48%] md:block">
+                    <ShopDashboard />
+                  </div>
+                </>
+              ) : null}
               {photo.chips.map((chip, chipIndex) => (
                 <span
                   key={chip}
                   className={`side-card float-y absolute rounded-full border border-white/60 bg-white/85 px-3.5 py-2 text-xs font-semibold text-night shadow-[0_18px_40px_-14px_rgba(7,20,38,0.6)] backdrop-blur-md ${
-                    chipIndex === 0 ? "left-4 top-4 md:left-6 md:top-6" : "bottom-4 right-4 md:bottom-6 md:right-6"
+                    photo.dashboard
+                      ? chipIndex === 0
+                        ? "right-4 top-4 md:right-6 md:top-6"
+                        : "bottom-4 right-4 md:bottom-6 md:right-6"
+                      : chipIndex === 0
+                        ? "left-4 top-4 md:left-6 md:top-6"
+                        : "bottom-4 right-4 md:bottom-6 md:right-6"
                   }`}
                   style={{ animationDelay: `${index * 0.8 + chipIndex * 1.4}s` } as CSSProperties}
                 >
@@ -46,6 +71,11 @@ export function BuiltFor({ copy }: { copy: Messages["hero"]["built"] }) {
                 </span>
               ))}
             </figure>
+            {photo.dashboard ? (
+              <div className="mt-4 md:hidden">
+                <ShopDashboard />
+              </div>
+            ) : null}
           </Reveal>
         ))}
       </div>
@@ -104,6 +134,50 @@ export function AccountantShowcase({ copy }: { copy: Messages["hero"]["acct"] })
         </Reveal>
       </div>
     </section>
+  );
+}
+
+/** Compact "today" dashboard floating out of the boutique owner's laptop. */
+function ShopDashboard() {
+  const bars = [32, 46, 38, 58, 52, 70, 88];
+  return (
+    <div className="report-pop light-scope rounded-2xl border border-white/70 bg-white/90 p-3 text-[#071426] shadow-[0_30px_60px_-20px_rgba(7,20,38,0.6)] backdrop-blur-md">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <span className="grid h-5 w-5 place-items-center rounded-md bg-[#0d9488] text-[9px] font-bold text-white">L</span>
+          <span className="text-[11px] font-semibold">Lekont · Today</span>
+        </div>
+        <span className="flex items-center gap-1 rounded-full bg-[#ccfbf1] px-1.5 py-0.5 text-[9px] font-semibold text-[#0d9488]">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#0d9488]" />
+          Live
+        </span>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <div className="rounded-lg bg-[#f6f8fb] px-2 py-1.5">
+          <p className="text-[9px] uppercase tracking-wide text-[#5b6678]">Sales</p>
+          <p className="text-[13px] font-semibold tabular-nums">MUR 48,250</p>
+          <p className="text-[9px] font-semibold text-[#0d9488]">▲ 12% vs last Thu</p>
+        </div>
+        <div className="rounded-lg bg-[#f6f8fb] px-2 py-1.5">
+          <p className="text-[9px] uppercase tracking-wide text-[#5b6678]">Margin</p>
+          <p className="text-[13px] font-semibold tabular-nums">41%</p>
+          <p className="text-[9px] text-[#5b6678]">VAT due MUR 6,290</p>
+        </div>
+      </div>
+      <div className="mt-2 flex h-10 items-end gap-1">
+        {bars.map((height, index) => (
+          <span
+            key={index}
+            className="bar-breathe flex-1 rounded-t-[3px] bg-gradient-to-t from-[#0d9488] to-[#5eead4]"
+            style={{ height: `${height}%`, animationDelay: `${index * 0.15}s` }}
+          />
+        ))}
+      </div>
+      <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-[#fef3c7] px-2 py-1 text-[10px] font-medium text-[#b45309]">
+        <span>⚠</span>
+        <span className="truncate">Denim size 38 · 3 left</span>
+      </div>
+    </div>
   );
 }
 

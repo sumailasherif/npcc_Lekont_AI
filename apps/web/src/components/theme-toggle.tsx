@@ -1,7 +1,6 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { MouseEvent } from "react";
 
 export type ThemeChoice = "light" | "dark" | "system";
 
@@ -21,11 +20,18 @@ function read(): ThemeChoice {
 }
 
 function subscribe(callback: () => void) {
+  // Another tab changed the theme: apply it here too, then refresh the button.
+  const onStorage = () => {
+    const choice = read();
+    if (choice === "system") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = choice;
+    callback();
+  };
   listeners.add(callback);
-  window.addEventListener("storage", callback);
+  window.addEventListener("storage", onStorage);
   return () => {
     listeners.delete(callback);
-    window.removeEventListener("storage", callback);
+    window.removeEventListener("storage", onStorage);
   };
 }
 
@@ -42,60 +48,63 @@ function apply(choice: ThemeChoice) {
   listeners.forEach((listener) => listener());
 }
 
-const OPTIONS: { id: ThemeChoice; label: string; icon: string }[] = [
-  { id: "light", label: "Light", icon: "M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66 1.41-1.41M4.93 19.07l1.41-1.41m0-11.32L4.93 4.93m14.14 14.14-1.41-1.41M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" },
-  { id: "dark", label: "Dark", icon: "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" },
-  { id: "system", label: "System", icon: "M3 5h18v11H3V5Zm5 15h8m-4-4v4" },
-];
+const SUN =
+  "M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66 1.41-1.41M4.93 19.07l1.41-1.41m0-11.32L4.93 4.93m14.14 14.14-1.41-1.41M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z";
+const MOON = "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z";
+const DARK_QUERY = "(prefers-color-scheme: dark)";
 
+/** The theme actually on screen: the saved choice, or the device setting when none is saved. */
+function readEffective(): "light" | "dark" {
+  const choice = read();
+  if (choice !== "system") return choice;
+  return window.matchMedia(DARK_QUERY).matches ? "dark" : "light";
+}
+
+function subscribeEffective(callback: () => void) {
+  const media = window.matchMedia(DARK_QUERY);
+  media.addEventListener("change", callback);
+  const stop = subscribe(callback);
+  return () => {
+    media.removeEventListener("change", callback);
+    stop();
+  };
+}
+
+/**
+ * One quiet light/dark switch. Follows the device until the visitor picks a side;
+ * the change is a short cross-fade rather than a wipe.
+ */
 export function ThemeToggle() {
-  const choice = useSyncExternalStore(subscribe, read, () => "system" as ThemeChoice);
+  const theme = useSyncExternalStore(subscribeEffective, readEffective, () => "light" as const);
+  const next = theme === "dark" ? "light" : "dark";
+  const label = next === "dark" ? "Switch to dark mode" : "Switch to light mode";
 
-  function choose(next: ThemeChoice, event: MouseEvent<HTMLButtonElement>) {
-    if (next === choice) return;
+  function toggle() {
+    const deviceTheme = window.matchMedia(DARK_QUERY).matches ? "dark" : "light";
+    // Picking the device's own theme goes back to following the device.
+    const choice: ThemeChoice = next === deviceTheme ? "system" : next;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
-
     if (!reduce && typeof doc.startViewTransition === "function") {
-      const rect = event.currentTarget.getBoundingClientRect();
-      document.documentElement.style.setProperty("--tx", `${rect.left + rect.width / 2}px`);
-      document.documentElement.style.setProperty("--ty", `${rect.top + rect.height / 2}px`);
-      doc.startViewTransition(() => apply(next));
+      doc.startViewTransition(() => apply(choice));
       return;
     }
-
     document.documentElement.classList.add("theme-fade");
-    apply(next);
-    window.setTimeout(() => document.documentElement.classList.remove("theme-fade"), 400);
+    apply(choice);
+    window.setTimeout(() => document.documentElement.classList.remove("theme-fade"), 300);
   }
 
   return (
-    <div
-      role="radiogroup"
-      aria-label="Theme"
-      className="flex shrink-0 items-center gap-0.5 rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur"
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={label}
+      title={label}
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-slate-300 backdrop-blur transition hover:border-white/25 hover:text-white"
     >
-      {OPTIONS.map((option) => {
-        const active = option.id === choice;
-        return (
-          <button
-            key={option.id}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            aria-label={option.label}
-            title={option.label}
-            onClick={(event) => choose(option.id, event)}
-            className={`grid h-7 w-7 place-items-center rounded-full transition ${
-              active ? "bg-white text-night shadow" : "text-slate-300 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d={option.icon} />
-            </svg>
-          </button>
-        );
-      })}
-    </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d={theme === "dark" ? SUN : MOON} />
+      </svg>
+    </button>
   );
 }
