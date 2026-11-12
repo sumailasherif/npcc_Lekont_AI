@@ -97,7 +97,7 @@ INVOICE_RE = re.compile(
 ALERT_RE = re.compile(r"^(?:alert|alerts|rappel)\s+(.+)$", re.IGNORECASE)
 
 MENU = (
-    "I'm Lekont, your business assistant. Talk to me like a person:\n"
+    "Here is what I can do:\n"
     "• “sold 3 bags at 250”\n"
     "• “what is low in stock?”\n"
     "• “add 10 copier paper”\n"
