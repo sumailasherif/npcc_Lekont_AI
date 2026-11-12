@@ -593,6 +593,147 @@ body {
   transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ---------- WhatsApp hub: 3D phone, wired feature blobs ----------
+ * Colours are mixed from theme tokens so the panel works in light and dark. */
+.wa-hub {
+  background:
+    linear-gradient(140deg,
+      color-mix(in srgb, #25d366 16%, var(--color-card)) 0%,
+      color-mix(in srgb, #14b8a6 9%, var(--color-card)) 55%,
+      color-mix(in srgb, #25d366 10%, var(--color-surface)) 100%);
+  border: 1px solid color-mix(in srgb, #25d366 22%, var(--color-line));
+  box-shadow: 0 40px 90px -50px rgba(7, 60, 40, 0.55);
+}
+.wa-hub-dots {
+  background-image: radial-gradient(color-mix(in srgb, #128c7e 22%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: radial-gradient(ellipse at 70% 50%, black 20%, transparent 70%);
+}
+.wa-eyebrow {
+  color: color-mix(in srgb, #128c7e 70%, var(--color-ink));
+}
+.wa-gradient-text {
+  background: linear-gradient(100deg, #128c7e, #25d366 55%, #14b8a6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.wa-blob {
+  border-radius: 38% 62% 55% 45% / 45% 40% 60% 55%;
+  background: radial-gradient(circle at 30% 25%, var(--c1, #6ee7a0), var(--c2, #25d366) 45%, var(--c3, #128c7e) 100%);
+  box-shadow:
+    0 16px 30px -12px color-mix(in srgb, var(--c3, #128c7e) 75%, transparent),
+    inset 0 -5px 10px rgba(7, 60, 40, 0.3),
+    inset 0 4px 8px rgba(255, 255, 255, 0.35);
+}
+.wa-orb {
+  background: radial-gradient(circle at 30% 25%, var(--c1, #6ee7a0), var(--c2, #25d366) 50%, var(--c3, #0f9f6e) 100%);
+  box-shadow:
+    0 18px 36px -12px color-mix(in srgb, var(--c3, #128c7e) 80%, transparent),
+    inset 0 -6px 12px rgba(7, 60, 40, 0.3),
+    inset 0 5px 10px rgba(255, 255, 255, 0.4);
+}
+.wa-phone-wrap {
+  perspective: 1200px;
+}
+@keyframes wa-phone-float {
+  0%, 100% { transform: rotateY(-18deg) rotateX(8deg) rotateZ(-5deg) translateY(0); }
+  50% { transform: rotateY(-12deg) rotateX(5deg) rotateZ(-3deg) translateY(-10px); }
+}
+.wa-phone {
+  width: 196px;
+  height: 392px;
+  padding: 9px;
+  border-radius: 38px;
+  background: linear-gradient(145deg, #e7ebef, #9aa4ae 45%, #dfe4e8);
+  box-shadow:
+    -24px 36px 60px -20px rgba(7, 40, 30, 0.55),
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.7),
+    inset 0 0 0 4px #1b1f24;
+  transform-style: preserve-3d;
+  animation: wa-phone-float 7s ease-in-out infinite;
+}
+.wa-phone-screen {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 30px;
+  background: #efeae2;
+  color-scheme: light;
+}
+/* MacBook frame */
+.mac {
+  width: 100%;
+}
+.mac-lid {
+  position: relative;
+  padding: 2.2% 2.2% 3%;
+  border-radius: 18px 18px 6px 6px;
+  background: linear-gradient(180deg, #2b2f36, #15181d);
+  box-shadow:
+    0 0 0 1.5px #3a3f47,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 40px 80px -30px rgba(7, 40, 30, 0.55);
+}
+.mac-lid::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0.9%;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #3b4250;
+  transform: translateX(-50%);
+}
+.mac-screen {
+  overflow: hidden;
+  border-radius: 6px;
+  aspect-ratio: 16 / 10;
+  background: #ffffff;
+  color-scheme: light;
+}
+.mac-base {
+  position: relative;
+  height: 14px;
+  margin: 0 -7%;
+  border-radius: 2px 2px 14px 14px;
+  background: linear-gradient(180deg, #d9dde2 0%, #b8bec6 55%, #8d949d 100%);
+  box-shadow: 0 18px 30px -12px rgba(7, 20, 38, 0.5);
+}
+.mac-base::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 16%;
+  height: 6px;
+  border-radius: 0 0 8px 8px;
+  background: #a9b0b8;
+  transform: translateX(-50%);
+}
+@keyframes mac-rise {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.mac-float {
+  animation: mac-rise 8s ease-in-out infinite;
+}
+
+/* ---------- FAQ accordion ---------- */
+.faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.faq-item[data-open="true"] .faq-panel {
+  grid-template-rows: 1fr;
+}
+.faq-item[data-open="true"] .faq-icon {
+  transform: rotate(45deg);
+}
+
 /* ---------- Problem / why Lekont wins ---------- */
 .wins-check {
   transform: scale(0);

@@ -23,6 +23,7 @@ import { SpendChart } from "@/components/spend-chart";
 import { TiltCard } from "@/components/tilt-card";
 import { WhatsAppTeaser } from "@/components/whatsapp-teaser";
 import { AccountantShowcase, BuiltFor } from "@/components/photo-sections";
+import { Faq } from "@/components/faq";
 import { ProblemSection, WhyLekontWins } from "@/components/problem-wins";
 import { DealtDeck, OrbitTools, PhotoGallery, PinnedStory, StoryStats } from "@/components/scroll-stories";
 import {
@@ -372,6 +373,9 @@ export default function OverviewPage() {
 
       {/* Horizontal photo gallery driven by vertical scroll */}
       <PhotoGallery copy={t.story.gallery} />
+
+      {/* FAQ */}
+      <Faq copy={t.site.faq} footer={t.site.footer} />
 
       {/* Call to action */}
       <section className="mx-auto max-w-6xl px-4 py-24 md:px-6">

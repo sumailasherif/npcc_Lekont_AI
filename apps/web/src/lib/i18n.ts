@@ -203,6 +203,35 @@ export type Messages = {
       endCta: string;
     };
   };
+  site: {
+    waHub: {
+      eyebrow: string;
+      title: string;
+      highlight: string;
+      sub: string;
+      cta: string;
+      chat: { from: "me" | "bot"; text: string }[];
+      nodes: { title: string; body: string }[];
+    };
+    faq: {
+      eyebrow: string;
+      title: string;
+      sub: string;
+      items: { q: string; a: string }[];
+      more: string;
+    };
+    footer: {
+      ctaTitle: string;
+      ctaSub: string;
+      bookCall: string;
+      tryWhatsApp: string;
+      product: string;
+      company: string;
+      faq: string;
+      rights: string;
+      madeFor: string;
+    };
+  };
 };
 
 export const messages: Record<Locale, Messages> = {
@@ -297,7 +326,7 @@ export const messages: Record<Locale, Messages> = {
     },
     hero: {
       tryLive: "Try it live",
-      overviewEyebrow: "Live on synthetic Mauritian SME data",
+      overviewEyebrow: "Business automation and intelligence · a smart system for SMEs",
       overviewLead: "Your back office,",
       overviewHighlight: "in plain language.",
       reviewDocuments: "Review documents",
@@ -473,6 +502,56 @@ export const messages: Record<Locale, Messages> = {
         endCta: "Open the simulator",
       },
     },
+    site: {
+      waHub: {
+        eyebrow: "Built on WhatsApp",
+        title: "Your whole back office,",
+        highlight: "inside one chat.",
+        sub: "No new app, no training. Your team already knows how to send a message. Lekont turns those messages into invoices, books and answers.",
+        cta: "Try it live",
+        chat: [
+          { from: "me", text: "invoice Ramesh 2500" },
+          { from: "bot", text: "🧾 Draft INV-0419 ready · MUR 2,500" },
+          { from: "me", text: "how much did I sell today?" },
+          { from: "bot", text: "📊 MUR 48,250 · up 12% on last Thursday" },
+        ],
+        nodes: [
+          { title: "Verified business", body: "Customers see your shop name" },
+          { title: "Team inbox", body: "Owner and staff on one number" },
+          { title: "Smart reminders", body: "Unpaid invoices, stock, VAT dates" },
+          { title: "Connect your tools", body: "Excel, CSV and CRM exports" },
+          { title: "PDF in the chat", body: "Invoices and reports, ready to send" },
+          { title: "Reads photos", body: "Receipts and notebook pages" },
+        ],
+      },
+      faq: {
+        eyebrow: "FAQ",
+        title: "Questions owners ask us",
+        sub: "Straight answers about how Lekont works day to day.",
+        items: [
+          { q: "Do I need to install an app?", a: "No. Lekont works inside WhatsApp, on the phone you already use. The web workspace is there when you want the bigger picture, but nothing has to be installed." },
+          { q: "Which documents can Lekont read?", a: "Supplier invoices, receipts, payslips, bank statements and photos of handwritten notebook pages, in French or English. You can ask questions and get answers in English, French or Kreol." },
+          { q: "What if Lekont reads something wrong?", a: "Every line shows how confident Lekont is. Anything unclear goes to review, and nothing reaches your ledger until a person approves it. You can edit any field before approving." },
+          { q: "Does Lekont replace my accountant?", a: "No. It does the typing and sorting so your accountant gets clean, reviewed numbers and a monthly PDF or Excel report, instead of a shoebox of receipts." },
+          { q: "How does it handle VAT?", a: "Lekont checks the 15% VAT on every invoice line against the totals and flags anything that does not add up. Your VAT return is still filed by you or your accountant." },
+          { q: "Can my staff use it too?", a: "Yes. Staff can record sales and check stock from the shop floor, while the owner or accountant approves what goes into the books." },
+          { q: "Is my business data safe?", a: "Your data stays in your own workspace and travels over encrypted connections. Nothing from a photo is saved until you confirm it, and you can export everything as PDF, CSV or Excel at any time." },
+          { q: "How do I get started?", a: "Book a short call. We set up your workspace with a few of your own documents so you see your real numbers on day one." },
+        ],
+        more: "Still have a question?",
+      },
+      footer: {
+        ctaTitle: "Close the month in minutes, not weekends.",
+        ctaSub: "See Lekont on your own invoices and notebook pages in a short call.",
+        bookCall: "Book a call",
+        tryWhatsApp: "Try it on WhatsApp",
+        product: "Product",
+        company: "Lekont",
+        faq: "FAQ",
+        rights: "All rights reserved.",
+        madeFor: "Made for small businesses in Mauritius.",
+      },
+    },
   },
   fr: {
     nav: { overview: "Aperçu", documents: "Documents", ask: "Demander", readiness: "Préparation", whatsapp: "WhatsApp" },
@@ -566,7 +645,7 @@ export const messages: Record<Locale, Messages> = {
     },
     hero: {
       tryLive: "Essayer en direct",
-      overviewEyebrow: "En direct sur des données synthétiques de PME mauriciennes",
+      overviewEyebrow: "Automatisation et intelligence d’affaires · un système intelligent pour les PME",
       overviewLead: "Votre back-office,",
       overviewHighlight: "en langage clair.",
       reviewDocuments: "Vérifier les documents",
@@ -742,6 +821,56 @@ export const messages: Record<Locale, Messages> = {
         endCta: "Ouvrir le simulateur",
       },
     },
+    site: {
+      waHub: {
+        eyebrow: "Construit sur WhatsApp",
+        title: "Tout votre back-office,",
+        highlight: "dans une seule conversation.",
+        sub: "Aucune nouvelle appli, aucune formation. Votre équipe sait déjà envoyer un message. Lekont transforme ces messages en factures, en comptes et en réponses.",
+        cta: "Essayer en direct",
+        chat: [
+          { from: "me", text: "facture Ramesh 2500" },
+          { from: "bot", text: "🧾 Brouillon INV-0419 prêt · MUR 2 500" },
+          { from: "me", text: "combien j’ai vendu aujourd’hui ?" },
+          { from: "bot", text: "📊 MUR 48 250 · +12 % sur jeudi dernier" },
+        ],
+        nodes: [
+          { title: "Entreprise vérifiée", body: "Vos clients voient le nom de la boutique" },
+          { title: "Boîte partagée", body: "Gérant et employés sur un seul numéro" },
+          { title: "Rappels intelligents", body: "Impayés, stock, échéances de TVA" },
+          { title: "Vos outils connectés", body: "Exports Excel, CSV et CRM" },
+          { title: "PDF dans le chat", body: "Factures et rapports prêts à envoyer" },
+          { title: "Lit les photos", body: "Reçus et pages de cahier" },
+        ],
+      },
+      faq: {
+        eyebrow: "FAQ",
+        title: "Les questions que posent les gérants",
+        sub: "Des réponses claires sur le fonctionnement de Lekont au quotidien.",
+        items: [
+          { q: "Faut-il installer une appli ?", a: "Non. Lekont fonctionne dans WhatsApp, sur le téléphone que vous utilisez déjà. L’espace web est là pour la vue d’ensemble, mais rien n’est à installer." },
+          { q: "Quels documents Lekont sait-il lire ?", a: "Factures fournisseurs, reçus, bulletins de paie, relevés bancaires et photos de pages de cahier manuscrites, en français ou en anglais. Vous pouvez poser vos questions et recevoir les réponses en anglais, français ou kreol." },
+          { q: "Et si Lekont lit mal quelque chose ?", a: "Chaque ligne indique le niveau de confiance. Tout ce qui est incertain passe en vérification, et rien n’entre au grand livre sans validation humaine. Vous pouvez corriger chaque champ avant de valider." },
+          { q: "Lekont remplace-t-il mon comptable ?", a: "Non. Il fait la saisie et le tri pour que votre comptable reçoive des chiffres propres et vérifiés, avec un rapport mensuel en PDF ou Excel, au lieu d’une boîte de reçus." },
+          { q: "Comment gère-t-il la TVA ?", a: "Lekont vérifie la TVA à 15 % sur chaque ligne de facture par rapport aux totaux et signale ce qui ne colle pas. La déclaration de TVA reste déposée par vous ou votre comptable." },
+          { q: "Mes employés peuvent-ils l’utiliser ?", a: "Oui. Les employés enregistrent les ventes et vérifient le stock depuis la boutique, et le gérant ou le comptable valide ce qui entre dans les comptes." },
+          { q: "Mes données sont-elles en sécurité ?", a: "Vos données restent dans votre propre espace et circulent par des connexions chiffrées. Rien d’une photo n’est enregistré sans votre accord, et vous pouvez tout exporter en PDF, CSV ou Excel à tout moment." },
+          { q: "Comment démarrer ?", a: "Réservez un court appel. Nous préparons votre espace avec quelques-uns de vos documents pour que vous voyiez vos vrais chiffres dès le premier jour." },
+        ],
+        more: "Encore une question ?",
+      },
+      footer: {
+        ctaTitle: "Clôturez le mois en minutes, pas en week-ends.",
+        ctaSub: "Découvrez Lekont sur vos propres factures et pages de cahier lors d’un court appel.",
+        bookCall: "Réserver un appel",
+        tryWhatsApp: "Essayer sur WhatsApp",
+        product: "Produit",
+        company: "Lekont",
+        faq: "FAQ",
+        rights: "Tous droits réservés.",
+        madeFor: "Conçu pour les petites entreprises de Maurice.",
+      },
+    },
   },
   cr: {
     nav: { overview: "Virmont", documents: "Dokiman", ask: "Demann", readiness: "Preparasion", whatsapp: "WhatsApp" },
@@ -833,7 +962,7 @@ export const messages: Record<Locale, Messages> = {
     },
     hero: {
       tryLive: "Esey li an direk",
-      overviewEyebrow: "An direk lor done sintetik PME morisien",
+      overviewEyebrow: "Lotomatisasion ek lintelizans biznes · enn sistem entelizan pou PME",
       overviewLead: "Ou back-office,",
       overviewHighlight: "an langaz kler.",
       reviewDocuments: "Verifie dokiman",
@@ -1007,6 +1136,56 @@ export const messages: Record<Locale, Messages> = {
         ],
         endTitle: "Esey li lor WhatsApp.",
         endCta: "Ouver similater la",
+      },
+    },
+    site: {
+      waHub: {
+        eyebrow: "Fer lor WhatsApp",
+        title: "Tou ou biro,",
+        highlight: "dan enn sel chat.",
+        sub: "Pena nouvo aplikasion, pena formasion. Ou lekip deza kone avoy enn mesaz. Lekont fer sa bann mesaz la vinn faktir, kont ek repons.",
+        cta: "Esey li an direk",
+        chat: [
+          { from: "me", text: "faktir Ramesh 2500" },
+          { from: "bot", text: "🧾 Brouyon INV-0419 pare · MUR 2,500" },
+          { from: "me", text: "konbien mo finn vann zordi?" },
+          { from: "bot", text: "📊 MUR 48,250 · +12% lor zedi dernie" },
+        ],
+        nodes: [
+          { title: "Biznes verifie", body: "Klian trouv non ou laboutik" },
+          { title: "Inbox lekip", body: "Patron ek staf lor enn sel nimero" },
+          { title: "Rapel entelizan", body: "Faktir pa pe, stok, dat TVA" },
+          { title: "Konekte ou zouti", body: "Export Excel, CSV ek CRM" },
+          { title: "PDF dan chat la", body: "Faktir ek rapor pare pou avoy" },
+          { title: "Lir foto", body: "Resi ek paz kaye" },
+        ],
+      },
+      faq: {
+        eyebrow: "FAQ",
+        title: "Kestion ki patron demann nou",
+        sub: "Repons kler lor kouma Lekont marse sak zour.",
+        items: [
+          { q: "Eski mo bizin instal enn aplikasion?", a: "Non. Lekont marse dan WhatsApp, lor telefonn ki ou deza servi. Lespas web la la kan ou anvi trouv tablo konple, me pena nanyin pou instale." },
+          { q: "Ki dokiman Lekont kapav lir?", a: "Faktir fourniser, resi, fis lapey, releve labank ek foto paz kaye ekrir lamen, an Franse ouswa Angle. Ou kapav poz kestion ek gagn repons an Angle, Franse ouswa Kreol." },
+          { q: "Ki arive si Lekont lir enn zafer mal?", a: "Sak linn montre konbien Lekont sir. Tou seki pa kler al pou verifikasion, ek nanyin pa rant dan ou ledzer san enn dimoun aprouve. Ou kapav modifie sak sif avan aprouve." },
+          { q: "Eski Lekont ranplas mo kontab?", a: "Non. Li fer tapaz ek triyaz pou ou kontab gagn sif prop ek verifie, ek enn rapor mansiel an PDF ouswa Excel, olie enn bwat resi." },
+          { q: "Kouma li zer TVA?", a: "Lekont verifie TVA 15% lor sak linn faktir konpare ar total ek siyal tou seki pa koresponn. Deklarasion TVA reste ou ouswa ou kontab ki fer li." },
+          { q: "Eski mo staf kapav servi li osi?", a: "Wi. Staf kapav anrezistre lavant ek gete stok depi dan laboutik, ek patron ouswa kontab aprouve seki rant dan bann kont." },
+          { q: "Eski mo bann done an sekirite?", a: "Ou done reste dan ou prop lespas ek pas par koneksion kripte. Nanyin depi enn foto pa sove san ou dakor, ek ou kapav export tou an PDF, CSV ouswa Excel nimport ki ler." },
+          { q: "Kouma mo koumanse?", a: "Rezerv enn ti apel. Nou prepar ou lespas avek enn de ou prop dokiman pou ou trouv ou vre sif depi premie zour." },
+        ],
+        more: "Ou ankor ena enn kestion?",
+      },
+      footer: {
+        ctaTitle: "Ferm ou mwa an enn de minit, pa an wikenn.",
+        ctaSub: "Get Lekont lor ou prop faktir ek paz kaye dan enn ti apel.",
+        bookCall: "Rezerv enn apel",
+        tryWhatsApp: "Esey lor WhatsApp",
+        product: "Prodwi",
+        company: "Lekont",
+        faq: "FAQ",
+        rights: "Tou drwa rezerve.",
+        madeFor: "Fer pou ti biznes Moris.",
       },
     },
   },
