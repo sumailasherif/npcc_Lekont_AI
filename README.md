@@ -154,6 +154,11 @@ notebook photos — then asks before posting anything irreversible.
 
 | Message | Action |
 | --- | --- |
+| `board brief` | Spend, payroll share, VAT, supplier concentration, document backlog |
+| `supplier concentration risk` | Top supplier share, HHI and risk label |
+| `VAT this quarter` | Input VAT: total, last three months, latest |
+| `payroll as a share of spend` | Monthly and year-to-date payroll ratio |
+| `where should we automate first?` | Readiness score and first candidate |
 | `sold 3 bags at 250` | Records the sale and updates stock |
 | `what is low in stock?` | Lists items at or below reorder level |
 | `add 10 copier paper` | Adds stock |

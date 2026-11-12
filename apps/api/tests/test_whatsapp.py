@@ -113,3 +113,50 @@ def test_webhook_accepts_meta_payload(client) -> None:
     response = client.post("/api/v1/whatsapp/webhook", json=payload)
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+
+
+def test_board_brief(client) -> None:
+    body = client.post(
+        "/api/v1/whatsapp/simulate",
+        json={"from_number": "23050000011", "text": "board brief"},
+    ).json()
+    assert body["intent"] == "brief"
+    assert body["data"]["brief"]["spend"] > 0
+    assert "Board brief" in body["reply"]
+
+
+def test_supplier_concentration(client) -> None:
+    body = client.post(
+        "/api/v1/whatsapp/simulate",
+        json={"from_number": "23050000011", "text": "supplier concentration risk"},
+    ).json()
+    assert body["intent"] == "concentration"
+    assert body["data"]["concentration"]["hhi"] > 0
+    assert body["data"]["concentration"]["risk"] in {"low", "medium", "high"}
+
+
+def test_vat_quarter(client) -> None:
+    body = client.post(
+        "/api/v1/whatsapp/simulate",
+        json={"from_number": "23050000011", "text": "VAT this quarter"},
+    ).json()
+    assert body["intent"] == "vat"
+    assert body["data"]["vat"]["total"] > 0
+
+
+def test_payroll_ratio(client) -> None:
+    body = client.post(
+        "/api/v1/whatsapp/simulate",
+        json={"from_number": "23050000011", "text": "payroll as a share of spend"},
+    ).json()
+    assert body["intent"] == "payroll"
+    assert body["data"]["payroll"]["share"] > 0
+
+
+def test_automation_recommendation(client) -> None:
+    body = client.post(
+        "/api/v1/whatsapp/simulate",
+        json={"from_number": "23050000011", "text": "where should we automate first?"},
+    ).json()
+    assert body["intent"] == "automation"
+    assert "readiness" in body["data"]["automation"]

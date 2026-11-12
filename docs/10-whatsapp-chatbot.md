@@ -15,6 +15,11 @@ The same command engine powers:
 
 | User says | Bot does |
 | --- | --- |
+| "board brief" | Five director-level numbers: spend, payroll share, VAT, supplier concentration, document backlog |
+| "supplier concentration risk" | Top supplier share, second source, HHI and a risk label |
+| "VAT this quarter" | Input VAT total, last three months and latest month |
+| "payroll as a share of spend" | Payroll ratio for the month and year to date |
+| "where should we automate first?" | Readiness score and the first candidate process |
 | "hi" / "bonjour" / "bonzour" | Greets and lists what it can do |
 | "sold 3 bags at 250" | Records the sale, updates stock, shows today's total |
 | "what is low in stock?" | Lists stock, flags items at or below reorder level |

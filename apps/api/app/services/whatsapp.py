@@ -15,6 +15,7 @@ from datetime import UTC, date, datetime
 import httpx
 
 from app.core.config import get_settings
+from app.data.ledger_source import get_ledger
 from app.db import whatsapp_store
 from app.schemas.common import Language
 from app.schemas.documents import DocumentCreate, DocumentType
@@ -97,14 +98,16 @@ INVOICE_RE = re.compile(
 ALERT_RE = re.compile(r"^(?:alert|alerts|rappel)\s+(.+)$", re.IGNORECASE)
 
 MENU = (
-    "Here is what I can do:\n"
-    "• “sold 3 bags at 250”\n"
-    "• “what is low in stock?”\n"
-    "• “add 10 copier paper”\n"
-    "• “invoice Ramesh 2500”\n"
-    "• “how much did I sell today?”\n"
-    "• “remind me to call the supplier Friday”\n"
-    "• send a photo of your notebook and I will read it"
+    "Here's what I can do for you:\n"
+    '📊 Board brief: "board brief" for the five numbers a director needs\n'
+    "🧾 Invoices: “invoice Ramesh 2500” and I draft it, ready to send as a PDF\n"
+    "📊 Know your numbers: sales, spend, VAT and profit, with a live dashboard\n"
+    "💸 Sales and stock: “sold 3 bags at 250”, “what is low in stock?”\n"
+    "👥 Payslips: prepare your team's monthly pay\n"
+    "📥 Imports: send an Excel, CSV or CRM export and I'll bring it in\n"
+    "📤 Exports: PDF, CSV or Excel, whenever you need them\n"
+    "📒 Your notebook: send a photo of a page and I'll read it for you\n\n"
+    "Nothing is saved until you confirm."
 )
 
 
@@ -132,9 +135,7 @@ def _log(
     )
     if len(_MESSAGES) > MAX_LOG:
         del _MESSAGES[: len(_MESSAGES) - MAX_LOG]
-    whatsapp_store.persist_message(
-        _MESSAGES[-1].id, direction, from_number, text, intent
-    )
+    whatsapp_store.persist_message(_MESSAGES[-1].id, direction, from_number, text, intent)
 
 
 def _money(value: float) -> str:
@@ -257,6 +258,155 @@ def _report() -> tuple[str, dict]:
     return reply, {"today_total": today_total, "month_total": month_total, "top_item": best}
 
 
+def _latest_month() -> str:
+    return max(str(row["month"]) for row in get_ledger())
+
+
+def _month_rows(month: str) -> list[dict]:
+    return [row for row in get_ledger() if str(row["month"]) == month]
+
+
+def _brief() -> tuple[str, dict]:
+    summary = documents.dashboard_summary()
+    month = _latest_month()
+    rows = _month_rows(month)
+    total = sum(float(row["amount"]) for row in rows)
+    payroll = sum(float(row["amount"]) for row in rows if row["category"] == "Payroll")
+    vat = sum(float(row["vat"]) for row in rows)
+    payroll_share = (payroll / total * 100) if total else 0
+
+    suppliers: dict[str, float] = {}
+    for row in get_ledger():
+        if row["category"] == "Payroll":
+            continue
+        suppliers[str(row["supplier"])] = suppliers.get(str(row["supplier"]), 0.0) + float(
+            row["amount"]
+        )
+    top = max(suppliers, key=suppliers.get) if suppliers else "—"
+    top_share = (suppliers.get(top, 0.0) / sum(suppliers.values()) * 100) if suppliers else 0
+
+    reply = (
+        f"Board brief — {month}\n"
+        f"• Spend: {_money(total)}; payroll {payroll_share:.0f}% of it.\n"
+        f"• Input VAT: {_money(vat)}.\n"
+        f"• Supplier concentration: {top} at {top_share:.0f}% of purchases.\n"
+        f"• Documents: {summary.needs_review} waiting for review, "
+        f"{summary.approved} approved.\n"
+        f"• Automation readiness: {summary.readiness_score}/100. "
+        "Invoice capture is the first candidate while documents are queued."
+    )
+    return reply, {
+        "brief": {
+            "month": month,
+            "spend": round(total, 2),
+            "payroll_share": round(payroll_share, 1),
+            "vat": round(vat, 2),
+            "top_supplier": top,
+            "top_supplier_share": round(top_share, 1),
+            "needs_review": summary.needs_review,
+            "readiness": summary.readiness_score,
+        }
+    }
+
+
+def _concentration() -> tuple[str, dict]:
+    suppliers: dict[str, float] = {}
+    for row in get_ledger():
+        if row["category"] == "Payroll":
+            continue
+        suppliers[str(row["supplier"])] = suppliers.get(str(row["supplier"]), 0.0) + float(
+            row["amount"]
+        )
+    total = sum(suppliers.values()) or 1.0
+    ranked = sorted(suppliers.items(), key=lambda item: item[1], reverse=True)
+    top, top_value = ranked[0]
+    second, second_value = ranked[1] if len(ranked) > 1 else ("—", 0.0)
+    share = top_value / total * 100
+    hhi = sum((value / total) ** 2 for value in suppliers.values()) * 10000
+    risk = "high" if share >= 50 or hhi >= 2500 else "medium" if share >= 35 else "low"
+    reply = (
+        f"Supplier concentration risk: {risk.upper()}.\n"
+        f"• {top}: {_money(top_value)} ({share:.0f}% of purchases).\n"
+        f"• Next: {second} at {second_value / total * 100:.0f}%.\n"
+        f"• HHI {hhi:.0f} (above 2,500 is concentrated).\n"
+        "A second source or a price review would reduce the exposure."
+    )
+    return reply, {
+        "concentration": {
+            "risk": risk,
+            "top_supplier": top,
+            "top_share": round(share, 1),
+            "hhi": round(hhi, 0),
+        }
+    }
+
+
+def _vat_reply() -> tuple[str, dict]:
+    rows = get_ledger()
+    months = sorted({str(row["month"]) for row in rows})
+    by_month: dict[str, float] = {}
+    for row in rows:
+        by_month[str(row["month"])] = by_month.get(str(row["month"]), 0.0) + float(row["vat"])
+    total = sum(by_month.values())
+    last_three = sum(by_month[month] for month in months[-3:])
+    latest = months[-1]
+    reply = (
+        f"Input VAT: {_money(total)} since {months[0]}.\n"
+        f"• Last three months: {_money(last_three)}.\n"
+        f"• {latest}: {_money(by_month[latest])}.\n"
+        "This is VAT paid on purchases; output VAT and filing are not in the ledger."
+    )
+    return reply, {
+        "vat": {
+            "total": round(total, 2),
+            "last_three_months": round(last_three, 2),
+            "latest_month": latest,
+            "latest": round(by_month[latest], 2),
+        }
+    }
+
+
+def _payroll_reply() -> tuple[str, dict]:
+    rows = get_ledger()
+    month = _latest_month()
+    month_rows = _month_rows(month)
+    total = sum(float(row["amount"]) for row in month_rows) or 1.0
+    payroll = sum(float(row["amount"]) for row in month_rows if row["category"] == "Payroll")
+    ytd_payroll = sum(float(row["amount"]) for row in rows if row["category"] == "Payroll")
+    ytd_total = sum(float(row["amount"]) for row in rows) or 1.0
+    reply = (
+        f"Payroll: {_money(payroll)} in {month}, {payroll / total * 100:.0f}% of spend.\n"
+        f"• Year to date: {_money(ytd_payroll)} ({ytd_payroll / ytd_total * 100:.0f}% of spend).\n"
+        "A ratio above 55% leaves little room for suppliers and VAT."
+    )
+    return reply, {
+        "payroll": {
+            "month": month,
+            "payroll": round(payroll, 2),
+            "share": round(payroll / total * 100, 1),
+            "ytd_share": round(ytd_payroll / ytd_total * 100, 1),
+        }
+    }
+
+
+def _automation_reply() -> tuple[str, dict]:
+    summary = documents.dashboard_summary()
+    reply = (
+        f"Automation readiness is {summary.readiness_score}/100.\n"
+        f"• {summary.needs_review} documents are waiting for review, so invoice "
+        "capture is the first candidate.\n"
+        "• Run the six-process check in the dashboard for effort and impact per process.\n"
+        "Start with the process that has high impact and low effort, then measure "
+        "hours saved for one month."
+    )
+    return reply, {
+        "automation": {
+            "readiness": summary.readiness_score,
+            "needs_review": summary.needs_review,
+        }
+    }
+
+
 def _notebook_demo(from_number: str) -> tuple[str, dict]:
     lines = [
         {"date": "11/11", "description": "Sugar 5 kg", "amount": 425.0},
@@ -324,7 +474,10 @@ def handle(from_number: str, text: str, kind: str = "text") -> SimulateResponse:
         reply, data = _notebook_demo(from_number)
         intent = "notebook"
     elif lowered in {"hi", "hello", "hey", "bonjour", "salut", "alo", "allô", "bonzour"}:
-        reply = "Hi 👋 I'm Lekont, your business assistant on WhatsApp.\n\n" + MENU
+        reply = (
+            "Hi 👋 I'm Lekont, your back office on WhatsApp. "
+            "Invoices, payslips and your numbers, all from this chat.\n\n" + MENU
+        )
         data = None
         intent = "greeting"
     elif any(word in lowered for word in ("help", "menu", "start", "ki fer")):
@@ -359,6 +512,21 @@ def handle(from_number: str, text: str, kind: str = "text") -> SimulateResponse:
         assert match is not None
         reply, data = _add_stock(match.group(2), int(match.group(1)))
         intent = "stock_add"
+    elif any(word in lowered for word in ("brief", "board", "executive", "director")):
+        reply, data = _brief()
+        intent = "brief"
+    elif any(word in lowered for word in ("concentration", "supplier risk", "risk")):
+        reply, data = _concentration()
+        intent = "concentration"
+    elif "vat" in lowered or "tva" in lowered:
+        reply, data = _vat_reply()
+        intent = "vat"
+    elif "payroll" in lowered or "salary" in lowered:
+        reply, data = _payroll_reply()
+        intent = "payroll"
+    elif any(word in lowered for word in ("automate", "automation", "readiness")):
+        reply, data = _automation_reply()
+        intent = "automation"
     elif any(word in lowered for word in ("report", "today", "sales", "rapport", "bilan")):
         reply, data = _report()
         intent = "report"
