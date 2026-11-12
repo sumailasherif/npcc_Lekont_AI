@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = 60.0
     llm_max_tokens: int = 2000
 
+    # WhatsApp Cloud API (optional; the simulator works without these).
+    whatsapp_verify_token: str = "lekont-demo"
+    whatsapp_token: str = ""
+    whatsapp_phone_number_id: str = ""
+
     # Supabase free tier (Postgres + pgvector).
     supabase_url: str = ""
     supabase_anon_key: str = ""

@@ -33,6 +33,9 @@
 | Judges see a generic BI tool | Medium | Medium | Lead with document intake + human review, not charts | Demo |
 | LLM cost or latency | Low | Low | Optional key; regex-first; 60s timeout | API |
 | Real factory/SME access | Medium | High | 8–10 interviews; synthetic data works without access | Research |
+| WhatsApp/Meta policy change | Medium | Medium | Simulator is the primary demo; webhook is thin | API |
+| Bot posts wrong sale from a photo | Medium | High | Preview + explicit “post”; no auto-post | Product |
+| Chat logs contain personal data | Medium | High | Synthetic demo, tenant id, retention and deletion in pilot | Product |
 
 ## Responsible AI checklist
 

@@ -58,6 +58,22 @@ payslip volume, admin hours, tools, pain points) and returns a readiness score,
 six process scores with effort/impact, a recommended first process, and three
 next steps. The rules are explicit and explainable.
 
+## WhatsApp chatbot flow
+
+```
+WhatsApp (Meta) --webhook--> FastAPI --+
+Simulator (web) --/simulate----------+
+                                      +--> whatsapp.handle()
+                                            -> documents.create_document() (invoice draft)
+                                            -> insights.ask() (ledger question)
+                                            -> in-memory or Postgres state
+```
+
+- Deterministic intents; no free-form SQL.
+- Notebook photos produce a preview and wait for `post`.
+- Postgres tables: `whatsapp_messages`, `stock_items`, `sales`.
+- If credentials are missing, the simulator still exercises the same engine.
+
 ## Data
 
 - Default: in-memory synthetic data (`app/data/backoffice.py`).

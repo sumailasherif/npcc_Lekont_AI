@@ -146,6 +146,36 @@ Writes `data/samples/ledger_100.csv`, `supabase/seed/0001_documents.sql` and
 | Insights | `POST /insights/ask`, `POST /insights/readiness` |
 | Dashboard | `GET /dashboard/summary` |
 
+## WhatsApp chatbot
+
+A conversational assistant for owners who already live in WhatsApp. It records
+sales, checks stock, drafts invoices, answers ledger questions and reads
+notebook photos — then asks before posting anything irreversible.
+
+| Message | Action |
+| --- | --- |
+| `sold 3 bags at 250` | Records the sale and updates stock |
+| `what is low in stock?` | Lists items at or below reorder level |
+| `add 10 copier paper` | Adds stock |
+| `invoice Ramesh 2500` | Creates an invoice draft for review |
+| `how much did I sell today?` | Today and month totals |
+| `who are my top suppliers?` | Answers from the ledger |
+| `remind me to call the supplier` | Saves a reminder |
+| photo of a notebook | Shows a preview, waits for `post` |
+
+- Webhook: `GET/POST /api/v1/whatsapp/webhook` (Meta Cloud API).
+- Simulator: `POST /api/v1/whatsapp/simulate` (no Meta credentials needed).
+- Persistence: `whatsapp_messages`, `stock_items`, `sales` in Postgres.
+- Setup, guardrails and privacy: `docs/10-whatsapp-chatbot.md`.
+
+Environment:
+
+```env
+WHATSAPP_VERIFY_TOKEN=lekont-demo
+WHATSAPP_TOKEN=
+WHATSAPP_PHONE_NUMBER_ID=
+```
+
 ## Design
 
 The interface follows the Holistics pattern: a persistent workspace sidebar, a

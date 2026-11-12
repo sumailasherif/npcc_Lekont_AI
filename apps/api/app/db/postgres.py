@@ -9,6 +9,7 @@ database is unreachable.
 from __future__ import annotations
 
 import logging
+import time
 from typing import Any
 
 from app.core.config import get_settings
@@ -16,11 +17,15 @@ from app.core.config import get_settings
 logger = logging.getLogger(__name__)
 
 DEMO_ORG_ID = "00000000-0000-0000-0000-000000000001"
+_UNAVAILABLE_UNTIL = 0.0
 
 
 def _connect():
+    global _UNAVAILABLE_UNTIL
     settings = get_settings()
     if not settings.database_url:
+        return None
+    if time.monotonic() < _UNAVAILABLE_UNTIL:
         return None
     try:
         import psycopg
@@ -31,10 +36,11 @@ def _connect():
     try:
         return psycopg.connect(
             settings.database_url,
-            connect_timeout=5,
+            connect_timeout=3,
             row_factory=dict_row,
         )
     except Exception as exc:  # noqa: BLE001 - demo must degrade gracefully
+        _UNAVAILABLE_UNTIL = time.monotonic() + 60
         logger.warning("Postgres unavailable, using in-memory demo data: %s", exc)
         return None
 

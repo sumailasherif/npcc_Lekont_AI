@@ -132,6 +132,34 @@ POST /api/v1/insights/readiness
 }
 ```
 
+## WhatsApp
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/v1/whatsapp/webhook` | Meta verification handshake |
+| POST | `/api/v1/whatsapp/webhook` | Receive a Cloud API event and reply |
+| POST | `/api/v1/whatsapp/simulate` | Local simulator, same engine |
+| GET | `/api/v1/whatsapp/messages` | Conversation log |
+| POST | `/api/v1/whatsapp/reset` | Clear the demo conversation |
+
+```json
+POST /api/v1/whatsapp/simulate
+{ "from_number": "23050000000", "text": "sold 3 bags at 250", "kind": "text" }
+```
+
+```json
+{
+  "reply": "Recorded: 3 × bags at MUR 250 = MUR 750.\nSales today: MUR 2,030.",
+  "intent": "sale",
+  "messages": ["..."],
+  "data": { "sale": { "item": "bags", "qty": 3, "unit_price": 250, "total": 750 } }
+}
+```
+
+Supported intents: greeting, help, sale, stock, stock_add, invoice, report,
+alert, notebook, notebook_post, insight, unknown. `unknown` returns the menu,
+never a guess.
+
 ## Dashboard
 
 `GET /api/v1/dashboard/summary` returns document counts, current-month spend and

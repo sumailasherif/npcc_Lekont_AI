@@ -32,6 +32,7 @@ Interactive docs: <http://127.0.0.1:8010/docs>
 | Export | `GET /api/v1/documents/export` |
 | Insights | `POST /api/v1/insights/ask`, `POST /api/v1/insights/readiness` |
 | Dashboard | `GET /api/v1/dashboard/summary` |
+| WhatsApp | `GET/POST /api/v1/whatsapp/webhook`, `POST /api/v1/whatsapp/simulate` |
 
 ## Tests
 
