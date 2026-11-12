@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppShell } from "@/components/app-shell";
+import { LanguageProvider } from "@/components/language-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <AppShell>{children}</AppShell>
+        <LanguageProvider>
+          <AppShell>{children}</AppShell>
+        </LanguageProvider>
       </body>
     </html>
   );

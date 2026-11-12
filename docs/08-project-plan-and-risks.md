@@ -1,56 +1,54 @@
-# Project plan and risk register
+# Project plan and risks
 
 ## Milestones
 
-| ID | Milestone | Output | Exit criteria |
-| --- | --- | --- | --- |
-| M0 | Scaffold | Monorepo, docs, synthetic packs, CI | `npm run build`, `pytest` and CI pass |
-| M1 | Interviews | 5-8 anonymised interview notes, revised problem statement | At least two supervisors confirm the repeated-question problem |
-| M2 | Retrieval | Supabase schema, ingestion, chunk search | 20-question eval set, covered answers cite the right step |
-| M3 | Authoring | Voice capture, draft generation, translation, approval | A supervisor can take a voice note to a published 3-language card |
-| M4 | Operator flow | Mobile-first ask surface, gap logging | An operator can ask in Kreol and either get a cited answer or a clear refusal |
-| M5 | Demo hardening | Seeded 3 sector packs, scripted demo, eval report | 10-minute demo runs end to end twice without manual fixes |
-
-## Workstreams and owners
-
-| Workstream | Owner | Support |
+| Milestone | Deliverable | Exit criteria |
 | --- | --- | --- |
-| Product and evidence | Sherif | interviews, PRD |
-| API and retrieval | TBD | FastAPI, Supabase |
-| Web and design | TBD | Next.js, Delphi-style UI |
-| Data packs | TBD | textile, food, light engineering |
-| Demo and pitch | TBD | script, metrics |
+| M0 — Scaffold | Monorepo, API, web shell, CI | `lint`, `typecheck`, `build`, `pytest` pass |
+| M1 — Documents | Extraction, confidence, review, CSV | 6 demo documents, review flow, export |
+| M2 — Postgres | Supabase schema, RLS, 100-row seed | `select count(*)` = 100; API loads from DB |
+| M3 — Insights | Ask intents, calculation, chart, table | 6 supported questions; unknown refused |
+| M4 — Readiness | Six-process diagnostic | Score, recommendation, next steps |
+| M5 — Demo | Holistics-style UI, motion, story | 5-minute walkthrough without notes |
 
-## Risk register
+## Demo script (5 minutes)
 
-| # | Risk | L | I | Mitigation | Owner |
-| --- | --- | --- | --- | --- | --- |
-| R1 | Wrong or unsafe instruction reaches an operator | M | H | Approval gate, versioning, citations, refusal path, high-risk steps flagged | Product |
-| R2 | Kreol translation is poor or inconsistent | H | M | Supervisor edit, site glossary, low-confidence flag, human review | Data |
-| R3 | No factory access for interviews or pilot | M | H | Synthetic packs, alumni/HRDC introductions, two interviews minimum | Product |
-| R4 | Sensitive company data leaks | L | H | Synthetic data only in the repo, Supabase RLS, no raw data in git | API |
-| R5 | Model provider outage or cost | M | M | OpenCode Go fallback model, free model option, timeout and refusal | API |
-| R6 | Scope creep (attrition, IoT, HRIS) | H | M | Out-of-scope list is binding; changes need a written decision | Product |
-| R7 | Demo fails live | M | H | Seeded data, local fallback, recorded backup, run twice | Demo |
-| R8 | Judge sees a generic chatbot | M | H | Lead with the approval gate, citations, gaps and multilingual evidence | Pitch |
-| R9 | Low operator adoption | M | M | Phone-first, three languages, supervisor sign-off, no new hardware | Product |
-| R10 | Unclear data ownership blocks pilot | M | M | Written data agreement, per-tenant isolation, deletion on request | Product |
+1. **Overview** — six documents, two need review, spend this month.
+2. **Documents** — open the French invoice; show fields and confidence; correct
+   one field; approve as a named reviewer; export CSV.
+3. **Ask AI** — "top 5 suppliers", then "monthly spend"; show the calculation.
+4. **Ask AI** — a question outside the intents; show the refusal.
+5. **Readiness** — run the check; read the recommended first process and why.
+6. **Postgres** — show the same data in Supabase; 100 ledger rows.
 
-L = likelihood, I = impact.
+## Risks
 
-## Responsible-AI checklist
+| Risk | Likelihood | Impact | Mitigation | Owner |
+| --- | --- | --- | --- | --- |
+| Confidently wrong number | Medium | High | Fixed intents, calculation shown, caveats, no free SQL | API |
+| Personal data in payslips | Medium | High | Synthetic demo, RLS, minimisation, named reviewer, deletion | Product |
+| Extraction misses FR fields | Medium | Medium | Bilingual regex, LLM fill, confidence, review queue | API |
+| Supabase unavailable in demo | Low | Medium | In-memory fallback, local seed CSV | API |
+| Scope creep to ERP posting | Medium | Medium | Export only; posting is out of scope | Product |
+| Judges see a generic BI tool | Medium | Medium | Lead with document intake + human review, not charts | Demo |
+| LLM cost or latency | Low | Low | Optional key; regex-first; 60s timeout | API |
+| Real factory/SME access | Medium | High | 8–10 interviews; synthetic data works without access | Research |
 
-- [ ] Human approval before any instruction is published.
-- [ ] Every answer cites an approved version.
-- [ ] Explicit refusal when the knowledge base does not cover the question.
-- [ ] No individual performance scoring.
-- [ ] Only synthetic data in the repository.
-- [ ] Tenant isolation and row-level security before a pilot.
-- [ ] Audit trail for submissions and approvals.
-- [ ] Clear disclaimer shown with every answer.
+## Responsible AI checklist
 
-## Weekly cadence
+- [x] Human approves before export.
+- [x] Confidence shown per field.
+- [x] Answers show inputs and caveats.
+- [x] Unknown questions refused.
+- [x] Synthetic data in the repo; no real PII.
+- [x] RLS and tenant isolation documented.
+- [x] No automated decisions about people (payroll is data entry only).
+- [ ] Pilot: DPIA, retention policy, deletion workflow.
 
-- Monday: evidence and interviews.
-- Wednesday: build and eval run.
-- Friday: demo rehearsal and decision log.
+## Next two weeks
+
+1. Run 8 interviews with owners and accountants (guide in `03`).
+2. Add PDF upload + OCR behind a storage bucket.
+3. Add the three most-requested questions from interviews.
+4. Measure correction rate on 20 real (consented, anonymised) documents.
+5. Prepare the 5-minute demo and the evidence one-pager.

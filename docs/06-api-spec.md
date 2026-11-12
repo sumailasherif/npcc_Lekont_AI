@@ -1,8 +1,8 @@
 # API spec
 
-Base URL: `http://localhost:8000` (the running demo uses `8010`; set
-`NEXT_PUBLIC_API_URL` in `apps/web/.env.local`). All product routes are under
-`/api/v1`. Generated schema: `api-spec/openapi.json`. Interactive docs: `/docs`.
+Base URL: `http://localhost:8010` (the web app reads
+`NEXT_PUBLIC_API_URL`). Product routes are under `/api/v1`. Generated schema:
+`api-spec/openapi.json`. Interactive docs: `/docs`.
 
 ## Meta
 
@@ -11,170 +11,135 @@ Base URL: `http://localhost:8000` (the running demo uses `8010`; set
 | GET | `/` | Service info |
 | GET | `/health` | Health check |
 
-## Sources
+## Documents
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET | `/api/v1/sources` | List knowledge sources |
-| POST | `/api/v1/sources` | Register a source |
-| DELETE | `/api/v1/sources/{id}` | Remove a source |
+| GET | `/api/v1/documents` | List documents (summaries) |
+| POST | `/api/v1/documents` | Extract a document from text |
+| GET | `/api/v1/documents/{id}` | Full document with fields |
+| POST | `/api/v1/documents/{id}/review` | Correct fields and approve |
+| GET | `/api/v1/documents/export` | CSV export with audit columns |
+
+### Create
 
 ```json
-POST /api/v1/sources
+POST /api/v1/documents
 {
-  "title": "Overlock jam procedure",
-  "kind": "pdf",
-  "sector": "textile",
-  "language": "en",
-  "notes": "Synthetic demo document"
+  "filename": "facture_island_packaging_2026-09.pdf",
+  "doc_type": "invoice",
+  "language": "fr",
+  "text": "FACTURE\nFournisseur: Island Packaging Ltd\nNumero de facture: INV-2026-014\nDate: 12/09/2026\nDevise: MUR\nSous-total: 42,500.00\nTVA (15%): 6,375.00\nTotal: 48,875.00\n"
 }
 ```
 
-## Query
-
-`POST /api/v1/query`
+Response (abridged):
 
 ```json
 {
-  "question": "How do I clear a thread jam on the overlock machine?",
-  "language": "en",
-  "role_id": "senior_operator"
+  "id": "doc-1a2b3c4d",
+  "doc_type": "invoice",
+  "language": "fr",
+  "supplier": "Island Packaging Ltd",
+  "total": 48875.0,
+  "currency": "MUR",
+  "status": "needs_review",
+  "confidence": 0.96,
+  "fields": [
+    { "key": "supplier", "label": "Supplier", "value": "Island Packaging Ltd", "confidence": 0.96, "corrected": false },
+    { "key": "total", "label": "Total", "value": "48,875.00", "confidence": 0.96, "corrected": false }
+  ]
 }
 ```
 
-Response:
+### Review
+
+```json
+POST /api/v1/documents/doc-1a2b3c4d/review
+{
+  "reviewer": "d.ramgoolam",
+  "fields": [{ "key": "total", "value": "48,875.00" }]
+}
+```
+
+Approval sets `status = approved`, `confidence = 1.0` for corrected fields and
+stores the reviewer. A missing document returns `404`.
+
+### Export
+
+```json
+GET /api/v1/documents/export
+{
+  "filename": "lekont_documents.csv",
+  "rows": 6,
+  "csv": "document_id,filename,type,supplier_or_employee,total,currency,status,confidence,reviewer\n..."
+}
+```
+
+## Insights
+
+### Ask
+
+```json
+POST /api/v1/insights/ask
+{ "question": "Who are my top 5 suppliers by spend?" }
+```
 
 ```json
 {
-  "covered": true,
-  "answer": "1. Press the red stop button...\n2. Lift the presser foot...",
-  "source_answer": "1. Press the red stop button...",
-  "language": "en",
+  "intent": "suppliers",
+  "answer": "Island Packaging Ltd is your largest supplier at MUR 101,000...",
+  "calculation": "SUM(amount) GROUP BY supplier ORDER BY amount DESC LIMIT 5; payroll excluded",
+  "columns": [
+    { "key": "supplier", "label": "Supplier" },
+    { "key": "amount", "label": "Spend (MUR)" }
+  ],
+  "rows": [{ "supplier": "Island Packaging Ltd", "amount": 101000.0 }],
+  "chart": { "type": "bar", "x": "supplier", "y": "amount" },
   "confidence": 0.92,
-  "citations": [
-    { "sop_id": "sop-txt-001", "version": 1, "step": 1, "quote": "Press the red stop button..." }
-  ],
-  "gap_id": null,
-  "translation_engine": "identity",
-  "review_required": false,
-  "disclaimer": "Answer generated from approved work instructions..."
+  "caveats": ["Based on the synthetic ledger.", "Payroll is excluded."],
+  "suggested": ["How has my monthly spend changed?"]
 }
 ```
 
-`source_answer` is always English. FR and Kreol are produced at request time and
-`translation_engine` is one of `identity`, `llm`, `memory` or `glossary`.
-`review_required` is true whenever a human should check the translation before
-it reaches the shop floor.
+Supported intents: `suppliers`, `monthly`, `vat`, `categories`, `payroll`,
+`largest`, `month`, `automation`, `unknown`. Unknown questions return guidance,
+never a guessed number.
 
-When nothing matches: `covered=false`, `citations=[]`, and `gap_id` is set.
-
-## Live translation
-
-`POST /api/v1/translate`
+### Readiness
 
 ```json
+POST /api/v1/insights/readiness
 {
-  "text": "Press the red stop button and wait until the machine is fully still.",
-  "target_language": "cr",
-  "source_language": "en"
+  "sector": "Distribution",
+  "employees": 12,
+  "monthly_invoices": 45,
+  "monthly_payslips": 6,
+  "admin_hours": 22,
+  "tools": ["excel", "whatsapp"],
+  "pain_points": ["invoices", "reporting"]
 }
 ```
 
 ```json
 {
-  "source_text": "Press the red stop button...",
-  "translated_text": "Tap lor bouton are rouz la ek atann ki lamin la are nety.",
-  "source_language": "en",
-  "target_language": "cr",
-  "engine": "llm",
-  "review_required": true,
-  "confidence": 0.78
+  "readiness_score": 63,
+  "band": "Ready for a first automation",
+  "recommended_first": "Invoice capture",
+  "summary": "Readiness 63/100 ...",
+  "scores": [{ "process": "Invoice capture", "score": 80, "effort": "low", "impact": "high", "reason": "45 invoices/month and a named pain." }],
+  "next_steps": ["Collect 20 recent invoices, in French and English.", "..."]
 }
 ```
 
-Engines are tried in order: `llm` (OpenCode Go / `deepseek-v4.1-flash`),
-`memory` (curated EN/FR/Kreol pairs from approved SOPs, instant and offline) and
-`glossary` (word-level fallback, always flagged for review). Results are cached
-in-process so switching language in the UI is immediate after the first call.
+## Dashboard
 
-## Experts (Delphi-style minds)
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/api/v1/experts` | List minds; filter with `?category=` and `?q=` |
-| GET | `/api/v1/experts/{id}` | Profile, knowledge cards and sample questions |
-| POST | `/api/v1/experts/{id}/chat` | Grounded conversation with one mind |
-
-```json
-POST /api/v1/experts/textile-ops-veteran/chat
-{
-  "message": "How do I clear a thread jam on an overlock machine?",
-  "language": "fr",
-  "history": []
-}
-```
-
-```json
-{
-  "answer": "Voici la procedure...",
-  "source_answer": "Here is the procedure...",
-  "language": "fr",
-  "citations": [
-    { "card_id": "apparel-jam", "title": "Clearing an overlock thread jam", "source": "Synthetic SOP pack, textile", "year": 2026 }
-  ],
-  "confidence": 0.86,
-  "engine": "llm",
-  "review_required": false,
-  "suggested": ["How do I train a new operator who speaks only Kreol?"],
-  "disclaimer": "Composite practitioner profile created for the NPCC challenge..."
-}
-```
-
-`engine` is `llm`, `knowledge` (assembled directly from cards, offline) or
-`scope` (the question is outside the mind's material). Public-record profiles
-are not authored or endorsed by the named person; composite profiles are
-fictional and labelled as such.
-
-## SOPs
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/api/v1/sops` | List SOPs |
-| POST | `/api/v1/sops` | Create a draft |
-| GET | `/api/v1/sops/{id}` | Read a SOP with translations |
-| POST | `/api/v1/sops/{id}/generate` | Generate a draft from a source |
-| POST | `/api/v1/sops/{id}/translate` | Add languages |
-| POST | `/api/v1/sops/{id}/submit` | Move to review |
-| POST | `/api/v1/sops/{id}/approve` | Publish a new version |
-
-```json
-POST /api/v1/sops/{id}/approve
-{ "reviewer": "a.supervisor", "comment": "Checked against line 3" }
-```
-
-## Gaps
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/api/v1/gaps` | Open gaps, highest count first |
-| POST | `/api/v1/gaps/{id}/promote` | Turn a gap into an SOP draft |
-
-## Skills
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/api/v1/skills/roles` | Roles with skill requirements |
-| GET | `/api/v1/skills/roles/{id}` | One role |
-
-## Analytics
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/api/v1/analytics/summary` | Covered rate, gaps, SOP counts |
+`GET /api/v1/dashboard/summary` returns document counts, current-month spend and
+VAT, readiness score, top supplier and the monthly series used by the chart.
 
 ## Conventions
 
-- Errors use FastAPI's `{"detail": "..."}` shape with standard status codes.
-- Auth in production: Supabase JWT in `Authorization: Bearer <token>`.
-  The scaffold reads an optional `X-Demo-User` header.
-- All list responses are sorted deterministically so the UI and tests are stable.
+- Errors: `{"detail": "..."}` with standard status codes.
+- Auth: none in the demo; a pilot uses Supabase JWT in `Authorization: Bearer`.
+- Database: loads from Postgres when `DATABASE_URL` is set, otherwise synthetic.
+- Lists are sorted deterministically.

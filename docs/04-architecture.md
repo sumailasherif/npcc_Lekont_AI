@@ -3,121 +3,85 @@
 ## Shape
 
 ```
-             +---------------------------+
-             |  Next.js 16 (apps/web)    |
-             |  Discover / Ask / Review  |
-             +------------+--------------+
-                          | HTTPS (JSON)
-             +------------v--------------+
-             |  FastAPI (apps/api)       |
-             |  query, sops, gaps, skills|
-             +------+-------------+------+
-                    |             |
-        OpenCode Go |             | Supabase (free)
-        chat models |             | Postgres + pgvector
-                    v             v
-             +-----------+  +------------------+
-             | LLM       |  | sources, chunks, |
-             | deepseek  |  | sops, gaps, logs |
-             +-----------+  +------------------+
+                +-------------------------------+
+                |  Next.js 16 (apps/web)        |
+                |  Overview / Documents / Ask / |
+                |  Readiness                     |
+                +---------------+---------------+
+                                | HTTPS JSON
+                +---------------v---------------+
+                |  FastAPI (apps/api)           |
+                |  documents · insights · dash  |
+                +------+----------------+-------+
+                       |                |
+          OpenCode Go  |                | psycopg
+          (optional)   |                | (optional)
+                       v                v
+                +-------------+  +----------------------+
+                | deepseek    |  | Supabase Postgres    |
+                | extraction  |  | documents · fields · |
+                | fallback    |  | ledger · readiness   |
+                +-------------+  +----------------------+
 ```
 
-## Request flow for a question
+## Document flow
 
-1. Operator asks in EN, FR or Kreol; the web app posts to `POST /api/v1/query`.
-2. The API embeds the question (Supabase Edge `gte-small`, free) or falls back to
-   keyword retrieval in local development.
-3. It retrieves the top chunks, restricted to **published** SOP versions for the
-   organisation.
-4. OpenCode Go generates an answer **only from the retrieved passages**, with a
-   strict system prompt and a refusal path.
-5. The API validates that every claim maps to a cited step; if not, it refuses.
-6. If nothing matches, it writes a `knowledge_gaps` row and returns `covered =
-   false`.
-7. If the requested language is FR or Kreol, the English answer is translated
-   live and the response carries `translation_engine` and `review_required`.
-8. The web app renders the answer with citations, or the gap acknowledgement.
+1. `POST /api/v1/documents` with the document text (the demo accepts text; a
+   pilot adds PDF/OCR upload to storage).
+2. `extraction.extract` runs regex for the expected fields, then calls the LLM
+   **only for missing fields**, with a JSON-only prompt.
+3. Each field gets a confidence; missing required fields lower the document
+   confidence and keep it in `needs_review`.
+4. A named reviewer edits fields in `POST /documents/{id}/review`; the document
+   becomes `approved` and the reviewer is stored.
+5. `GET /documents/export` returns CSV with the document id, party, total,
+   status, confidence and reviewer.
 
-## Expert minds (Delphi layer)
+## Insight flow
 
-The discover surface and the line assistant share one backend but different
-trust rules.
+`POST /insights/ask` maps the question to a fixed intent, computes the aggregate
+over the ledger, and returns:
 
-```
-GET /experts ──► curated profiles + knowledge cards
-GET /experts/{id} ──► profile, sources, sample questions
-POST /experts/{id}/chat ──► retrieve cards ──► LLM (optional) ──► translate
-```
+- a natural-language answer,
+- the rows and columns,
+- a chart hint,
+- the calculation string,
+- caveats and suggested follow-ups.
 
-- **Retrieval** ranks the message against the mind's knowledge cards only.
-  There is no open-web access at answer time.
-- **Generation** is optional. Without a key, the reply is assembled directly
-  from the matched cards, so the demo works offline and cannot hallucinate.
-- **Scope guard**: if no card matches, the mind says so and lists the topics it
-  can cover instead of guessing.
-- **Provenance**: every answer carries the card title, source and year.
+There is **no free-form SQL generation** in the demo. That is a deliberate trust
+choice: a wrong number presented confidently is the risk the brief names.
 
-### Live translation
+## Readiness flow
 
-Three engines are tried in order, then cached in-process:
+`POST /insights/readiness` takes six inputs (sector, employees, invoice and
+payslip volume, admin hours, tools, pain points) and returns a readiness score,
+six process scores with effort/impact, a recommended first process, and three
+next steps. The rules are explicit and explainable.
 
-| Engine | When | Review flag |
-| --- | --- | --- |
-| `llm` | `OPENCODE_GO_API_KEY` is set | Kreol only |
-| `memory` | Exact match in curated SOP translations | Kreol only |
-| `glossary` | Any other text | Always |
+## Data
 
-English is the source of truth (`source_answer`). FR and Kreol are derived at
-request time and never stored as approved content until a supervisor publishes
-them. This keeps the "human stays accountable" rule intact while making the
-language switch feel instant.
+- Default: in-memory synthetic data (`app/data/backoffice.py`).
+- With `DATABASE_URL`: `app/db/postgres.py` loads documents, fields and the
+  100-row ledger; writes are best-effort.
+- `supabase/migrations/0002_backoffice.sql` defines the schema and RLS.
 
-## Why the answer is a card, not a chat bubble
+## Trust boundaries
 
-Delphi's product is a conversational digital mind. That is the right pattern for
-discovery and authoring. It is the wrong pattern for a shop floor, where an
-operator needs a stable, versioned, auditable instruction. So:
-
-- **Chat** is the supervisor and authoring interface.
-- **The published artifact** is an immutable SOP card, in three languages.
-- The operator-facing surface can answer follow-ups, but every answer is
-  constrained to the approved card.
-
-## What we borrow from Delphi
-
-| Delphi | Retenou |
-| --- | --- |
-| `Knowledge` sources (web, files, audio) | SOPs, manuals, fault codes, expert voice notes |
-| Digital Mind per person | Digital Trainer per line/role/machine |
-| `Audience` | Operators by role, line, shift, language |
-| `Conversations` | Operator questions, text and voice |
-| Conversation analytics | Unanswered questions become a skills-gap report |
-| One shareable link | One link per line/role |
-
-## What we deliberately do not copy
-
-- Consumer expert discovery and matching.
-- Celebrity clones and persona mimicry.
-- Automatic publication.
-- Pinecone/Workflow-scale infrastructure; Supabase and a single FastAPI service
-  are enough for the challenge.
+- The LLM only sees the document text, never the whole database.
+- Extraction is additive: the LLM fills missing fields and cannot overwrite a
+  regex match.
+- No export without a reviewer.
+- Only synthetic data is committed; real data stays in `data/raw/` or Supabase.
+- Every answer exposes its inputs and its limits.
 
 ## Stack
 
 | Layer | Choice | Cost |
 | --- | --- | --- |
 | Web | Next.js 16, TypeScript, Tailwind 4 | Free (Vercel Hobby) |
-| API | FastAPI, Pydantic | Free (local or free host) |
-| Models | OpenCode Go, `deepseek-v4.1-flash` | Included in Go plan; free models available |
-| Database | Supabase Postgres + pgvector | Free tier |
-| Embeddings | Supabase Edge Function `gte-small`, or local `fastembed` | Free |
-| Voice input | Browser Web Speech API / MediaRecorder | Free, on device |
+| API | FastAPI, Pydantic | Free |
+| Model | OpenCode Go, `deepseek-v4.1-flash` | Included in Go plan |
+| Database | Supabase Postgres | Free tier |
 | CI | GitHub Actions | Free for public repos |
 
-## Trust boundaries
-
-- The model never sees more than the retrieved passages for the tenant.
-- Row-level security is enabled before a pilot; the scaffold documents the
-  policies in the migration.
-- Every publish writes `review_log`; every write can write `audit_log`.
-- Only synthetic data is committed to the repository.
+See `09-free-stack.md`.

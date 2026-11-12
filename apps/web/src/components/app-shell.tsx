@@ -4,15 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { useLanguage } from "@/components/language-provider";
+import { LOCALES } from "@/lib/i18n";
+
 const NAV = [
-  { href: "/", label: "Overview", icon: "M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6V11h-6v9Zm0-16v4h6V4h-6Z" },
-  { href: "/documents", label: "Documents", icon: "M6 3h9l4 4v14H6V3Zm8 1v4h4" },
-  { href: "/ask", label: "Ask AI", icon: "M4 5h16v11H9l-5 4V5Z" },
-  { href: "/readiness", label: "Readiness", icon: "M4 19V9m5 10V5m5 14v-7m5 7V7" },
-];
+  { href: "/", key: "overview", icon: "M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6V11h-6v9Zm0-16v4h6V4h-6Z" },
+  { href: "/documents", key: "documents", icon: "M6 3h9l4 4v14H6V3Zm8 1v4h4" },
+  { href: "/ask", key: "ask", icon: "M4 5h16v11H9l-5 4V5Z" },
+  { href: "/readiness", key: "readiness", icon: "M4 19V9m5 10V5m5 14v-7m5 7V7" },
+] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const { locale, setLocale, t } = useLanguage();
 
   return (
     <div className="min-h-screen">
@@ -24,27 +28,45 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
             <span className="leading-tight">
               <span className="block text-sm font-semibold tracking-tight">Lekont</span>
-              <span className="block text-[10px] text-[#64748b]">SME back office</span>
+              <span className="block text-[10px] text-[#64748b]">{t.shell.tagline}</span>
             </span>
           </Link>
 
           <span className="hidden rounded-full bg-[#eef2ff] px-2.5 py-1 text-[10px] font-medium text-[#4f46e5] sm:block">
-            Demo workspace
+            {t.shell.demoWorkspace}
           </span>
 
           <div className="ml-auto hidden w-72 items-center gap-2 rounded-xl border border-[#e6e8f0] bg-[#f9fafb] px-3 py-2 text-xs text-[#64748b] lg:flex">
             <SearchIcon />
-            <span className="flex-1">Search documents, suppliers, questions…</span>
+            <span className="flex-1">{t.shell.searchPlaceholder}</span>
             <kbd className="rounded border border-[#e6e8f0] bg-white px-1.5 py-0.5 text-[10px]">
               ⌘K
             </kbd>
           </div>
 
+          <div className="flex items-center gap-1 rounded-xl border border-[#e6e8f0] bg-white p-1 text-[11px] font-medium">
+            {LOCALES.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setLocale(item.id)}
+                aria-pressed={locale === item.id}
+                className={`rounded-lg px-2 py-1 transition ${
+                  locale === item.id
+                    ? "bg-[#0f172a] text-white"
+                    : "text-[#64748b] hover:bg-[#f1f5f9]"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
           <Link
             href="/ask"
-            className="rounded-xl bg-[#0f172a] px-3.5 py-2 text-xs font-medium text-white transition hover:bg-[#1e293b]"
+            className="hidden rounded-xl bg-[#0f172a] px-3.5 py-2 text-xs font-medium text-white transition hover:bg-[#1e293b] sm:block"
           >
-            Ask AI
+            {t.shell.askAi}
           </Link>
           <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-[#0d9488] to-[#059669] text-xs font-semibold text-white">
             SS
@@ -56,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <aside className="hidden w-56 shrink-0 flex-col justify-between md:flex">
           <nav className="flex flex-col gap-1">
             <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#94a3b8]">
-              Workspace
+              {t.shell.workspace}
             </p>
             {NAV.map((item, index) => {
               const active =
@@ -83,14 +105,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                   >
                     <path d={item.icon} />
                   </svg>
-                  {item.label}
+                  {t.nav[item.key]}
                 </Link>
               );
             })}
 
             <div className="mt-6 rounded-2xl border border-[#e6e8f0] bg-white p-3">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-[#94a3b8]">
-                Data sources
+                {t.shell.dataSources}
               </p>
               <div className="mt-2 flex flex-col gap-1.5 text-[11px] text-[#475569]">
                 <span className="flex items-center justify-between">
@@ -98,11 +120,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-soft" />
                 </span>
                 <span className="flex items-center justify-between text-[#94a3b8]">
-                  Seed rows
+                  {t.shell.seedRows}
                   <span className="tabular-nums">100</span>
                 </span>
                 <span className="flex items-center justify-between text-[#94a3b8]">
-                  Documents
+                  {t.shell.documents}
                   <span className="tabular-nums">6</span>
                 </span>
               </div>
@@ -110,10 +132,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="mt-6 rounded-2xl bg-[#0f172a] p-4 text-white">
-            <p className="text-xs font-medium">Synthetic demo</p>
-            <p className="mt-1 text-[11px] leading-5 text-white/60">
-              No real company, employee or invoice data. Review before export.
-            </p>
+            <p className="text-xs font-medium">{t.shell.syntheticDemo}</p>
+            <p className="mt-1 text-[11px] leading-5 text-white/60">{t.shell.syntheticNote}</p>
           </div>
         </aside>
 

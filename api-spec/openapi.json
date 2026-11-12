@@ -1,18 +1,18 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Retenou AI API",
-    "description": "Multilingual shop-floor capability API. Grounded answers only from supervisor-approved work instructions.",
+    "title": "Lekont API",
+    "description": "Lekont turns invoices, payslips and contracts into human-checked data, then answers plain-language questions about the numbers and recommends what an SME should automate first.",
     "version": "0.1.0"
   },
   "paths": {
-    "/api/v1/sources": {
+    "/api/v1/documents": {
       "get": {
         "tags": [
-          "sources"
+          "documents"
         ],
-        "summary": "Read Sources",
-        "operationId": "read_sources_api_v1_sources_get",
+        "summary": "Read Documents",
+        "operationId": "read_documents_api_v1_documents_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -20,10 +20,10 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Source"
+                    "$ref": "#/components/schemas/DocumentSummary"
                   },
                   "type": "array",
-                  "title": "Response Read Sources Api V1 Sources Get"
+                  "title": "Response Read Documents Api V1 Documents Get"
                 }
               }
             }
@@ -32,15 +32,15 @@
       },
       "post": {
         "tags": [
-          "sources"
+          "documents"
         ],
-        "summary": "Add Source",
-        "operationId": "add_source_api_v1_sources_post",
+        "summary": "Add Document",
+        "operationId": "add_document_api_v1_documents_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SourceCreate"
+                "$ref": "#/components/schemas/DocumentCreate"
               }
             }
           },
@@ -52,7 +52,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Source"
+                  "$ref": "#/components/schemas/Document"
                 }
               }
             }
@@ -70,27 +70,55 @@
         }
       }
     },
-    "/api/v1/sources/{source_id}": {
-      "delete": {
+    "/api/v1/documents/export": {
+      "get": {
         "tags": [
-          "sources"
+          "documents"
         ],
-        "summary": "Remove Source",
-        "operationId": "remove_source_api_v1_sources__source_id__delete",
+        "summary": "Export",
+        "operationId": "export_api_v1_documents_export_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{document_id}": {
+      "get": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "Read Document",
+        "operationId": "read_document_api_v1_documents__document_id__get",
         "parameters": [
           {
-            "name": "source_id",
+            "name": "document_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Source Id"
+              "title": "Document Id"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Successful Response"
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -105,18 +133,70 @@
         }
       }
     },
-    "/api/v1/query": {
+    "/api/v1/documents/{document_id}/review": {
       "post": {
         "tags": [
-          "query"
+          "documents"
+        ],
+        "summary": "Review",
+        "operationId": "review_api_v1_documents__document_id__review_post",
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/insights/ask": {
+      "post": {
+        "tags": [
+          "insights"
         ],
         "summary": "Ask",
-        "operationId": "ask_api_v1_query_post",
+        "operationId": "ask_api_v1_insights_ask_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/QueryRequest"
+                "$ref": "#/components/schemas/AskRequest"
               }
             }
           },
@@ -128,7 +208,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/QueryResponse"
+                  "$ref": "#/components/schemas/AskResponse"
                 }
               }
             }
@@ -146,483 +226,18 @@
         }
       }
     },
-    "/api/v1/sops": {
-      "get": {
-        "tags": [
-          "sops"
-        ],
-        "summary": "Read Sops",
-        "operationId": "read_sops_api_v1_sops_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/SopSummary"
-                  },
-                  "type": "array",
-                  "title": "Response Read Sops Api V1 Sops Get"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v1/insights/readiness": {
       "post": {
         "tags": [
-          "sops"
+          "insights"
         ],
-        "summary": "Add Sop",
-        "operationId": "add_sop_api_v1_sops_post",
+        "summary": "Readiness",
+        "operationId": "readiness_api_v1_insights_readiness_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SopCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sop"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/sops/{sop_id}": {
-      "get": {
-        "tags": [
-          "sops"
-        ],
-        "summary": "Read Sop",
-        "operationId": "read_sop_api_v1_sops__sop_id__get",
-        "parameters": [
-          {
-            "name": "sop_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Sop Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sop"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/sops/{sop_id}/generate": {
-      "post": {
-        "tags": [
-          "sops"
-        ],
-        "summary": "Generate",
-        "operationId": "generate_api_v1_sops__sop_id__generate_post",
-        "parameters": [
-          {
-            "name": "sop_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Sop Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sop"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/sops/{sop_id}/translate": {
-      "post": {
-        "tags": [
-          "sops"
-        ],
-        "summary": "Translate",
-        "operationId": "translate_api_v1_sops__sop_id__translate_post",
-        "parameters": [
-          {
-            "name": "sop_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Sop Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TranslateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sop"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/sops/{sop_id}/submit": {
-      "post": {
-        "tags": [
-          "sops"
-        ],
-        "summary": "Submit",
-        "operationId": "submit_api_v1_sops__sop_id__submit_post",
-        "parameters": [
-          {
-            "name": "sop_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Sop Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sop"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/sops/{sop_id}/approve": {
-      "post": {
-        "tags": [
-          "sops"
-        ],
-        "summary": "Approve",
-        "operationId": "approve_api_v1_sops__sop_id__approve_post",
-        "parameters": [
-          {
-            "name": "sop_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Sop Id"
-            }
-          },
-          {
-            "name": "x-demo-user",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Demo-User"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApproveRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sop"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/gaps": {
-      "get": {
-        "tags": [
-          "gaps"
-        ],
-        "summary": "Read Gaps",
-        "operationId": "read_gaps_api_v1_gaps_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Gap"
-                  },
-                  "type": "array",
-                  "title": "Response Read Gaps Api V1 Gaps Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/gaps/{gap_id}/promote": {
-      "post": {
-        "tags": [
-          "gaps"
-        ],
-        "summary": "Promote",
-        "operationId": "promote_api_v1_gaps__gap_id__promote_post",
-        "parameters": [
-          {
-            "name": "gap_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Gap Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Gap"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/skills/roles": {
-      "get": {
-        "tags": [
-          "skills"
-        ],
-        "summary": "Read Roles",
-        "operationId": "read_roles_api_v1_skills_roles_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/Role"
-                  },
-                  "type": "array",
-                  "title": "Response Read Roles Api V1 Skills Roles Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/skills/roles/{role_id}": {
-      "get": {
-        "tags": [
-          "skills"
-        ],
-        "summary": "Read Role",
-        "operationId": "read_role_api_v1_skills_roles__role_id__get",
-        "parameters": [
-          {
-            "name": "role_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Role Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Role"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/analytics/summary": {
-      "get": {
-        "tags": [
-          "analytics"
-        ],
-        "summary": "Read Summary",
-        "operationId": "read_summary_api_v1_analytics_summary_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AnalyticsSummary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/translate": {
-      "post": {
-        "tags": [
-          "translation"
-        ],
-        "summary": "Translate",
-        "operationId": "translate_api_v1_translate_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TranslationRequest"
+                "$ref": "#/components/schemas/DiagnosticRequest"
               }
             }
           },
@@ -634,7 +249,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TranslationResponse"
+                  "$ref": "#/components/schemas/DiagnosticResponse"
                 }
               }
             }
@@ -652,162 +267,20 @@
         }
       }
     },
-    "/api/v1/experts": {
+    "/api/v1/dashboard/summary": {
       "get": {
         "tags": [
-          "experts"
+          "dashboard"
         ],
-        "summary": "Read Experts",
-        "operationId": "read_experts_api_v1_experts_get",
-        "parameters": [
-          {
-            "name": "category",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/ExpertCategory"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Category"
-            }
-          },
-          {
-            "name": "q",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Q"
-            }
-          }
-        ],
+        "summary": "Summary",
+        "operationId": "summary_api_v1_dashboard_summary_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Expert"
-                  },
-                  "title": "Response Read Experts Api V1 Experts Get"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/experts/{expert_id}": {
-      "get": {
-        "tags": [
-          "experts"
-        ],
-        "summary": "Read Expert",
-        "operationId": "read_expert_api_v1_experts__expert_id__get",
-        "parameters": [
-          {
-            "name": "expert_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Expert Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Expert"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/experts/{expert_id}/chat": {
-      "post": {
-        "tags": [
-          "experts"
-        ],
-        "summary": "Chat",
-        "operationId": "chat_api_v1_experts__expert_id__chat_post",
-        "parameters": [
-          {
-            "name": "expert_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Expert Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExpertChatRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExpertChatResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/DashboardSummary"
                 }
               }
             }
@@ -868,330 +341,85 @@
   },
   "components": {
     "schemas": {
-      "AnalyticsSummary": {
+      "AskRequest": {
         "properties": {
-          "questions_total": {
-            "type": "integer",
-            "title": "Questions Total"
-          },
-          "covered_rate": {
-            "type": "number",
-            "title": "Covered Rate"
-          },
-          "gaps_open": {
-            "type": "integer",
-            "title": "Gaps Open"
-          },
-          "sops_published": {
-            "type": "integer",
-            "title": "Sops Published"
-          },
-          "sops_in_review": {
-            "type": "integer",
-            "title": "Sops In Review"
-          },
-          "languages": {
-            "items": {
-              "$ref": "#/components/schemas/Language"
-            },
-            "type": "array",
-            "title": "Languages"
-          }
-        },
-        "type": "object",
-        "required": [
-          "questions_total",
-          "covered_rate",
-          "gaps_open",
-          "sops_published",
-          "sops_in_review",
-          "languages"
-        ],
-        "title": "AnalyticsSummary"
-      },
-      "ApproveRequest": {
-        "properties": {
-          "reviewer": {
+          "question": {
             "type": "string",
-            "maxLength": 120,
-            "minLength": 2,
-            "title": "Reviewer"
-          },
-          "comment": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 1000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Comment"
-          }
-        },
-        "type": "object",
-        "required": [
-          "reviewer"
-        ],
-        "title": "ApproveRequest"
-      },
-      "ChatTurn": {
-        "properties": {
-          "role": {
-            "type": "string",
-            "enum": [
-              "user",
-              "assistant"
-            ],
-            "title": "Role"
-          },
-          "content": {
-            "type": "string",
-            "title": "Content"
-          }
-        },
-        "type": "object",
-        "required": [
-          "role",
-          "content"
-        ],
-        "title": "ChatTurn"
-      },
-      "Citation": {
-        "properties": {
-          "sop_id": {
-            "type": "string",
-            "title": "Sop Id"
-          },
-          "version": {
-            "type": "integer",
-            "title": "Version"
-          },
-          "step": {
-            "type": "integer",
-            "title": "Step"
-          },
-          "quote": {
-            "type": "string",
-            "title": "Quote"
-          }
-        },
-        "type": "object",
-        "required": [
-          "sop_id",
-          "version",
-          "step",
-          "quote"
-        ],
-        "title": "Citation"
-      },
-      "Expert": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "initials": {
-            "type": "string",
-            "title": "Initials"
-          },
-          "role": {
-            "type": "string",
-            "title": "Role"
-          },
-          "organisation": {
-            "type": "string",
-            "title": "Organisation"
-          },
-          "country": {
-            "type": "string",
-            "title": "Country"
-          },
-          "city": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "City"
-          },
-          "categories": {
-            "items": {
-              "$ref": "#/components/schemas/ExpertCategory"
-            },
-            "type": "array",
-            "title": "Categories"
-          },
-          "headline": {
-            "type": "string",
-            "title": "Headline"
-          },
-          "bio": {
-            "type": "string",
-            "title": "Bio"
-          },
-          "languages": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Languages"
-          },
-          "accent": {
-            "type": "string",
-            "title": "Accent"
-          },
-          "featured": {
-            "type": "boolean",
-            "title": "Featured",
-            "default": false
-          },
-          "mauritian": {
-            "type": "boolean",
-            "title": "Mauritian",
-            "default": false
-          },
-          "verified": {
-            "type": "boolean",
-            "title": "Verified",
-            "default": false
-          },
-          "profile_type": {
-            "type": "string",
-            "enum": [
-              "public_record",
-              "composite"
-            ],
-            "title": "Profile Type",
-            "default": "public_record"
-          },
-          "disclaimer": {
-            "type": "string",
-            "title": "Disclaimer"
-          },
-          "topics": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Topics"
-          },
-          "sample_questions": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Sample Questions"
-          },
-          "knowledge": {
-            "items": {
-              "$ref": "#/components/schemas/KnowledgeCard"
-            },
-            "type": "array",
-            "title": "Knowledge"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "initials",
-          "role",
-          "organisation",
-          "country",
-          "categories",
-          "headline",
-          "bio",
-          "languages",
-          "accent",
-          "disclaimer",
-          "topics",
-          "sample_questions",
-          "knowledge"
-        ],
-        "title": "Expert"
-      },
-      "ExpertCategory": {
-        "type": "string",
-        "enum": [
-          "leadership",
-          "textile",
-          "food",
-          "engineering",
-          "supply_chain",
-          "quality",
-          "maintenance",
-          "ai",
-          "finance"
-        ],
-        "title": "ExpertCategory"
-      },
-      "ExpertChatRequest": {
-        "properties": {
-          "message": {
-            "type": "string",
-            "maxLength": 1200,
-            "minLength": 2,
-            "title": "Message"
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Question"
           },
           "language": {
             "$ref": "#/components/schemas/Language",
             "default": "en"
-          },
-          "history": {
-            "items": {
-              "$ref": "#/components/schemas/ChatTurn"
-            },
-            "type": "array",
-            "maxItems": 20,
-            "title": "History"
           }
         },
         "type": "object",
         "required": [
-          "message"
+          "question"
         ],
-        "title": "ExpertChatRequest"
+        "title": "AskRequest"
       },
-      "ExpertChatResponse": {
+      "AskResponse": {
         "properties": {
+          "intent": {
+            "type": "string",
+            "title": "Intent"
+          },
           "answer": {
             "type": "string",
             "title": "Answer"
           },
-          "source_answer": {
+          "calculation": {
             "type": "string",
-            "title": "Source Answer"
+            "title": "Calculation"
           },
-          "language": {
-            "$ref": "#/components/schemas/Language"
-          },
-          "citations": {
+          "columns": {
             "items": {
-              "$ref": "#/components/schemas/ExpertCitation"
+              "$ref": "#/components/schemas/Column"
             },
             "type": "array",
-            "title": "Citations"
+            "title": "Columns"
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Rows"
+          },
+          "chart": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Chart"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "confidence": {
             "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Confidence"
           },
-          "engine": {
-            "type": "string",
-            "title": "Engine"
-          },
-          "review_required": {
-            "type": "boolean",
-            "title": "Review Required"
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Caveats"
           },
           "suggested": {
             "items": {
@@ -1199,77 +427,93 @@
             },
             "type": "array",
             "title": "Suggested"
-          },
-          "disclaimer": {
-            "type": "string",
-            "title": "Disclaimer"
           }
         },
         "type": "object",
         "required": [
+          "intent",
           "answer",
-          "source_answer",
-          "language",
-          "citations",
+          "calculation",
+          "columns",
+          "rows",
           "confidence",
-          "engine",
-          "review_required",
-          "suggested",
-          "disclaimer"
+          "caveats",
+          "suggested"
         ],
-        "title": "ExpertChatResponse"
+        "title": "AskResponse"
       },
-      "ExpertCitation": {
+      "Chart": {
         "properties": {
-          "card_id": {
+          "type": {
             "type": "string",
-            "title": "Card Id"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "source": {
-            "type": "string",
-            "title": "Source"
-          },
-          "year": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
+            "enum": [
+              "bar",
+              "line"
             ],
-            "title": "Year"
+            "title": "Type",
+            "default": "bar"
+          },
+          "x": {
+            "type": "string",
+            "title": "X"
+          },
+          "y": {
+            "type": "string",
+            "title": "Y"
           }
         },
         "type": "object",
         "required": [
-          "card_id",
-          "title",
-          "source"
+          "x",
+          "y"
         ],
-        "title": "ExpertCitation"
+        "title": "Chart"
       },
-      "Gap": {
+      "Column": {
         "properties": {
-          "id": {
+          "key": {
             "type": "string",
-            "title": "Id"
+            "title": "Key"
           },
-          "question": {
+          "label": {
             "type": "string",
-            "title": "Question"
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label"
+        ],
+        "title": "Column"
+      },
+      "DashboardSummary": {
+        "properties": {
+          "documents_total": {
+            "type": "integer",
+            "title": "Documents Total"
           },
-          "language": {
-            "$ref": "#/components/schemas/Language"
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
           },
-          "sector": {
-            "$ref": "#/components/schemas/Sector"
+          "approved": {
+            "type": "integer",
+            "title": "Approved"
           },
-          "role_id": {
+          "monthly_spend": {
+            "type": "number",
+            "title": "Monthly Spend"
+          },
+          "monthly_vat": {
+            "type": "number",
+            "title": "Monthly Vat"
+          },
+          "readiness_score": {
+            "type": "integer",
+            "title": "Readiness Score"
+          },
+          "top_supplier": {
             "anyOf": [
               {
                 "type": "string"
@@ -1278,48 +522,456 @@
                 "type": "null"
               }
             ],
-            "title": "Role Id"
+            "title": "Top Supplier"
           },
-          "count": {
+          "top_supplier_spend": {
+            "type": "number",
+            "title": "Top Supplier Spend"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "monthly": {
+            "items": {
+              "$ref": "#/components/schemas/MonthlyPoint"
+            },
+            "type": "array",
+            "title": "Monthly"
+          }
+        },
+        "type": "object",
+        "required": [
+          "documents_total",
+          "needs_review",
+          "approved",
+          "monthly_spend",
+          "monthly_vat",
+          "readiness_score",
+          "top_supplier",
+          "top_supplier_spend",
+          "currency",
+          "monthly"
+        ],
+        "title": "DashboardSummary"
+      },
+      "DiagnosticRequest": {
+        "properties": {
+          "sector": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2,
+            "title": "Sector"
+          },
+          "employees": {
             "type": "integer",
-            "title": "Count"
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Employees"
+          },
+          "monthly_invoices": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Monthly Invoices"
+          },
+          "monthly_payslips": {
+            "type": "integer",
+            "maximum": 5000.0,
+            "minimum": 0.0,
+            "title": "Monthly Payslips"
+          },
+          "admin_hours": {
+            "type": "integer",
+            "maximum": 400.0,
+            "minimum": 0.0,
+            "title": "Admin Hours"
+          },
+          "tools": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tools"
+          },
+          "pain_points": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pain Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sector",
+          "employees",
+          "monthly_invoices",
+          "monthly_payslips",
+          "admin_hours"
+        ],
+        "title": "DiagnosticRequest"
+      },
+      "DiagnosticResponse": {
+        "properties": {
+          "readiness_score": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Readiness Score"
+          },
+          "band": {
+            "type": "string",
+            "title": "Band"
+          },
+          "recommended_first": {
+            "type": "string",
+            "title": "Recommended First"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "scores": {
+            "items": {
+              "$ref": "#/components/schemas/ProcessScore"
+            },
+            "type": "array",
+            "title": "Scores"
+          },
+          "next_steps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Next Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "readiness_score",
+          "band",
+          "recommended_first",
+          "summary",
+          "scores",
+          "next_steps"
+        ],
+        "title": "DiagnosticResponse"
+      },
+      "Document": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "doc_type": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "supplier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
           },
           "status": {
-            "$ref": "#/components/schemas/GapStatus"
+            "$ref": "#/components/schemas/DocumentStatus"
           },
-          "first_seen": {
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "uploaded_at": {
             "type": "string",
             "format": "date-time",
-            "title": "First Seen"
+            "title": "Uploaded At"
           },
-          "last_seen": {
+          "text": {
             "type": "string",
-            "format": "date-time",
-            "title": "Last Seen"
+            "title": "Text"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/ExtractedField"
+            },
+            "type": "array",
+            "title": "Fields"
+          },
+          "reviewer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewer"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
           }
         },
         "type": "object",
         "required": [
           "id",
-          "question",
+          "filename",
+          "doc_type",
           "language",
-          "sector",
-          "role_id",
-          "count",
+          "supplier",
+          "total",
+          "currency",
           "status",
-          "first_seen",
-          "last_seen"
+          "confidence",
+          "needs_review",
+          "uploaded_at",
+          "text",
+          "fields"
         ],
-        "title": "Gap"
+        "title": "Document"
       },
-      "GapStatus": {
+      "DocumentCreate": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "Filename"
+          },
+          "doc_type": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "en"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 20000,
+            "minLength": 10,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "doc_type",
+          "text"
+        ],
+        "title": "DocumentCreate"
+      },
+      "DocumentStatus": {
         "type": "string",
         "enum": [
-          "open",
-          "promoted",
-          "dismissed"
+          "needs_review",
+          "approved",
+          "exported"
         ],
-        "title": "GapStatus"
+        "title": "DocumentStatus"
+      },
+      "DocumentSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "doc_type": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "supplier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DocumentStatus"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "needs_review": {
+            "type": "integer",
+            "title": "Needs Review"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Uploaded At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "filename",
+          "doc_type",
+          "language",
+          "supplier",
+          "total",
+          "currency",
+          "status",
+          "confidence",
+          "needs_review",
+          "uploaded_at"
+        ],
+        "title": "DocumentSummary"
+      },
+      "DocumentType": {
+        "type": "string",
+        "enum": [
+          "invoice",
+          "payslip",
+          "contract"
+        ],
+        "title": "DocumentType"
+      },
+      "ExportResponse": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "rows": {
+            "type": "integer",
+            "title": "Rows"
+          },
+          "csv": {
+            "type": "string",
+            "title": "Csv"
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "rows",
+          "csv"
+        ],
+        "title": "ExportResponse"
+      },
+      "ExtractedField": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "default": 1
+          },
+          "corrected": {
+            "type": "boolean",
+            "title": "Corrected",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "value",
+          "confidence"
+        ],
+        "title": "ExtractedField"
+      },
+      "FieldCorrection": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "FieldCorrection"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1334,52 +986,6 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "KnowledgeCard": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "body": {
-            "type": "string",
-            "title": "Body"
-          },
-          "source": {
-            "type": "string",
-            "title": "Source"
-          },
-          "year": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Year"
-          },
-          "topics": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Topics"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "title",
-          "body",
-          "source"
-        ],
-        "title": "KnowledgeCard"
-      },
       "Language": {
         "type": "string",
         "enum": [
@@ -1389,641 +995,95 @@
         ],
         "title": "Language"
       },
-      "QueryRequest": {
+      "MonthlyPoint": {
         "properties": {
-          "question": {
+          "month": {
             "type": "string",
-            "maxLength": 1000,
-            "minLength": 3,
-            "title": "Question"
+            "title": "Month"
           },
-          "language": {
-            "$ref": "#/components/schemas/Language",
-            "default": "en"
-          },
-          "role_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "question"
-        ],
-        "title": "QueryRequest"
-      },
-      "QueryResponse": {
-        "properties": {
-          "covered": {
-            "type": "boolean",
-            "title": "Covered"
-          },
-          "answer": {
-            "type": "string",
-            "title": "Answer"
-          },
-          "source_answer": {
-            "type": "string",
-            "title": "Source Answer",
-            "default": ""
-          },
-          "language": {
-            "$ref": "#/components/schemas/Language"
-          },
-          "confidence": {
+          "spend": {
             "type": "number",
-            "maximum": 1.0,
+            "title": "Spend"
+          },
+          "vat": {
+            "type": "number",
+            "title": "Vat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "month",
+          "spend",
+          "vat"
+        ],
+        "title": "MonthlyPoint"
+      },
+      "ProcessScore": {
+        "properties": {
+          "process": {
+            "type": "string",
+            "title": "Process"
+          },
+          "score": {
+            "type": "integer",
+            "maximum": 100.0,
             "minimum": 0.0,
-            "title": "Confidence"
+            "title": "Score"
           },
-          "citations": {
-            "items": {
-              "$ref": "#/components/schemas/Citation"
-            },
-            "type": "array",
-            "title": "Citations"
-          },
-          "gap_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+          "effort": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
             ],
-            "title": "Gap Id"
+            "title": "Effort"
           },
-          "translation_engine": {
+          "impact": {
             "type": "string",
-            "title": "Translation Engine",
-            "default": "identity"
-          },
-          "review_required": {
-            "type": "boolean",
-            "title": "Review Required",
-            "default": false
-          },
-          "disclaimer": {
-            "type": "string",
-            "title": "Disclaimer"
-          }
-        },
-        "type": "object",
-        "required": [
-          "covered",
-          "answer",
-          "language",
-          "confidence",
-          "citations",
-          "disclaimer"
-        ],
-        "title": "QueryResponse"
-      },
-      "RiskLevel": {
-        "type": "string",
-        "enum": [
-          "low",
-          "medium",
-          "high"
-        ],
-        "title": "RiskLevel"
-      },
-      "Role": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "sector": {
-            "$ref": "#/components/schemas/Sector"
-          },
-          "headcount": {
-            "type": "integer",
-            "title": "Headcount"
-          },
-          "skills": {
-            "items": {
-              "$ref": "#/components/schemas/SkillRequirement"
-            },
-            "type": "array",
-            "title": "Skills"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "sector",
-          "headcount",
-          "skills"
-        ],
-        "title": "Role"
-      },
-      "Sector": {
-        "type": "string",
-        "enum": [
-          "textile",
-          "food",
-          "light_engineering"
-        ],
-        "title": "Sector"
-      },
-      "SkillRequirement": {
-        "properties": {
-          "skill": {
-            "type": "string",
-            "title": "Skill"
-          },
-          "required": {
-            "type": "integer",
-            "maximum": 4.0,
-            "minimum": 1.0,
-            "title": "Required",
-            "description": "1 = awareness, 4 = can train others"
-          }
-        },
-        "type": "object",
-        "required": [
-          "skill",
-          "required"
-        ],
-        "title": "SkillRequirement"
-      },
-      "Sop": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "sector": {
-            "$ref": "#/components/schemas/Sector"
-          },
-          "role_id": {
-            "type": "string",
-            "title": "Role Id"
-          },
-          "machine_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+            "enum": [
+              "low",
+              "medium",
+              "high"
             ],
-            "title": "Machine Id"
+            "title": "Impact"
           },
-          "status": {
-            "$ref": "#/components/schemas/SopStatus"
-          },
-          "version": {
-            "type": "integer",
-            "title": "Version"
-          },
-          "languages": {
-            "items": {
-              "$ref": "#/components/schemas/Language"
-            },
-            "type": "array",
-            "title": "Languages"
-          },
-          "approved_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Approved By"
-          },
-          "updated_at": {
+          "reason": {
             "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          },
-          "translations": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/SopTranslation"
-            },
-            "propertyNames": {
-              "$ref": "#/components/schemas/Language"
-            },
-            "type": "object",
-            "title": "Translations"
+            "title": "Reason"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "title",
-          "sector",
-          "role_id",
-          "machine_id",
-          "status",
-          "version",
-          "languages",
-          "approved_by",
-          "updated_at",
-          "translations"
+          "process",
+          "score",
+          "effort",
+          "impact",
+          "reason"
         ],
-        "title": "Sop"
+        "title": "ProcessScore"
       },
-      "SopCreate": {
+      "ReviewRequest": {
         "properties": {
-          "title": {
+          "reviewer": {
             "type": "string",
-            "maxLength": 200,
-            "minLength": 3,
-            "title": "Title"
-          },
-          "sector": {
-            "$ref": "#/components/schemas/Sector"
-          },
-          "role_id": {
-            "type": "string",
-            "title": "Role Id"
-          },
-          "machine_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Machine Id"
-          },
-          "source_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "sector",
-          "role_id"
-        ],
-        "title": "SopCreate"
-      },
-      "SopStatus": {
-        "type": "string",
-        "enum": [
-          "draft",
-          "generated",
-          "in_review",
-          "approved",
-          "published",
-          "archived"
-        ],
-        "title": "SopStatus"
-      },
-      "SopStep": {
-        "properties": {
-          "order": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Order"
-          },
-          "text": {
-            "type": "string",
-            "minLength": 3,
-            "title": "Text"
-          },
-          "risk": {
-            "$ref": "#/components/schemas/RiskLevel",
-            "default": "low"
-          }
-        },
-        "type": "object",
-        "required": [
-          "order",
-          "text"
-        ],
-        "title": "SopStep"
-      },
-      "SopSummary": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "sector": {
-            "$ref": "#/components/schemas/Sector"
-          },
-          "role_id": {
-            "type": "string",
-            "title": "Role Id"
-          },
-          "machine_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Machine Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/SopStatus"
-          },
-          "version": {
-            "type": "integer",
-            "title": "Version"
-          },
-          "languages": {
-            "items": {
-              "$ref": "#/components/schemas/Language"
-            },
-            "type": "array",
-            "title": "Languages"
-          },
-          "approved_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Approved By"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "title",
-          "sector",
-          "role_id",
-          "machine_id",
-          "status",
-          "version",
-          "languages",
-          "approved_by",
-          "updated_at"
-        ],
-        "title": "SopSummary"
-      },
-      "SopTranslation": {
-        "properties": {
-          "language": {
-            "$ref": "#/components/schemas/Language"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "steps": {
-            "items": {
-              "$ref": "#/components/schemas/SopStep"
-            },
-            "type": "array",
-            "title": "Steps"
-          }
-        },
-        "type": "object",
-        "required": [
-          "language",
-          "title",
-          "steps"
-        ],
-        "title": "SopTranslation"
-      },
-      "Source": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/SourceKind"
-          },
-          "sector": {
-            "$ref": "#/components/schemas/Sector"
-          },
-          "language": {
-            "type": "string",
-            "title": "Language"
-          },
-          "status": {
-            "$ref": "#/components/schemas/SourceStatus"
-          },
-          "chunks": {
-            "type": "integer",
-            "title": "Chunks"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "title",
-          "kind",
-          "sector",
-          "language",
-          "status",
-          "chunks",
-          "created_at"
-        ],
-        "title": "Source"
-      },
-      "SourceCreate": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "maxLength": 200,
+            "maxLength": 120,
             "minLength": 2,
-            "title": "Title"
+            "title": "Reviewer"
           },
-          "kind": {
-            "$ref": "#/components/schemas/SourceKind"
-          },
-          "sector": {
-            "$ref": "#/components/schemas/Sector"
-          },
-          "language": {
-            "type": "string",
-            "title": "Language",
-            "default": "en"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 1000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "kind",
-          "sector"
-        ],
-        "title": "SourceCreate"
-      },
-      "SourceKind": {
-        "type": "string",
-        "enum": [
-          "pdf",
-          "docx",
-          "audio",
-          "video",
-          "url",
-          "text"
-        ],
-        "title": "SourceKind"
-      },
-      "SourceStatus": {
-        "type": "string",
-        "enum": [
-          "uploaded",
-          "ingesting",
-          "ready",
-          "failed"
-        ],
-        "title": "SourceStatus"
-      },
-      "TranslateRequest": {
-        "properties": {
-          "languages": {
+          "fields": {
             "items": {
-              "$ref": "#/components/schemas/Language"
+              "$ref": "#/components/schemas/FieldCorrection"
             },
             "type": "array",
-            "title": "Languages"
-          }
-        },
-        "type": "object",
-        "title": "TranslateRequest"
-      },
-      "TranslationRequest": {
-        "properties": {
-          "text": {
-            "type": "string",
-            "maxLength": 4000,
-            "minLength": 1,
-            "title": "Text"
-          },
-          "target_language": {
-            "$ref": "#/components/schemas/Language"
-          },
-          "source_language": {
-            "$ref": "#/components/schemas/Language",
-            "default": "en"
+            "title": "Fields"
           }
         },
         "type": "object",
         "required": [
-          "text",
-          "target_language"
+          "reviewer"
         ],
-        "title": "TranslationRequest"
-      },
-      "TranslationResponse": {
-        "properties": {
-          "source_text": {
-            "type": "string",
-            "title": "Source Text"
-          },
-          "translated_text": {
-            "type": "string",
-            "title": "Translated Text"
-          },
-          "source_language": {
-            "$ref": "#/components/schemas/Language"
-          },
-          "target_language": {
-            "$ref": "#/components/schemas/Language"
-          },
-          "engine": {
-            "type": "string",
-            "title": "Engine"
-          },
-          "review_required": {
-            "type": "boolean",
-            "title": "Review Required"
-          },
-          "confidence": {
-            "type": "number",
-            "maximum": 1.0,
-            "minimum": 0.0,
-            "title": "Confidence"
-          }
-        },
-        "type": "object",
-        "required": [
-          "source_text",
-          "translated_text",
-          "source_language",
-          "target_language",
-          "engine",
-          "review_required",
-          "confidence"
-        ],
-        "title": "TranslationResponse"
+        "title": "ReviewRequest"
       },
       "ValidationError": {
         "properties": {

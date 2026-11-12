@@ -1,130 +1,102 @@
 # UI wireframes
 
-The visual language follows Delphi's dark, quiet layout: a left rail, a centred
-question surface, category chips, and cards. The content is shop-floor, not
-consumer advice.
+Blueprint: Holistics (workspace sidebar + dashboard canvas + AI answer surface).
+Colours and motion are Lekont's: indigo/violet, soft off-white, animated
+counters, chart draw-in, staggered cards.
 
-## 1. Discover (implemented)
-
-```
-+----------+--------------------------------------------------+
-| Retenou  |                    (timeline)                    |
-|          |              [ S ] 3 gaps to review              |
-| Discover |                                                  |
-| Convers. |          Ask the people who've run this line     |
-| Knowledge|      Describe the situation. Get their perspective.|
-| Gaps     |   +------------------------------------------+   |
-| Profile  |   | Ask about a jam, a lot number, a vibration|   |
-|          |   |                        EN FR Kreol  mic Ask|   |
-|          |   +------------------------------------------+   |
-| Add      |   [Textile] [Food] [Light eng.] [Safety] ...     |
-| knowledge|                                                  |
-|          |   Ask the line                    Synthetic data |
-| More     |   [purple card] [cream card] [teal card]         |
-|          |   [Sector packs 3] [Languages] [Uncited 0]       |
-+----------+--------------------------------------------------+
-```
-
-Current behaviour: the Ask panel calls `POST /api/v1/query` and renders the
-answer with citations, or the gap acknowledgement. If the API is down it shows a
-clear message instead of a fake answer.
-
-## 2. Knowledge
+## Shell
 
 ```
-+--------------------------------------------------------------+
-| Knowledge                         [ + Upload ] [ Record ]   |
-+--------------------------------------------------------------+
-| Overlock jam procedure      PDF   textile   ready   12 chunks|
-| Line 2 traceability guide   PDF   food      ready   24 chunks|
-| CNC vibration checklist     audio light eng. ingesting  -    |
-+--------------------------------------------------------------+
-| Ingesting: 1   Needs review: 0   Failed: 0                    |
-+--------------------------------------------------------------+
++------------------------------------------------------------------+
+| L Lekont  [Demo]      search…            [Ask AI]  (SS)          |
++----------+-------------------------------------------------------+
+| Overview |                                                       |
+| Documents|   page content                                        |
+| Ask AI   |                                                       |
+| Readiness|                                                       |
+|          |                                                       |
+| Sources  |                                                       |
+| [Synthetic demo]                                                 |
++----------+-------------------------------------------------------+
 ```
 
-## 3. SOP authoring
+- Sticky translucent header, gradient logo mark.
+- Sidebar items fade-up on load; active item is an indigo gradient.
+- Data source card shows Postgres status and seed counts.
+
+## Overview `/`
 
 ```
-+--------------------------------------------------------------+
-| Draft: Clear a thread jam on the overlock machine            |
-| Source: Overlock jam procedure.pdf     Language: EN          |
-+---------------------------+----------------------------------+
-| [ Record 10 min ]         | 1. Press the red stop button ... |
-| [ Upload existing SOP ]   |    risk: high    [edit] [delete]  |
-|                           | 2. Lift the presser foot ...      |
-| Transcript:               | 3. Cut the tangled thread ...     |
-| "So when it jams, first   | ...                              |
-|  you stop the machine..." | [ Add step ]                      |
-+---------------------------+----------------------------------+
-| [ Generate steps ]  [ Translate FR CR ]  [ Submit for review ]|
-+--------------------------------------------------------------+
+Workspace · Overview                         [+ Add document]
+Back office overview
+[Documents] [Needs review] [Spend this month] [Readiness]
+[ Cash outflow chart (area, animated)      ] [ Ask AI gradient card ]
+[ Recent documents table                    ]
+[ Top supplier ] [ Next best action ]
 ```
 
-## 4. Review queue
+- KPI numbers count up once.
+- Area chart draws its line, then dots pop in staggered.
+- Table rows lift on hover; confidence is a mini bar.
+
+## Documents `/documents`
 
 ```
-+--------------------------------------------------------------+
-| Review queue (2)                                             |
-+--------------------------------------------------------------+
-| Overlock jam  v2   EN FR CR   [ diff ]  [ Reject ] [ Approve ]|
-| Batch log     v1   EN FR      [ diff ]  [ Reject ] [ Approve ]|
-+--------------------------------------------------------------+
-| Approving publishes a new immutable version and records you.  |
-+--------------------------------------------------------------+
+Documents                                    [Export CSV] [+ Add]
+[All] [Needs review]
++---------------------------+  +-----------------------------+
+| table: file/party/total   |  | selected document            |
+| status, confidence        |  | fields with confidence       |
+|                           |  | editable inputs              |
+|                           |  | reviewer + Approve           |
++---------------------------+  +-----------------------------+
 ```
 
-## 5. Operator answer (mobile-first)
+- Add form: filename, type, language, pasted document text.
+- Low-confidence fields are amber.
+- Detail panel slides in; approval updates the row without reload.
+
+## Ask AI `/ask`
 
 ```
-+--------------------------------+
-| < Back        EN FR Kreol      |
-+--------------------------------+
-| Approved instruction           |
-| confidence 92%                 |
-|                                |
-| 1. Press the red stop button.. |
-| 2. Lift the presser foot...    |
-| 3. Cut the tangled thread...   |
-|                                |
-| Source: sop-txt-001 v1 step 1  |
-+--------------------------------+
-| [ Was this useful? ] [ Ask ]   |
-+--------------------------------+
+Ask your spreadsheet
+[ question................................ ] [Ask]
+[suggestion chips]
++--------------------------------------------------+
+| answer + confidence                              |
+| calculation (dark code block)                    |
+| chart (bar or line)                              |
+| table of underlying rows                         |
+| caveats + follow-up chips                        |
++--------------------------------------------------+
 ```
 
-If not covered:
+- Answer card fades up; bars grow from left; line draws.
+- The calculation is always visible. No number without its inputs.
+
+## Readiness `/readiness`
 
 ```
-| Not in the approved instructions yet.        |
-| Logged for a supervisor. Gap #gap-004.       |
-| [ Call supervisor ]                          |
+Automation readiness
++--------------------------+  +----------------------+
+| sector / employees       |  | score /100 + band    |
+| invoices / payslips      |  | recommended first    |
+| admin hours              |  | process bars         |
+| tools chips              |  | next steps           |
+| pain chips               |  |                      |
+| [Run the check]          |  |                      |
++--------------------------+  +----------------------+
 ```
 
-## 6. Gaps
-
-```
-+--------------------------------------------------------------+
-| Gaps                                        [ Export CSV ]   |
-+--------------------------------------------------------------+
-| 7x  How do I reset the overlock counter?   [Promote to SOP]  |
-| 4x  Ki manyer netwaye difil anba platform?  [Promote to SOP]  |
-| 3x  Escalation when a lot number is unread? [Promote to SOP]  |
-+--------------------------------------------------------------+
-```
-
-## 7. Roles and skills
-
-```
-+--------------------------------------------------------------+
-| Senior operator   textile   42 people                         |
-| Machine setup      #### 3/4                                   |
-| Fault diagnosis    ##   2/4   <- gap: 7 questions this month  |
-| Quality check      ###  3/4                                   |
-+--------------------------------------------------------------+
-```
+- Score appears with a scale-in; bars animate to their value.
+- Empty state explains the diagnostic before it runs.
 
 ## States
 
-Every screen needs empty, loading, error and refused states. The refused state
-is a product feature, not an error page: it is how the system stays honest.
+| State | Treatment |
+| --- | --- |
+| Loading | Skeleton shimmer for the chart; "Loading documents…" row |
+| Empty | Explanatory card, not a blank table |
+| Error | Rose banner with the API hint (`port 8010`) |
+| Not covered | Ask returns the supported intents and suggestions |
+| Offline | In-memory demo still works; Postgres warning in logs |

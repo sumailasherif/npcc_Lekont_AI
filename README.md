@@ -1,54 +1,53 @@
-# Retenou AI
+# Lekont
 
-Multilingual shop-floor capability for Mauritian manufacturing, built for the
-**NPCC National AI Startups Lab**.
+**Your SME back office, in plain language.** Built for the **NPCC National AI
+Startups Lab**.
 
-Retenou AI captures an expert's know-how once, publishes supervisor-approved work
-instructions in **English, French and Kreol**, and turns the questions operators
-cannot answer into a live skills-gap map. The interface follows the Delphi
-pattern: a discover surface, a knowledge surface, conversations and a profile,
-with answers grounded in approved sources.
+Lekont reads invoices, payslips and contracts in **French and English**, extracts
+the fields with a confidence score, and keeps a named human in the loop before
+anything is exported. Once the data is clean, it answers plain-language
+questions about the numbers — with the calculation shown — and scores six
+back-office processes to recommend **what to automate first**.
 
-On top of the line assistant, the app ships a **Delphi-style library of minds**:
-global industry thinkers (Goldratt, Deming, Ohno, Hau Lee, Andrew Ng) and
-Mauritian industry voices (Arnaud Lagesse / IBL, Jean-Pierre Dalais / CIEL,
-Hector Espitalier-Noël / ENL, plus composite textile and food practitioners).
-Each mind has curated knowledge cards, citations and sample questions. FR and
-Kreol are translated **live at request time** with the LLM, a curated
-translation memory, or a glossary fallback, and every machine translation is
-flagged for review.
+This combines two opportunity areas from the NPCC research brief:
 
-> **Status:** working scaffold. The API serves synthetic data from an in-memory
-> store; Supabase + pgvector and the OpenCode Go client are wired for the next
-> milestone. Nothing is published without a named supervisor. Public-record
-> expert profiles are built from public material and are not endorsed by the
-> named people; composite profiles are fictional and labelled.
+- **#5 Document and back-office automation** — evidence strong (S1, S3, S4, S5).
+- **#7 Business intelligence and automation readiness for SMEs** — evidence
+  medium (S1, S2, S4).
 
-## The problem
+The combination is deliberate: #5 produces the clean dataset that #7 needs, so
+the SME does not start with an empty spreadsheet.
 
-Mauritian manufacturers are adopting technology faster than they can build the
-people who run it. The HRDC reports behind the NPCC brief describe the same
-pattern in textile, food and light engineering: a weak middle layer of
-supervisors, technicians and maintenance staff; expert know-how that leaves with
-the expert; and expatriate operators who do not read the instruction that exists
-on paper.
+> **Status:** working demo. Synthetic data by default; Postgres/Supabase is
+> wired and loads automatically when `DATABASE_URL` is set. Nothing is exported
+> until a reviewer approves it.
 
-## How it works
+## What it does
 
 ```
-capture -> ground -> draft -> translate -> approve -> ask -> gaps -> capture
+upload -> extract -> human review -> approved data -> ask -> readiness -> act
 ```
 
-1. **Capture** - a supervisor records a 10-minute voice note or uploads an
-   existing SOP and fault-code list.
-2. **Ground** - sources are chunked and embedded so every answer cites the
-   approved paragraph it came from.
-3. **Draft and translate** - the draft is generated in English, French and
-   Kreol, then edited by the supervisor.
-4. **Approve** - nothing reaches an operator until a named supervisor signs off;
-   published versions are immutable.
-5. **Learn** - questions the knowledge base cannot answer become skills gaps,
-   not confident guesses.
+1. **Extract** — invoices, payslips and contracts are parsed with regex first
+   and the LLM only for missing fields. Every field has a confidence.
+2. **Review** — low-confidence fields are highlighted; a named reviewer edits
+   and approves. The export keeps the audit trail.
+3. **Ask** — questions like *"Who are my top 5 suppliers?"* return an answer,
+   the rows, a chart, the calculation, and what the answer does not cover.
+4. **Readiness** — six processes (invoice capture, payroll, reporting, filing,
+   supplier reconciliation, stock) are scored on effort and impact, with a
+   recommended first process and next steps.
+
+## Why this use case
+
+The HRDC reports behind the brief describe Mauritian SMEs that cannot tell when
+automation is appropriate (`11%` "unclear when to use automation"), that see new
+technology as "not relevant" (`62%`), and that carry a skills gap among current
+staff (`55%`). Meanwhile BPO and finance employers are shifting away from routine
+task execution toward BI, RPA, ERP and document handling (S4, S5). Lekont sells
+time saved and errors avoided, not "AI".
+
+See `docs/01-use-case-choice.md` and `docs/02-evidence-map.md`.
 
 ## Repository layout
 
@@ -59,10 +58,12 @@ capture -> ground -> draft -> translate -> approve -> ask -> gaps -> capture
 │   └── web/                  Next.js 16, TypeScript, Tailwind 4
 ├── api-spec/                 Generated OpenAPI spec
 ├── data/
-│   ├── samples/              Synthetic packs: textile, food, light engineering
+│   ├── samples/              Synthetic documents + ledger_100.csv
 │   └── raw/                  Real data, git-ignored
 ├── docs/                     PRD, evidence, data model, API, UI, plan
-├── supabase/migrations/      Postgres + pgvector schema (free tier)
+├── supabase/
+│   ├── migrations/           Postgres + RLS schema
+│   └── seed/                 Documents + 100 ledger rows
 ├── .env.example
 └── package.json              npm workspace root
 ```
@@ -72,44 +73,46 @@ capture -> ground -> draft -> translate -> approve -> ask -> gaps -> capture
 ### 1. Environment
 
 ```powershell
-Copy-Item .env.example .env    # macOS/Linux: cp .env.example .env
+Copy-Item .env.example .env
 ```
 
-Only `OPENCODE_GO_API_KEY` is needed to call a model. Get a key from
-<https://opencode.ai/console>. Supabase is optional for local work.
+Only `OPENCODE_GO_API_KEY` is needed to call a model. The app works without it.
 
 ### 2. API
 
 ```powershell
 cd apps/api
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1    # macOS/Linux: source .venv/bin/activate
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements-dev.txt
-uvicorn app.main:app --reload
-```
-
-- Health: <http://127.0.0.1:8000/health>
-- Docs: <http://127.0.0.1:8000/docs>
-
-If port 8000 is already taken on your machine, run the API on 8010 and set
-`NEXT_PUBLIC_API_URL=http://localhost:8010` in `apps/web/.env.local`:
-
-```powershell
 uvicorn app.main:app --reload --port 8010
 ```
 
-### 3. Web
+- Health: <http://127.0.0.1:8010/health>
+- Docs: <http://127.0.0.1:8010/docs>
 
-In a second terminal, from the repository root:
+### 3. Web
 
 ```powershell
 npm install
 npm run dev
 ```
 
-Open <http://localhost:3000>.
+Open <http://localhost:3000>. `apps/web/.env.local` points at
+`http://localhost:8010`.
 
-### 4. Checks
+### 4. Supabase / Postgres (optional but recommended)
+
+1. Create a Supabase project (free tier).
+2. Run `supabase/migrations/0002_backoffice.sql` in the SQL editor.
+3. Run `supabase/seed/0001_documents.sql` then `supabase/seed/0002_ledger_100.sql`.
+4. Put the connection string in `.env` as `DATABASE_URL=postgresql://...`.
+5. Restart the API. It loads documents and the 100-row ledger from Postgres;
+   without `DATABASE_URL` it falls back to the in-memory demo.
+
+More detail: `supabase/README.md`.
+
+### 5. Checks
 
 ```powershell
 # API, from apps/api with the venv active
@@ -122,93 +125,51 @@ npm run typecheck
 npm run build
 ```
 
-### 5. OpenAPI
+### 6. Regenerate the seed
 
 ```powershell
 cd apps/api
-python -m app.scripts.export_openapi
+python -m app.scripts.generate_seed
 ```
 
-## Stack (free or already included)
-
-| Need | Choice | Cost |
-| --- | --- | --- |
-| Chat model | OpenCode Go, `deepseek-v4.1-flash` | Included in the Go plan |
-| Free model option | `beam-free`, `longcat-2.5-free` | Free while available |
-| Database | Supabase Postgres + pgvector | Free tier |
-| Embeddings | Supabase Edge `gte-small` | Free |
-| Voice input | Browser Web Speech API | Free, on device |
-| Web hosting | Vercel Hobby | Free |
-| CI | GitHub Actions | Free for public repos |
-
-See `docs/09-free-stack.md`. No other API keys are required.
+Writes `data/samples/ledger_100.csv`, `supabase/seed/0001_documents.sql` and
+`supabase/seed/0002_ledger_100.sql`.
 
 ## API overview
-
-All product routes live under `/api/v1`.
 
 | Area | Endpoints |
 | --- | --- |
 | Meta | `GET /`, `GET /health` |
-| Sources | `GET`, `POST /sources`; `DELETE /sources/{id}` |
-| Query | `POST /query` |
-| SOPs | `GET`, `POST /sops`; `GET /sops/{id}` |
-| Lifecycle | `POST /sops/{id}/generate`, `/translate`, `/submit`, `/approve` |
-| Gaps | `GET /gaps`; `POST /gaps/{id}/promote` |
-| Skills | `GET /skills/roles`, `/skills/roles/{id}` |
-| Analytics | `GET /analytics/summary` |
-| Experts | `GET /experts`, `/experts/{id}`; `POST /experts/{id}/chat` |
-| Translation | `POST /translate` (EN → FR / Kreol, cached) |
+| Documents | `GET`, `POST /documents`; `GET /documents/{id}` |
+| Review | `POST /documents/{id}/review` |
+| Export | `GET /documents/export` |
+| Insights | `POST /insights/ask`, `POST /insights/readiness` |
+| Dashboard | `GET /dashboard/summary` |
 
-## Expert minds
+## Design
 
-| Mind | Base | Sector focus |
-| --- | --- | --- |
-| Arnaud Lagesse | IBL Group (public record) | Conglomerate, logistics, regional expansion |
-| Jean-Pierre Dalais | CIEL Group (public record) | Diversification, textile, healthcare |
-| Hector Espitalier-Noël | ENL Group (public record) | Sugar transition, property, food quality |
-| Textile Operations Veteran | Composite | Overlock faults, changeovers, multilingual training |
-| Food Quality Lead | Composite | HACCP, batch records, traceability |
-| Eliyahu M. Goldratt | Theory of Constraints | Bottlenecks and throughput |
-| W. Edwards Deming | Deming Institute | Variation and quality systems |
-| Taiichi Ohno | Toyota Production System | Waste, standard work, kaizen |
-| Hau L. Lee | Stanford GSB | Supply chains, bullwhip effect |
-| Andrew Ng | DeepLearning.AI | Applied AI adoption |
+The interface follows the Holistics pattern: a persistent workspace sidebar, a
+dashboard canvas, KPI cards, an AI answer surface with the calculation visible,
+and a data table you can trace. Colours and motion are ours: indigo/violet,
+soft off-white, animated counters, chart draw-in and staggered cards.
 
-Public-record profiles are built only from public material and are not authored
-or endorsed by the person. Claim a mind to correct or remove it.
+## Data policy
 
-## Documentation
-
-| File | Contents |
-| --- | --- |
-| `docs/00-product/prd.md` | Product requirements |
-| `docs/00-product/personas-and-jtbd.md` | Users and jobs to be done |
-| `docs/00-product/metrics.md` | Product, safety and business metrics |
-| `docs/01-use-case-choice.md` | Why area 9 + part of area 8 |
-| `docs/02-evidence-map.md` | HRDC findings mapped to features |
-| `docs/03-interview-guide.md` | Stage 1 interview guide |
-| `docs/04-architecture.md` | Architecture and Delphi mapping |
-| `docs/05-data-model.md` | Entities, states and invariants |
-| `docs/06-api-spec.md` | Endpoint reference |
-| `docs/07-ui-wireframes.md` | Screens and states |
-| `docs/08-project-plan-and-risks.md` | Milestones and risk register |
-| `docs/09-free-stack.md` | Free-tier architecture |
+- Only synthetic data is committed.
+- Documents are invented; no real person, invoice or company is represented.
+- Real data belongs in `data/raw/` (git-ignored) or Supabase with RLS.
+- Personal data is in scope for payslips, so the pilot follows the Data
+  Protection Act 2017: minimisation, access control, named reviewer, deletion.
 
 ## Success metrics
 
 | Metric | Target |
 | --- | --- |
-| Questions answered from approved content | > 80% |
-| Unsafe or uncited answers | 0 |
-| Supervisor coaching hours saved per week | to measure in interviews |
-| Languages per published instruction | EN / FR / Kreol |
-
-## Data policy
-
-Only synthetic sample data is committed. Raw company data belongs in
-`data/raw/`, which is git-ignored. Real data stays in Supabase with access
-control, and is deleted on request.
+| Fields extracted without correction | > 85% |
+| Documents approved same day | > 80% |
+| Questions answered from the ledger | > 90% |
+| Answers with a visible calculation | 100% |
+| Unsafe export without reviewer | 0 |
 
 ## License
 

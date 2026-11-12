@@ -1,210 +1,287 @@
 @import "tailwindcss";
 
+/*
+ * Lekont design tokens - "Lagoon" palette.
+ * Deep-ocean ink for hero bands, lagoon teal as primary, coral as accent.
+ */
 :root {
-  --bg: #f6f7fb;
-  --surface: #ffffff;
-  --ink: #0f172a;
-  --muted: #64748b;
-  --line: #e6e8f0;
-  --primary: #4f46e5;
-  --primary-2: #7c3aed;
-  --teal: #0d9488;
-  --amber: #f59e0b;
+  --background: #f6f8fb;
+  --foreground: #0f172a;
+  --hero-cell: 64px;
 }
 
 @theme inline {
-  --color-background: var(--bg);
-  --color-foreground: var(--ink);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+@theme {
+  --color-ink: #071426;
+  --color-ink-2: #0c1f3a;
+  --color-ink-3: #13294a;
+  --color-lagoon: #14b8a6;
+  --color-lagoon-deep: #0d9488;
+  --color-lagoon-soft: #ccfbf1;
+  --color-lagoon-wash: #effcf9;
+  --color-coral: #ff6b4a;
+  --color-coral-soft: #ffe4dc;
+  --color-sun: #f59e0b;
+  --color-sun-soft: #fef3c7;
+  --color-surface: #f6f8fb;
+  --color-line: #e3e8ef;
+  --color-muted: #5b6678;
+}
+
 html {
   color-scheme: light;
+  scroll-behavior: smooth;
 }
 
 body {
-  background:
-    radial-gradient(900px 400px at 85% -10%, rgba(124, 58, 237, 0.08), transparent 60%),
-    radial-gradient(700px 360px at 10% 0%, rgba(79, 70, 229, 0.07), transparent 60%),
-    var(--bg);
-  color: var(--ink);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 ::selection {
-  background: rgba(79, 70, 229, 0.18);
+  background: rgba(20, 184, 166, 0.3);
 }
 
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ---------- Gradient text ---------- */
+.text-gradient {
+  background: linear-gradient(100deg, #5eead4 0%, #ffffff 45%, #ffb199 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* ---------- Entrance: fade in with blur (staggered via --d) ---------- */
+@keyframes fadeInBlur {
+  0% { opacity: 0; filter: blur(10px); transform: translateY(20%); }
+  100% { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+@keyframes fadeInBlurQuick {
+  0% { opacity: 0; filter: blur(10px); transform: translateY(10%); }
+  100% { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.hero-animated {
+  opacity: 0;
+  animation: fadeInBlur 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
 }
 
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -400px 0;
-  }
-  100% {
-    background-position: 400px 0;
-  }
-}
-
-@keyframes grow-x {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-@keyframes draw {
-  from {
-    stroke-dashoffset: 1200;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes pulse-soft {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.45;
-  }
-}
-
+.animate-fade-in,
 .animate-fade-up {
-  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fadeInBlurQuick 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
 }
 
-.animate-fade-in {
-  animation: fade-in 0.45s ease-out both;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.animate-slide-in {
-  animation: slide-in-right 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.delay-1 {
-  animation-delay: 60ms;
-}
-.delay-2 {
-  animation-delay: 120ms;
-}
-.delay-3 {
-  animation-delay: 180ms;
-}
-.delay-4 {
-  animation-delay: 240ms;
-}
-.delay-5 {
-  animation-delay: 300ms;
-}
-
-.card-lift {
+/* Scroll reveal: toggled by <Reveal> */
+.reveal {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(32px);
   transition:
-    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.22s ease,
-    border-color 0.22s ease;
+    opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
 }
 
-.card-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 40px -24px rgba(15, 23, 42, 0.35);
-  border-color: #c7d2fe;
+/* ---------- Hero grid with travelling beams ---------- */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(148, 197, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 197, 255, 0.07) 1px, transparent 1px);
+  background-size: var(--hero-cell) var(--hero-cell);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 100%);
 }
 
-.skeleton {
-  background: linear-gradient(90deg, #eef0f6 0px, #f7f8fc 40px, #eef0f6 80px);
-  background-size: 600px 100%;
-  animation: shimmer 1.4s infinite linear;
+.hero-grid-beam {
+  position: absolute;
+  pointer-events: none;
+}
+.hero-grid-beam--h {
+  height: 1px;
+  width: 180px;
+  left: -200px;
+  background: linear-gradient(90deg, transparent, var(--beam, #5eead4), transparent);
+  animation: hero-grid-beam-h 19.2s linear infinite;
+  animation-delay: var(--d, 0s);
+}
+.hero-grid-beam--v {
+  width: 1px;
+  height: 180px;
+  top: -200px;
+  background: linear-gradient(180deg, transparent, var(--beam, #5eead4), transparent);
+  animation: hero-grid-beam-v 19.2s linear infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes hero-grid-beam-h {
+  0% { transform: translateX(0); opacity: 0; }
+  5% { opacity: 1; }
+  45% { opacity: 1; }
+  50% { transform: translateX(calc(100vw + 400px)); opacity: 0; }
+  100% { transform: translateX(calc(100vw + 400px)); opacity: 0; }
+}
+@keyframes hero-grid-beam-v {
+  0% { transform: translateY(0); opacity: 0; }
+  5% { opacity: 1; }
+  45% { opacity: 1; }
+  50% { transform: translateY(1400px); opacity: 0; }
+  100% { transform: translateY(1400px); opacity: 0; }
 }
 
-.animate-draw {
-  stroke-dasharray: 1200;
-  animation: draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+@keyframes glow {
+  0% { opacity: 0.45; }
+  100% { opacity: 1; }
+}
+.animate-glow {
+  animation: glow 3.2s ease-in-out infinite alternate;
 }
 
-.animate-pulse-soft {
-  animation: pulse-soft 1.6s ease-in-out infinite;
+/* ---------- Marquee ---------- */
+@keyframes logoSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: logoSlide 60s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+.marquee {
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
 }
 
+/* ---------- Sparkles ---------- */
+@keyframes ai-sparkle-pop {
+  0% { opacity: 0; transform: scale(0) rotate(-45deg); }
+  70% { opacity: 1; transform: scale(1.06) rotate(10deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes ai-sparkle-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  40% { opacity: 0.3; transform: scale(0.7); }
+}
+.sparkle {
+  animation:
+    ai-sparkle-pop 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+    ai-sparkle-twinkle 2.4s ease-in-out 0.8s infinite;
+  animation-delay: var(--d, 0ms), calc(var(--d, 0ms) + 800ms);
+}
+
+/* ---------- Flow diagram: marching dashes and travelling dots ---------- */
+@keyframes dash-march {
+  100% { stroke-dashoffset: -20px; }
+}
+.dash-march {
+  stroke-dasharray: 4 6;
+  animation: dash-march 0.9s linear infinite;
+}
+@keyframes dot-move {
+  0% { offset-distance: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+.flow-dot {
+  offset-rotate: 0deg;
+  animation: dot-move 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-delay: var(--d, 0s);
+}
+
+/* ---------- Bars and progress ---------- */
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes grow-y {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
 .grow-bar {
-  transform-origin: left;
-  animation: grow-x 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: left center;
+  animation: grow-x 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+.grow-col {
+  transform-origin: bottom center;
+  animation: grow-y 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes tab-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.tab-progress {
+  transform-origin: left center;
+  animation: tab-progress var(--dur, 7s) linear both;
 }
 
-.grow-bar-up {
-  transform-origin: bottom;
-  animation: grow-x 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+/* Typewriter caret */
+@keyframes caret {
+  50% { opacity: 0; }
+}
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: currentColor;
+  animation: caret 1s step-end infinite;
 }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+/* Skeleton shimmer */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
 }
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #e9eef4;
 }
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 999px;
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: shimmer 1.4s infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  .hero-animated {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+  .hero-grid-beam,
+  .flow-dot {
+    display: none;
   }
 }

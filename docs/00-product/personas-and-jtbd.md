@@ -1,53 +1,37 @@
 # Personas and jobs to be done
 
-All personas are built from the HRDC findings in `../02-evidence-map.md`. Names
-are illustrative; the roles and pain points are the evidence.
+## 1. Priya — owner of a 14-person distributor
 
-## 1. Operator (including expatriate operators)
+- Runs the business from Excel and WhatsApp; the accountant visits monthly.
+- Wants to know supplier spend, monthly cash out, and VAT without waiting.
+- Trigger: a bank manager asks for figures, or a supplier raises prices.
+- Success: answers in under a minute, with the numbers she can defend.
 
-- Context: works at the machine, often on a shift where no supervisor is nearby.
-- Language: Kreol or French first; English may be weak.
-- Pain: asks the same question every week; the answer depends on who is on shift.
-- Job to be done: "When something goes wrong, tell me the safe next step in a
-  language I read, and show me where it comes from."
-- Success: resolves the issue without walking to the office.
-- What would make them distrust it: an answer that does not match the machine in
-  front of them, or a confident answer with no source.
+## 2. Daniel — bookkeeper at a small accounting firm
 
-## 2. Senior operator / technician (the expert)
+- Handles 20 SME clients; retypes invoices and payslips.
+- Paid for accuracy and deadlines, not for software enthusiasm.
+- Trigger: month-end, VAT return, payroll run.
+- Success: fewer keystrokes, only checks the low-confidence fields, clean CSV.
 
-- Context: 10-25 years on the line; fixes problems the manual does not cover.
-- Pain: interrupted all day for the same explanations; their method is not
-  written down.
-- Job to be done: "Capture what I know in 10 minutes, without writing a manual."
-- Success: fewer interruptions, and their know-how survives their retirement.
-- What would make them refuse: a tool that publishes a wrong version under their
-  name, or that takes more time than answering directly.
+## 3. Aisha — operations admin
 
-## 3. Supervisor / training officer (the buyer and approver)
+- Files invoices, payslips and contracts; hunts for documents at audit time.
+- Trigger: auditor request, supplier dispute, staff query.
+- Success: every document findable by supplier, date and type.
 
-- Context: responsible for output, quality and onboarding; measured on downtime
-  and rework.
-- Pain: training is verbal and inconsistent; translation is slow; no view of what
-  people actually do not know.
-- Job to be done: "Give me approved instructions in three languages, and show me
-  what my team keeps getting stuck on."
-- Success: shorter time-to-competency, fewer repeat questions, an audit trail.
-- What would make them reject it: anything that bypasses their approval, or a
-  gap report that feels like surveillance of individuals.
+## 4. Kevin — team lead in a BPO finance desk
 
-## 4. Plant / HR manager (economic buyer)
+- Processes client documents in French and English.
+- Trigger: client SLA, month-end volume spike.
+- Success: extraction with human checks, no client data leaks, auditable.
 
-- Context: approves spend; under pressure on productivity and compliance.
-- Pain: technology investment has not translated into capability.
-- Job to be done: "Show me a measurable productivity gain without a large
-  equipment purchase."
-- Success: hours saved, onboarding time reduced, audit findings avoided.
-- What would make them say no: a pilot that needs new hardware, a long IT
-  project, or unclear data ownership.
+## Jobs to be done
 
-## Anti-persona
-
-- An auditor is not a user. They receive the evidence; they do not operate the
-  tool.
-- An external candidate is not a user. This is not a recruitment product.
+| When | I want to | So I can |
+| --- | --- | --- |
+| an invoice arrives | capture the fields without retyping | close the month faster |
+| a field is uncertain | see it flagged and correct it | trust the export |
+| I need a number | ask in plain language | decide without the accountant |
+| I consider automation | see effort vs impact | start with the right process |
+| an auditor asks | trace a row to its source | stay compliant |

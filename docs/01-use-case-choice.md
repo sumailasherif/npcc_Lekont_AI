@@ -1,59 +1,48 @@
-# Use-case choice
+# Use-case choice — #5 + #7
 
-Decision: **Opportunity area 9 (know-how capture and multilingual work
-instructions) combined with the skills-mapping half of area 8.** Area 7
-(business intelligence readiness) and area 1 (predictive maintenance) were
-considered and rejected for the MVP.
+## Decision
 
-## Why 9 + part of 8
+Build **Lekont**: document and back-office automation (#5) as the intake engine,
+and SME business intelligence plus automation readiness (#7) as the delivery
+layer.
 
-| Criterion | Area 9 | Area 8 | Combined (our scope) |
-| --- | --- | --- | --- |
-| Evidence strength (HRDC brief) | Strong (S6, S7, S8) | Medium (S4, S5, S6) | Strong foundation, medium extension |
-| Data needed | SOPs, voice notes, manuals | Sensitive HR data | SOPs + voice + role requirements; no HR records |
-| Safety risk | Wrong instruction | Unfair inference about people | Managed by supervisor approval |
-| Buyer | Supervisor / training officer | HR | Supervisor; HR is a secondary stakeholder |
-| Demo feasibility | High | Low | High |
+## Why this pair
 
-The two combine into one loop: a role's skill requirements show where capability
-is thin, and generated multilingual instructions close the gap. The obvious
-combination would also include attrition prediction, but that is deliberately
-excluded: it needs sensitive data, raises fairness risk, and the evidence is
-weaker.
+- **#5 has strong evidence** (S1, S3, S4, S5) and a concrete buyer: accountants,
+  finance teams and BPO desks drowning in invoices, payslips and contracts.
+- **#7 has medium evidence** (S1, S2, S4) but the brief flags the real problem:
+  SMEs "struggle to assess their automation needs" and many see technology as
+  "not relevant".
+- Alone, #7 starts with no clean data. Alone, #5 stops at a CSV. Together, the
+  documents produce the dataset, and the dataset produces the answer to "what
+  next?".
 
-## Why not area 1 (predictive maintenance)
+## Fit with the brief's design requirements
 
-- Evidence is strong (S2, S6, S7, S8) and the business case is clear, but the
-  data is the problem: maintenance logs are paper, and a credible demo needs
-  factory access or months of history.
-- The brief's own candidate solution is a maintenance assistant, which drifts
-  toward the same knowledge-capture problem we are solving, but with a safety
-  context that is harder for a student team to validate.
-- It remains the strongest fallback if a factory partner appears.
+| Requirement | How Lekont meets it |
+| --- | --- |
+| Works for existing staff | Plain forms, no SQL, no new specialist role |
+| Phased and modular | Extract → review → export → ask → readiness |
+| Shows value quickly | First invoice extracted in seconds; first answer in one question |
+| Explains itself | Every answer shows the calculation and caveats |
+| Human in charge | Named reviewer before export; no auto-posting |
+| Fits existing tools | CSV out; Excel/Supabase in; FR/EN documents |
+| Respects data protection | Synthetic demo, RLS, minimisation, deletion |
 
-## Why not area 7 (business intelligence readiness)
+## Why not the other areas
 
-- Evidence is medium (S1, S2, S4), the market is crowded with BI tools, and the
-  "ask your spreadsheet" idea is easy to replicate.
-- It does not use the distinctive Mauritian context (multilingual workforce,
-  expatriate operators, ageing experts).
+| Area | Why not now |
+| --- | --- |
+| #1 Predictive maintenance | Strong evidence, but needs factory access and sensor/history data a student team cannot guarantee. |
+| #9 Multilingual work instructions | Strong evidence, but the buyer is a training officer and the value is harder to prove in six weeks. |
+| #4 Compliance/traceability | High value, but regulated and needs domain validation before a demo. |
+| #8 Skills/retention analytics | Sensitive HR data and fairness risk; weaker evidence than #5. |
 
-## Why the sector is not only textile
+## Positioning
 
-The need repeats across textile, food and light engineering:
+> **Lekont** — the account, in plain language. Capture the paperwork, keep a
+> human in the loop, and know what to automate next.
 
-- Textile: shrinking, ageing workforce and reliance on foreign labour (S6).
-- Food: expatriate shares from about 15% to 65% (S7).
-- Light engineering: shortage of production problem-solvers and succession risk
-  (S8).
-
-So the product is sector-agnostic with **sector packs** (SOPs, fault codes, role
-skills). Textile is the first pack because its evidence is the most detailed.
-
-## Scope cuts
-
-- No attrition prediction.
-- No HRIS integration.
-- No sensor or IoT input.
-- No consumer expert marketplace.
-- No automatic publish without a named approver.
+Primary segment: SMEs of 5–50 staff, plus the accountants and BPO desks that
+serve them. Sector-agnostic; the demo ledger is a distributor because the pain
+(invoices, suppliers, VAT, payroll) is universal.

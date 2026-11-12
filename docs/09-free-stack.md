@@ -1,47 +1,54 @@
 # Free stack
 
-Everything the project needs is free or included in an existing plan. No card
-required for the database, hosting or CI.
+Everything in the demo can run at zero cost.
 
-| Need | Choice | Cost | Notes |
-| --- | --- | --- | --- |
-| Chat model | OpenCode Go | Included in the Go plan | Endpoint `https://opencode.ai/inference/go/openai/v1`, OpenAI-compatible |
-| Default model | `deepseek-v4.1-flash` | Included in Go | Set `LLM_MODEL` to change |
-| Zero-cost models | `beam-free`, `longcat-2.5-free`, `iceman-contributor-free` | Free while available | Good for demos and load tests |
-| Database | Supabase free tier | Free | Postgres + pgvector + auth + storage |
-| Embeddings | Supabase Edge Function `gte-small` | Free | 384 dimensions; no external embedding bill |
-| Local embeddings (optional) | `fastembed` | Free | Runs on CPU, no API |
-| Voice input | Browser Web Speech API / MediaRecorder | Free | On-device; no paid ASR |
-| Web hosting | Vercel Hobby | Free | Next.js |
-| API hosting | Local, or a free container host | Free | For the demo, local is fine |
-| CI | GitHub Actions | Free for public repos | Lint, typecheck, build, tests |
-| Repo | GitHub | Free | Public repository |
+| Need | Choice | Limit / cost |
+| --- | --- | --- |
+| Web hosting | Vercel Hobby | Free for personal projects |
+| API hosting | Local or Render free | Free tier sleeps; fine for demo |
+| Database | Supabase Postgres | 500 MB, 2 projects free |
+| Auth (pilot) | Supabase Auth | Free tier |
+| Model | OpenCode Go, `deepseek-v4.1-flash` | Included in the Go plan |
+| Free model fallback | `beam-free`, `longcat-2.5-free` | Free while available |
+| CI | GitHub Actions | Free for public repos |
+| Charts | Hand-rolled SVG | No dependency |
+| Styling | Tailwind CSS 4 | Free |
 
-## OpenCode Go
+## Why this stack
 
-- One provider only: OpenCode Go. Do not add OpenAI, Anthropic or other keys.
-- Copy the key from <https://opencode.ai/console> into `.env` as
-  `OPENCODE_GO_API_KEY`.
-- The API sends `User-Agent: retenou-ai/0.1` and, when available, an
-  `x-opencode-session` header, per the Go usage guidance.
-- Free models are the default fallback if the Go allowance is exhausted.
+- **Supabase** gives Postgres, RLS and auth in one free project, so the pilot does
+  not need separate infrastructure.
+- **FastAPI** keeps extraction and aggregation server-side; the browser never
+  sees the database or the key.
+- **OpenCode Go** is OpenAI-compatible, so the same client works with any
+  provider by changing `OPENCODE_GO_BASE_URL`.
+- **No chart library**: the area chart, bars and sparklines are small SVG
+  components. Less JavaScript, full control of motion.
 
-## Supabase
+## Cost model (per 1,000 documents)
 
-1. Create a free project.
-2. Run `supabase/migrations/0001_init.sql` in the SQL editor (or `supabase db push`).
-3. Copy the project URL and keys into `.env`.
-4. Embeddings: deploy the `gte-small` edge function and store 384-dimension
-   vectors in `document_chunks.embedding`.
+| Item | Estimate |
+| --- | --- |
+| LLM extraction (only missing fields, ~700 tokens) | ~MUR 40–80 |
+| Postgres storage | negligible |
+| Hosting | free tier |
+| **Total** | **< MUR 0.10 per document** |
 
-The scaffold runs without Supabase: `app/store.py` keeps synthetic data in
-memory so the demo works offline.
+## Environment
 
-## If something must be paid
+```env
+OPENCODE_GO_API_KEY=
+OPENCODE_GO_BASE_URL=https://opencode.ai/inference/go/openai/v1
+LLM_MODEL=deepseek-v4.1-flash
+DATABASE_URL=postgresql://...
+```
 
-Do not add it. Instead:
+Without the key, extraction falls back to regex and the app still runs. Without
+`DATABASE_URL`, it uses the in-memory demo.
 
-- Use a free OpenCode Go model.
-- Use synthetic data.
-- Run the API locally during the demo.
-- Ask the Lab for a mentor who can provide a free sandbox.
+## Guardrails
+
+- The LLM never sees more than the document text being extracted.
+- No free-form SQL is executed.
+- Requests time out at 60 seconds; failures fall back to regex.
+- Only synthetic data is committed.

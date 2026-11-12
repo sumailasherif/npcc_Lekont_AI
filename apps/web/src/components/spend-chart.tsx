@@ -7,6 +7,8 @@ export function SpendChart({
 }: {
   data: { month: string; spend: number }[];
 }) {
+  const gradientId = `spend-${useId().replaceAll(":", "")}`;
+
   if (data.length < 2) return null;
 
   const width = 640;
@@ -25,7 +27,6 @@ export function SpendChart({
   const area = `M ${padX},${height - padY} L ${line.replaceAll(" ", " L ")} L ${
     width - padX
   },${height - padY} Z`;
-  const gradientId = `spend-${useId().replaceAll(":", "")}`;
 
   return (
     <div className="w-full">
